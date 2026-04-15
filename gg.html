@@ -8,13 +8,23 @@
         
         /* DEBUG PANEL */
         #debug-panel {
-            position: absolute; top: 10px; left: 10px; width: 320px;
-            background: rgba(0, 0, 0, 0.85); color: #0f0; padding: 15px;
-            border: 1px solid #0f0; border-radius: 4px; font-size: 14px;
-            pointer-events: none; z-index: 100;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 320px;
+            background: rgba(0, 0, 0, 0.85);
+            color: #0f0;
+            padding: 15px;
+            border: 1px solid #0f0;
+            border-radius: 4px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
         }
         .row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
-        .label { color: #aaa; } .val { font-weight: bold; }
+        .label { color: #aaa; }
+        .val { font-weight: bold; }
         h3 { margin-top: 0; color: white; border-bottom: 1px solid #0f0; padding-bottom: 5px; }
 
         /* CONTROLS OVERLAY */
@@ -23,8 +33,7 @@
             display: flex; justify-content: center; align-items: center; z-index: 999;
         }
         #instructions {
-            color: white; text-align: center; cursor: pointer; padding: 30px;
-            border: 2px solid #0f0; border-radius: 10px; font-family: sans-serif; background: #000;
+            color: white; text-align: center; cursor: pointer; padding: 30px; border: 2px solid #0f0; border-radius: 10px; font-family: sans-serif; background: #000;
         }
         #crosshair {
             position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
@@ -32,12 +41,29 @@
             pointer-events: none; z-index: 50; box-shadow: 0 0 5px #0f0;
         }
 
-        /* TARGET MARKER (Visual Helper) */
-        #target-marker {
-            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
-            border: 2px solid red; border-radius: 50%; transform: translate(-50%, -50%);
-            pointer-events: none; z-index: 40; opacity: 0.5;
+        /* ACTION BUTTONS */
+        #actions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
         }
+        button {
+            background: #003300;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+            transition: 0.2s;
+        }
+        button:hover { background: #0f0; color: black; }
+        button.active { background: #0f0; color: black; box-shadow: 0 0 10px #0f0; }
+
     </style>
 </head>
 <body>
@@ -49,20 +75,31 @@
         <div class="row"><span class="label">POS Y:</span> <span class="val" id="p-y">0.00</span></div>
         <div class="row"><span class="label">POS Z:</span> <span class="val" id="p-z">0.00</span></div>
         
-        <h3>🎯 FIXED TARGET (Looking At)</h3>
-        <div class="row"><span class="label">TARGET X:</span> <span class="val" style="color:red">-0.006</span></div>
-        <div class="row"><span class="label">TARGET Y:</span> <span class="val" style="color:red">1.041</span></div>
-        <div class="row"><span class="label">TARGET Z:</span> <span class="val" style="color:red">-0.008</span></div>
+        <h3>🎯 LOOKAT TARGET</h3>
+        <div class="row"><span class="label">TARGET X:</span> <span class="val" id="t-x">0.00</span></div>
+        <div class="row"><span class="label">TARGET Y:</span> <span class="val" id="t-y">0.00</span></div>
+        <div class="row"><span class="label">TARGET Z:</span> <span class="val" id="t-z">0.00</span></div>
+
+        <h3>⚡ STATUS</h3>
+        <div class="row"><span class="label">SPEED:</span> <span class="val" id="speed-val">0.2</span></div>
+        <div class="row"><span class="label">LOCKED:</span> <span class="val" id="lock-status">NO</span></div>
+        <div class="row"><span class="label">LOOKAT ON:</span> <span class="val" id="lookat-status">OFF</span></div>
     </div>
 
     <div id="crosshair"></div>
-    <div id="target-marker"></div> <!-- Red circle showing where you are looking -->
 
     <div id="blocker">
         <div id="instructions">
             <h1 style="color:#0f0">CLICK TO START</h1>
-            <p>Move Mouse to Rotate Around Target<br>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>ESC → Pause</p>
+            <p>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>Mouse → Look Around (until you set LookAt)<br>ESC → Pause</p>
         </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div id="actions">
+        <button onclick="setLookAtFromCamera()">🎯 SET LOOKAT HERE</button>
+        <button onclick="toggleLookAt()">🔄 TOGGLE LOOKAT LOCK</button>
+        <button onclick="resetLookAt()">❌ RESET LOOKAT</button>
     </div>
 
     <script type="importmap">
@@ -82,6 +119,7 @@
         // --- SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x111111);
+        scene.fog = new THREE.Fog(0x111111, 10, 50);
         
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -95,27 +133,24 @@
         dirLight.position.set(10, 20, 10);
         scene.add(dirLight);
 
-        // --- THE FIXED TARGET (From your screenshot) ---
-        const targetPos = new THREE.Vector3(-0.006, 1.041, -0.008);
-        
-        // Add a small red sphere at the target so you can see it
-        const geometry = new THREE.SphereGeometry(0.1, 16, 16);
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const targetMesh = new THREE.Mesh(geometry, material);
-        targetMesh.position.copy(targetPos);
-        scene.add(targetMesh);
-
         // --- CONTROLS ---
         const controls = new PointerLockControls(camera, document.body);
         const blocker = document.getElementById('blocker');
+        const lockStatus = document.getElementById('lock-status');
+        const lookatStatus = document.getElementById('lookat-status');
 
         document.addEventListener('click', () => controls.lock());
-        controls.addEventListener('lock', () => blocker.style.display = 'none');
-        controls.addEventListener('unlock', () => blocker.style.display = 'flex');
+        controls.addEventListener('lock', () => {
+            blocker.style.display = 'none';
+            lockStatus.innerText = "YES";
+            lockStatus.style.color = "#0f0";
+        });
+        controls.addEventListener('unlock', () => {
+            blocker.style.display = 'flex';
+            lockStatus.innerText = "NO";
+            lockStatus.style.color = "red";
+        });
         scene.add(controls.getObject());
-
-        // Start camera slightly away from target
-        controls.getObject().position.set(0, 2, 5);
 
         // --- MOVEMENT ---
         let moveF = false, moveB = false, moveL = false, moveR = false;
@@ -139,33 +174,92 @@
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
+            model.traverse((child) => {
+                if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
+            });
             scene.add(model);
-        }, undefined, function (error) { console.error(error); });
+            
+            // Initial Spawn
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
+            
+            // Set initial lookAt target to center of model
+            window.lookAtTarget = center.clone();
+            updateLookAtUI();
+        }, undefined, function (error) {
+            console.error(error);
+        });
+
+        // --- LOOKAT SYSTEM ---
+        window.lookAtEnabled = false;
+        window.lookAtTarget = new THREE.Vector3(0, 0, 0);
+
+        window.setLookAtFromCamera = function() {
+            // Raycast forward from camera to find what we're looking at
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            
+            if (intersects.length > 0) {
+                window.lookAtTarget.copy(intersects[0].point);
+                alert(`LookAt set to:\nX: ${window.lookAtTarget.x.toFixed(2)}\nY: ${window.lookAtTarget.y.toFixed(2)}\nZ: ${window.lookAtTarget.z.toFixed(2)}`);
+            } else {
+                // Fallback: use point 10 units in front of camera
+                const direction = new THREE.Vector3();
+                camera.getWorldDirection(direction);
+                window.lookAtTarget.copy(camera.position).add(direction.multiplyScalar(10));
+                alert(`LookAt set to point in front:\nX: ${window.lookAtTarget.x.toFixed(2)}\nY: ${window.lookAtTarget.y.toFixed(2)}\nZ: ${window.lookAtTarget.z.toFixed(2)}`);
+            }
+            updateLookAtUI();
+        };
+
+        window.toggleLookAt = function() {
+            window.lookAtEnabled = !window.lookAtEnabled;
+            lookatStatus.innerText = window.lookAtEnabled ? "ON" : "OFF";
+            lookatStatus.style.color = window.lookAtEnabled ? "#0f0" : "red";
+        };
+
+        window.resetLookAt = function() {
+            window.lookAtEnabled = false;
+            lookatStatus.innerText = "OFF";
+            lookatStatus.style.color = "red";
+            // Reset camera rotation to default
+            camera.rotation.set(0, 0, 0);
+        };
+
+        function updateLookAtUI() {
+            document.getElementById('t-x').innerText = window.lookAtTarget.x.toFixed(3);
+            document.getElementById('t-y').innerText = window.lookAtTarget.y.toFixed(3);
+            document.getElementById('t-z').innerText = window.lookAtTarget.z.toFixed(3);
+        }
 
         // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
-                // 1. Calculate Camera Direction
+                // Movement relative to camera direction (but only horizontal for walking)
                 const direction = new THREE.Vector3();
                 camera.getWorldDirection(direction);
-                
-                // 2. Calculate Right Vector for Strafing
+                direction.y = 0; // Flatten to ground
+                direction.normalize();
+
                 const right = new THREE.Vector3();
                 right.crossVectors(camera.up, direction).normalize();
 
-                // 3. Move Camera
                 if (moveF) controls.getObject().position.addScaledVector(direction, MOVEMENT_SPEED);
                 if (moveB) controls.getObject().position.addScaledVector(direction, -MOVEMENT_SPEED);
                 if (moveL) controls.getObject().position.addScaledVector(right, -MOVEMENT_SPEED);
                 if (moveR) controls.getObject().position.addScaledVector(right, MOVEMENT_SPEED);
 
-                // 4. FORCE CAMERA TO LOOK AT TARGET
-                camera.lookAt(targetPos);
+                // FORCE CAMERA TO LOOK AT TARGET IF ENABLED
+                if (window.lookAtEnabled) {
+                    camera.lookAt(window.lookAtTarget);
+                }
             }
             
-            // Update Debug UI
+            // UPDATE UI NUMBERS
             const p = controls.getObject().position;
             document.getElementById('p-x').innerText = p.x.toFixed(3);
             document.getElementById('p-y').innerText = p.y.toFixed(3);
