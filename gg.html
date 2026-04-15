@@ -1,705 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>End of the Road - Interactive Portfolio</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0f;
-            color: #fff;
-            overflow-x: hidden;
-        }
-
-        .hero-section {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .sketchfab-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .sketchfab-embed-wrapper iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Custom Overlay UI */
-        .overlay-ui {
-            position: absolute;
-            z-index: 10;
-            pointer-events: none;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-        }
-
-        /* Header */
-        .header {
-            position: absolute;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            pointer-events: auto;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #ffe66d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.7);
-            letter-spacing: 1px;
-        }
-
-        /* Potion Buttons Container */
-        .potions-container {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 30px;
-            pointer-events: auto;
-            padding: 20px 40px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-        }
-
-        .potion-btn {
-            position: relative;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.8));
-            color: #fff;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .potion-btn::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: rotate 4s linear infinite;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .potion-btn:hover::before {
-            opacity: 1;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .potion-btn:hover {
-            transform: scale(1.15) translateY(-5px);
-            border-color: #4ecdc4;
-            box-shadow: 0 0 30px rgba(78, 205, 196, 0.6), inset 0 0 20px rgba(78, 205, 196, 0.3);
-        }
-
-        .potion-btn.active {
-            border-color: #ff6b6b;
-            box-shadow: 0 0 40px rgba(255, 107, 107, 0.8), inset 0 0 30px rgba(255, 107, 107, 0.4);
-            transform: scale(1.2);
-        }
-
-        .potion-btn.active::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 2px solid #ff6b6b;
-            animation: pulse-ring 1.5s ease-out infinite;
-        }
-
-        @keyframes pulse-ring {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(1.5);
-                opacity: 0;
-            }
-        }
-
-        .potion-label {
-            position: absolute;
-            bottom: -35px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.8);
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .potion-btn:hover .potion-label,
-        .potion-btn.active .potion-label {
-            opacity: 1;
-        }
-
-        /* Info Panel */
-        .info-panel {
-            position: absolute;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            max-width: 300px;
-            padding: 30px;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: auto;
-            opacity: 0;
-            transition: all 0.5s ease;
-        }
-
-        .info-panel.visible {
-            opacity: 1;
-        }
-
-        .info-panel h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #4ecdc4;
-        }
-
-        .info-panel p {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 15px;
-        }
-
-        .info-panel .tag {
-            display: inline-block;
-            padding: 5px 15px;
-            background: rgba(78, 205, 196, 0.2);
-            border: 1px solid rgba(78, 205, 196, 0.5);
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: #4ecdc4;
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-
-        /* Scroll Indicator */
-        .scroll-indicator {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            pointer-events: auto;
-            opacity: 0.7;
-            animation: bounce 2s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-10px); }
-        }
-
-        .scroll-indicator span {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .scroll-arrow {
-            width: 20px;
-            height: 20px;
-            border-right: 2px solid rgba(255, 255, 255, 0.6);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.6);
-            transform: rotate(45deg);
-        }
-
-        /* Loading Screen */
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a0f;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-
-        .loading-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loader {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(78, 205, 196, 0.2);
-            border-top-color: #4ecdc4;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.6);
-            letter-spacing: 2px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .potions-container {
-                bottom: 60px;
-                gap: 15px;
-                padding: 15px 25px;
-            }
-
-            .potion-btn {
-                width: 55px;
-                height: 55px;
-                font-size: 1.2rem;
-            }
-
-            .info-panel {
-                right: 20px;
-                left: 20px;
-                top: auto;
-                bottom: 150px;
-                transform: none;
-                max-width: none;
-            }
-        }
-
-        /* Hide Sketchfab attribution for cleaner look (optional - check ToS) */
-        .sketchfab-attribution {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            z-index: 5;
-            opacity: 0.5;
-            transition: opacity 0.3s ease;
-        }
-
-        .sketchfab-attribution:hover {
-            opacity: 1;
-        }
-
-        .sketchfab-attribution a {
-            color: #1CAAD9;
-            text-decoration: none;
-            font-size: 12px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My 3D Model - GitHub Pages</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
+    #loading {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-family: sans-serif;
+      font-size: 24px;
+    }
+  </style>
 </head>
 <body>
+  <div id="loading">Loading 3D model...</div>
 
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loader"></div>
-        <div class="loading-text">Loading Experience...</div>
-    </div>
+  <!-- Three.js + GLTFLoader from CDN -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
 
-    <!-- Main Hero Section -->
-    <section class="hero-section">
-        
-        <!-- Sketchfab Embed -->
-        <div class="sketchfab-container">
-            <div class="sketchfab-embed-wrapper">
-                <iframe 
-                    id="sketchfab-frame"
-                    title="End of the Road | Made in Tilt Brush" 
-                    frameborder="0" 
-                    allowfullscreen 
-                    mozallowfullscreen="true" 
-                    webkitallowfullscreen="true" 
-                    allow="autoplay; fullscreen; xr-spatial-tracking" 
-                    xr-spatial-tracking 
-                    execution-while-out-of-viewport 
-                    execution-while-not-rendered 
-                    web-share 
-                    src="https://sketchfab.com/models/eb81c8d8ef604c759c13bb0475779e4a/embed?autostart=1&ui_animations=0&ui_stop=0&ui_inspector=0&ui_settings=0&ui_vr=0&ui_fullscreen=0&ui_help=0&ui_annotations=1">
-                </iframe>
-            </div>
-        </div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        <!-- Custom Overlay UI -->
-        <div class="overlay-ui">
-            
-            <!-- Header -->
-            <div class="header">
-                <h1>End of the Road</h1>
-                <p>Interactive 3D Experience</p>
-            </div>
+    // Scene setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a2e); // dark blue-gray like your Tilt Brush scene
 
-            <!-- Potion Buttons -->
-            <div class="potions-container">
-                <button class="potion-btn active" data-annotation="0" onclick="jumpToAnnotation(0)">
-                    1
-                    <span class="potion-label">Home</span>
-                </button>
-                <button class="potion-btn" data-annotation="1" onclick="jumpToAnnotation(1)">
-                    2
-                    <span class="potion-label">Car</span>
-                </button>
-                <button class="potion-btn" data-annotation="2" onclick="jumpToAnnotation(2)">
-                    3
-                    <span class="potion-label">Person</span>
-                </button>
-                <button class="potion-btn" data-annotation="3" onclick="jumpToAnnotation(3)">
-                    4
-                    <span class="potion-label">Sign</span>
-                </button>
-            </div>
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 5, 10);
 
-            <!-- Info Panel -->
-            <div class="info-panel" id="infoPanel">
-                <h3 id="infoTitle">Welcome</h3>
-                <p id="infoText">Explore this immersive 3D scene created in Tilt Brush. Click the potion buttons below to jump to different viewpoints and discover the story.</p>
-                <div id="infoTags">
-                    <span class="tag">3D Art</span>
-                    <span class="tag">Tilt Brush</span>
-                    <span class="tag">Interactive</span>
-                </div>
-            </div>
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
 
-            <!-- Scroll Indicator -->
-            <div class="scroll-indicator">
-                <span>Scroll to Explore</span>
-                <div class="scroll-arrow"></div>
-            </div>
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
 
-        </div>
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
 
-    </section>
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(5, 10, 7);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
 
-    <script>
-        // Annotation data with custom labels and descriptions
-        const annotations = [
-            {
-                index: 0,
-                label: "Home",
-                title: "The Beginning",
-                description: "A vast cosmic landscape stretches before you. Mountains rise against a star-filled sky, marking the start of an eternal journey.",
-                tags: ["Landscape", "Cosmic", "Beginning"]
-            },
-            {
-                index: 1,
-                label: "Car",
-                title: "The Vehicle",
-                description: "An abandoned car sits on the roadside, its headlights casting an eerie glow. What story does it tell of those who came before?",
-                tags: ["Vehicle", "Mystery", "Journey"]
-            },
-            {
-                index: 2,
-                label: "Person",
-                title: "The Traveler",
-                description: "A solitary figure rests by the road, bathed in warm light. Are they waiting, resting, or contemplating the path ahead?",
-                tags: ["Character", "Solitude", "Reflection"]
-            },
-            {
-                index: 3,
-                label: "Sign",
-                title: "The Warning",
-                description: "A caution sign stands sentinel, warning of dangers unknown. What lies beyond this point on the endless road?",
-                tags: ["Warning", "Danger", "Path"]
-            }
-        ];
-
-        let currentAnnotation = 0;
-        let apiInitialized = false;
-
-        // Initialize when page loads
-        window.addEventListener('load', function() {
-            // Hide loading screen after delay
-            setTimeout(() => {
-                document.getElementById('loadingScreen').classList.add('hidden');
-                document.getElementById('infoPanel').classList.add('visible');
-            }, 1500);
-
-            // Initialize Sketchfab API listener
-            initSketchfabAPI();
+    // Load GLTF Model
+    const loader = new GLTFLoader();
+    loader.load(
+      './droid-workshop-kitchen.gltf', // ← matches your filename
+      function (gltf) {
+        const model = gltf.scene;
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
         });
+        scene.add(model);
 
-        // Initialize Sketchfab PostMessage API
-        function initSketchfabAPI() {
-            const iframe = document.getElementById('sketchfab-frame');
-            
-            // Listen for messages from Sketchfab
-            window.addEventListener('message', function(event) {
-                if (event.origin !== 'https://sketchfab.com') return;
-                
-                const data = event.data;
-                
-                // Check if API is ready
-                if (data.type === 'viewerready') {
-                    apiInitialized = true;
-                    console.log('Sketchfab API Ready');
-                }
-            });
+        // Optional: center camera on model
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        controls.target.copy(center);
+        camera.position.set(center.x, center.y + 5, center.z + 10);
 
-            // Send initialization message
-            setTimeout(() => {
-                iframe.contentWindow.postMessage({ type: 'start' }, '*');
-            }, 2000);
-        }
+        // Hide loading text
+        document.getElementById('loading').style.display = 'none';
+      },
+      undefined,
+      function (error) {
+        console.error('Error loading model:', error);
+        document.getElementById('loading').innerText = 'Failed to load model. Check console.';
+      }
+    );
 
-        // Jump to specific annotation
-        function jumpToAnnotation(index) {
-            if (index < 0 || index >= annotations.length) return;
+    // Handle resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
-            currentAnnotation = index;
-            const annotation = annotations[index];
-
-            // Update button states
-            document.querySelectorAll('.potion-btn').forEach((btn, i) => {
-                if (i === index) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-
-            // Update info panel
-            updateInfoPanel(annotation);
-
-            // Send command to Sketchfab iframe
-            const iframe = document.getElementById('sketchfab-frame');
-            
-            // Try to trigger annotation via PostMessage API
-            if (apiInitialized) {
-                iframe.contentWindow.postMessage({
-                    type: 'annotation',
-                    index: index
-                }, '*');
-            } else {
-                // Fallback: reload iframe with annotation parameter
-                const baseUrl = 'https://sketchfab.com/models/eb81c8d8ef604c759c13bb0475779e4a/embed';
-                const params = new URLSearchParams({
-                    autostart: '1',
-                    ui_animations: '0',
-                    ui_stop: '0',
-                    ui_inspector: '0',
-                    ui_settings: '0',
-                    ui_vr: '0',
-                    ui_fullscreen: '0',
-                    ui_help: '0',
-                    ui_annotations: '1',
-                    annotation_index: index.toString()
-                });
-                iframe.src = `${baseUrl}?${params.toString()}`;
-            }
-
-            // Add visual feedback
-            createRippleEffect(index);
-        }
-
-        // Update info panel content
-        function updateInfoPanel(annotation) {
-            const panel = document.getElementById('infoPanel');
-            const title = document.getElementById('infoTitle');
-            const text = document.getElementById('infoText');
-            const tags = document.getElementById('infoTags');
-
-            // Fade out
-            panel.style.opacity = '0';
-
-            setTimeout(() => {
-                // Update content
-                title.textContent = annotation.title;
-                text.textContent = annotation.description;
-                
-                // Update tags
-                tags.innerHTML = annotation.tags.map(tag => 
-                    `<span class="tag">${tag}</span>`
-                ).join('');
-
-                // Fade in
-                panel.style.opacity = '1';
-            }, 300);
-        }
-
-        // Create ripple effect on button click
-        function createRippleEffect(index) {
-            const btn = document.querySelectorAll('.potion-btn')[index];
-            const ripple = document.createElement('div');
-            ripple.style.cssText = `
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                border-radius: 50%;
-                border: 2px solid #4ecdc4;
-                animation: ripple-effect 0.6s ease-out forwards;
-                pointer-events: none;
-            `;
-            
-            btn.appendChild(ripple);
-            
-            setTimeout(() => ripple.remove(), 600);
-        }
-
-        // Add ripple animation keyframes dynamically
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes ripple-effect {
-                0% {
-                    transform: scale(1);
-                    opacity: 1;
-                }
-                100% {
-                    transform: scale(2);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.key >= '1' && e.key <= '4') {
-                const index = parseInt(e.key) - 1;
-                jumpToAnnotation(index);
-            }
-        });
-
-        // Auto-rotate through annotations every 30 seconds (optional)
-        let autoRotateInterval;
-        
-        function startAutoRotate() {
-            autoRotateInterval = setInterval(() => {
-                const nextIndex = (currentAnnotation + 1) % annotations.length;
-                jumpToAnnotation(nextIndex);
-            }, 30000);
-        }
-
-        function stopAutoRotate() {
-            if (autoRotateInterval) {
-                clearInterval(autoRotateInterval);
-            }
-        }
-
-        // Stop auto-rotate on user interaction
-        document.querySelectorAll('.potion-btn').forEach(btn => {
-            btn.addEventListener('click', stopAutoRotate);
-        });
-
-        // Optional: Start auto-rotate after 1 minute of inactivity
-        setTimeout(startAutoRotate, 60000);
-
-        // Smooth scroll behavior for other sections (if added later)
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        });
-
-        // Parallax effect on mouse move (subtle)
-        document.addEventListener('mousemove', function(e) {
-            const x = (e.clientX / window.innerWidth - 0.5) * 20;
-            const y = (e.clientY / window.innerHeight - 0.5) * 20;
-            
-            const header = document.querySelector('.header');
-            if (header) {
-                header.style.transform = `translateX(calc(-50% + ${x}px)) translateY(${y}px)`;
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            // Adjust layout if needed
-            const iframe = document.getElementById('sketchfab-frame');
-            if (iframe) {
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-            }
-        });
-
-        // Error handling for iframe loading
-        document.getElementById('sketchfab-frame').addEventListener('error', function() {
-            console.error('Failed to load Sketchfab iframe');
-            document.querySelector('.loading-text').textContent = 'Error loading 3D model. Please refresh.';
-        });
-
-        // Preload hint
-        console.log('%c🎨 End of the Road - Interactive 3D Portfolio', 'font-size: 20px; font-weight: bold; color: #4ecdc4;');
-        console.log('%cPress 1-4 to navigate between viewpoints', 'font-size: 14px; color: #ff6b6b;');
-    </script>
-
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
 </body>
 </html>
-
