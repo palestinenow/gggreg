@@ -2,36 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fly Mode - Move Where You Look</title>
+    <title>Ultimate Dev Mode - Show All</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #111; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background: #111; font-family: 'Courier New', Courier, monospace; }
+        
+        /* DEBUG PANEL */
+        #debug-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 320px;
+            background: rgba(0, 0, 0, 0.85);
+            color: #0f0;
+            padding: 15px;
+            border: 1px solid #0f0;
+            border-radius: 4px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+        }
+        .row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+        .label { color: #aaa; }
+        .val { font-weight: bold; }
+        h3 { margin-top: 0; color: white; border-bottom: 1px solid #0f0; padding-bottom: 5px; }
+
+        /* CONTROLS OVERLAY */
         #blocker {
-            position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
             display: flex; justify-content: center; align-items: center; z-index: 999;
         }
         #instructions {
-            color: white; text-align: center; cursor: pointer; padding: 20px; border: 2px solid #fff; border-radius: 10px;
-        }
-        #loading {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 24px; z-index: 1000; pointer-events: none;
+            color: white; text-align: center; cursor: pointer; padding: 30px; border: 2px solid #0f0; border-radius: 10px; font-family: sans-serif; background: #000;
         }
         #crosshair {
             position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
-            background: white; border-radius: 50%; transform: translate(-50%, -50%);
-            pointer-events: none; mix-blend-mode: difference; z-index: 50;
+            background: #0f0; border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 50; box-shadow: 0 0 5px #0f0;
         }
+
+        /* SAVE SLOTS */
+        #save-slots {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+        .slot-row { display: flex; gap: 5px; }
+        button {
+            background: #003300;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+            transition: 0.2s;
+        }
+        button:hover { background: #0f0; color: black; }
+        button.active { background: #0f0; color: black; box-shadow: 0 0 10px #0f0; }
+
     </style>
 </head>
 <body>
 
-    <div id="loading">Loading World...</div>
+    <!-- DEBUG DATA PANEL -->
+    <div id="debug-panel">
+        <h3>📍 POSITION & ROTATION</h3>
+        <div class="row"><span class="label">POS X:</span> <span class="val" id="p-x">0.00</span></div>
+        <div class="row"><span class="label">POS Y:</span> <span class="val" id="p-y">0.00</span></div>
+        <div class="row"><span class="label">POS Z:</span> <span class="val" id="p-z">0.00</span></div>
+        
+        <div class="row"><span class="label">ROT X (Pitch):</span> <span class="val" id="r-x">0°</span></div>
+        <div class="row"><span class="label">ROT Y (Yaw):</span> <span class="val" id="r-y">0°</span></div>
+        <div class="row"><span class="label">ROT Z (Roll):</span> <span class="val" id="r-z">0°</span></div>
+
+        <h3>🧭 DIRECTION VECTOR</h3>
+        <div class="row"><span class="label">DIR X:</span> <span class="val" id="d-x">0.00</span></div>
+        <div class="row"><span class="label">DIR Y:</span> <span class="val" id="d-y">0.00</span></div>
+        <div class="row"><span class="label">DIR Z:</span> <span class="val" id="d-z">0.00</span></div>
+
+        <h3>⚡ STATUS</h3>
+        <div class="row"><span class="label">SPEED:</span> <span class="val" id="speed-val">0.2</span></div>
+        <div class="row"><span class="label">LOCKED:</span> <span class="val" id="lock-status">NO</span></div>
+    </div>
+
     <div id="crosshair"></div>
 
     <div id="blocker">
         <div id="instructions">
-            <h1>CLICK TO PLAY</h1>
-            <p>Z / W → Fly FORWARD where you're looking<br>S → Backward<br>A / Q ← Left | D → Right<br>Mouse → Look Anywhere<br>ESC → Pause</p>
+            <h1 style="color:#0f0">CLICK TO START DEV MODE</h1>
+            <p>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>Mouse → Look Around<br>ESC → Pause</p>
+        </div>
+    </div>
+
+    <!-- 3 SAVE SLOTS -->
+    <div id="save-slots">
+        <div class="slot-row">
+            <button onclick="saveSlot(1)">💾 SAVE 1</button>
+            <button onclick="loadSlot(1)">🚀 LOAD 1</button>
+        </div>
+        <div class="slot-row">
+            <button onclick="saveSlot(2)">💾 SAVE 2</button>
+            <button onclick="loadSlot(2)">🚀 LOAD 2</button>
+        </div>
+        <div class="slot-row">
+            <button onclick="saveSlot(3)">💾 SAVE 3</button>
+            <button onclick="loadSlot(3)">🚀 LOAD 3</button>
         </div>
     </div>
 
@@ -51,43 +131,42 @@
 
         // --- SETUP ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x202020);
+        scene.background = new THREE.Color(0x111111);
+        scene.fog = new THREE.Fog(0x111111, 10, 50);
         
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
         // --- LIGHTS ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); 
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.0); 
         scene.add(ambientLight);
-        
-        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
         dirLight.position.set(10, 20, 10);
         scene.add(dirLight);
 
         // --- CONTROLS ---
         const controls = new PointerLockControls(camera, document.body);
         const blocker = document.getElementById('blocker');
-        const instructions = document.getElementById('instructions');
-        const loading = document.getElementById('loading');
+        const lockStatus = document.getElementById('lock-status');
 
-        instructions.addEventListener('click', () => controls.lock());
-        
+        document.addEventListener('click', () => controls.lock());
         controls.addEventListener('lock', () => {
             blocker.style.display = 'none';
+            lockStatus.innerText = "YES";
+            lockStatus.style.color = "#0f0";
         });
-        
         controls.addEventListener('unlock', () => {
             blocker.style.display = 'flex';
+            lockStatus.innerText = "NO";
+            lockStatus.style.color = "red";
         });
-
         scene.add(controls.getObject());
 
-        // --- MOVEMENT VARIABLES ---
+        // --- MOVEMENT ---
         let moveF = false, moveB = false, moveL = false, moveR = false;
-        const MOVEMENT_SPEED = 2.5; 
+        const MOVEMENT_SPEED = 0.2; // Slow precise speed
 
         document.addEventListener('keydown', (e) => {
             if(e.code === 'KeyW' || e.code === 'ArrowUp' || e.code === 'KeyZ') moveF = true;
@@ -105,57 +184,85 @@
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
-        
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
-            
             model.traverse((child) => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                }
+                if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
             });
-
             scene.add(model);
             
-            // Center Camera on model
+            // Initial Spawn
             const box = new THREE.Box3().setFromObject(model);
             const center = box.getCenter(new THREE.Vector3());
             controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
-
-            loading.style.display = 'none';
-
         }, undefined, function (error) {
             console.error(error);
-            loading.innerText = "Error loading model. Check Console (F12).";
         });
 
-        // --- ANIMATION LOOP: TRUE FLY MODE ---
+        // --- SAVE SYSTEM ---
+        window.slots = { 1: null, 2: null, 3: null };
+
+        window.saveSlot = function(id) {
+            const p = controls.getObject().position;
+            const r = camera.rotation;
+            window.slots[id] = { x: p.x, y: p.y, z: p.z, ry: r.y, rx: r.x };
+            
+            // Visual feedback on button
+            const btns = document.querySelectorAll(`button[onclick="saveSlot(${id})"]`);
+            btns.forEach(b => {
+                b.innerText = "SAVED!";
+                setTimeout(() => b.innerText = `💾 SAVE ${id}`, 1000);
+            });
+        };
+
+        window.loadSlot = function(id) {
+            if (!window.slots[id]) return alert("Slot empty!");
+            const s = window.slots[id];
+            controls.getObject().position.set(s.x, s.y, s.z);
+            camera.rotation.set(s.rx, s.ry, 0); // Reset roll to 0 for stability
+        };
+
+        // --- ANIMATION LOOP WITH FULL DEBUG INFO ---
         function animate() {
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
-                // Get camera's forward direction (FULL 3D - no flattening!)
                 const direction = new THREE.Vector3();
                 camera.getWorldDirection(direction);
-                // DO NOT set direction.y = 0 → we want to fly up/down too!
-
-                // Get camera's right direction (for strafe)
                 const right = new THREE.Vector3();
                 right.crossVectors(camera.up, direction).normalize();
 
-                // Apply movement relative to camera orientation — FULL 3D
                 if (moveF) controls.getObject().position.addScaledVector(direction, MOVEMENT_SPEED);
                 if (moveB) controls.getObject().position.addScaledVector(direction, -MOVEMENT_SPEED);
                 if (moveL) controls.getObject().position.addScaledVector(right, -MOVEMENT_SPEED);
                 if (moveR) controls.getObject().position.addScaledVector(right, MOVEMENT_SPEED);
             }
             
+            // UPDATE ALL NUMBERS
+            const p = controls.getObject().position;
+            const r = camera.rotation;
+            const d = new THREE.Vector3();
+            camera.getWorldDirection(d);
+
+            // Position
+            document.getElementById('p-x').innerText = p.x.toFixed(3);
+            document.getElementById('p-y').innerText = p.y.toFixed(3);
+            document.getElementById('p-z').innerText = p.z.toFixed(3);
+
+            // Rotation (Radians to Degrees)
+            document.getElementById('r-x').innerText = (r.x * 180/Math.PI).toFixed(1) + "°";
+            document.getElementById('r-y').innerText = (r.y * 180/Math.PI).toFixed(1) + "°";
+            document.getElementById('r-z').innerText = (r.z * 180/Math.PI).toFixed(1) + "°";
+
+            // Direction Vector
+            document.getElementById('d-x').innerText = d.x.toFixed(3);
+            document.getElementById('d-y').innerText = d.y.toFixed(3);
+            document.getElementById('d-z').innerText = d.z.toFixed(3);
+
             renderer.render(scene, camera);
         }
         animate();
 
-        // Handle Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
