@@ -41,8 +41,8 @@
             pointer-events: none; z-index: 50; box-shadow: 0 0 5px #0f0;
         }
 
-        /* ACTION BUTTONS */
-        #actions {
+        /* SAVE SLOTS & LOOK TARGET BUTTON */
+        #controls-right {
             position: absolute;
             bottom: 20px;
             right: 20px;
@@ -51,6 +51,7 @@
             gap: 10px;
             z-index: 100;
         }
+        .slot-row { display: flex; gap: 5px; }
         button {
             background: #003300;
             color: #0f0;
@@ -64,26 +65,51 @@
         button:hover { background: #0f0; color: black; }
         button.active { background: #0f0; color: black; box-shadow: 0 0 10px #0f0; }
 
+        /* LOOK TARGET INDICATOR */
+        #look-target-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #ff0;
+            padding: 10px;
+            border: 1px solid #ff0;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
 
     <!-- DEBUG DATA PANEL -->
     <div id="debug-panel">
-        <h3>📍 CAMERA POSITION</h3>
+        <h3>📍 POSITION & ROTATION</h3>
         <div class="row"><span class="label">POS X:</span> <span class="val" id="p-x">0.00</span></div>
         <div class="row"><span class="label">POS Y:</span> <span class="val" id="p-y">0.00</span></div>
         <div class="row"><span class="label">POS Z:</span> <span class="val" id="p-z">0.00</span></div>
         
-        <h3>🎯 LOOKAT TARGET</h3>
-        <div class="row"><span class="label">TARGET X:</span> <span class="val" id="t-x">0.00</span></div>
-        <div class="row"><span class="label">TARGET Y:</span> <span class="val" id="t-y">0.00</span></div>
-        <div class="row"><span class="label">TARGET Z:</span> <span class="val" id="t-z">0.00</span></div>
+        <div class="row"><span class="label">ROT X (Pitch):</span> <span class="val" id="r-x">0°</span></div>
+        <div class="row"><span class="label">ROT Y (Yaw):</span> <span class="val" id="r-y">0°</span></div>
+        <div class="row"><span class="label">ROT Z (Roll):</span> <span class="val" id="r-z">0°</span></div>
+
+        <h3>🧭 DIRECTION VECTOR</h3>
+        <div class="row"><span class="label">DIR X:</span> <span class="val" id="d-x">0.00</span></div>
+        <div class="row"><span class="label">DIR Y:</span> <span class="val" id="d-y">0.00</span></div>
+        <div class="row"><span class="label">DIR Z:</span> <span class="val" id="d-z">0.00</span></div>
 
         <h3>⚡ STATUS</h3>
         <div class="row"><span class="label">SPEED:</span> <span class="val" id="speed-val">0.2</span></div>
         <div class="row"><span class="label">LOCKED:</span> <span class="val" id="lock-status">NO</span></div>
-        <div class="row"><span class="label">LOOKAT ON:</span> <span class="val" id="lookat-status">OFF</span></div>
+    </div>
+
+    <!-- LOOK TARGET INFO -->
+    <div id="look-target-info">
+        <strong>🎯 LOOK TARGET:</strong><br>
+        X: <span id="lt-x">0.00</span><br>
+        Y: <span id="lt-y">0.00</span><br>
+        Z: <span id="lt-z">0.00</span><br>
+        <small>Press [T] to set current view as target</small>
     </div>
 
     <div id="crosshair"></div>
@@ -91,15 +117,27 @@
     <div id="blocker">
         <div id="instructions">
             <h1 style="color:#0f0">CLICK TO START</h1>
-            <p>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>Mouse → Look Around (until you set LookAt)<br>ESC → Pause</p>
+            <p>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>Mouse → Look Around (temporarily)<br>[T] → Set Look Target<br>ESC → Pause</p>
         </div>
     </div>
 
-    <!-- ACTIONS -->
-    <div id="actions">
-        <button onclick="setLookAtFromCamera()">🎯 SET LOOKAT HERE</button>
-        <button onclick="toggleLookAt()">🔄 TOGGLE LOOKAT LOCK</button>
-        <button onclick="resetLookAt()">❌ RESET LOOKAT</button>
+    <!-- CONTROLS -->
+    <div id="controls-right">
+        <div class="slot-row">
+            <button onclick="saveSlot(1)">💾 SAVE POS 1</button>
+            <button onclick="loadSlot(1)">🚀 LOAD POS 1</button>
+        </div>
+        <div class="slot-row">
+            <button onclick="saveSlot(2)">💾 SAVE POS 2</button>
+            <button onclick="loadSlot(2)">🚀 LOAD POS 2</button>
+        </div>
+        <div class="slot-row">
+            <button onclick="saveSlot(3)">💾 SAVE POS 3</button>
+            <button onclick="loadSlot(3)">🚀 LOAD POS 3</button>
+        </div>
+        <div class="slot-row">
+            <button onclick="resetLookTarget()">🔄 RESET LOOK TARGET</button>
+        </div>
     </div>
 
     <script type="importmap">
@@ -137,7 +175,6 @@
         const controls = new PointerLockControls(camera, document.body);
         const blocker = document.getElementById('blocker');
         const lockStatus = document.getElementById('lock-status');
-        const lookatStatus = document.getElementById('lookat-status');
 
         document.addEventListener('click', () => controls.lock());
         controls.addEventListener('lock', () => {
@@ -161,6 +198,9 @@
             if(e.code === 'KeyS' || e.code === 'ArrowDown') moveB = true;
             if(e.code === 'KeyA' || e.code === 'ArrowLeft' || e.code === 'KeyQ') moveL = true;
             if(e.code === 'KeyD' || e.code === 'ArrowRight') moveR = true;
+            
+            // Press T to set look target
+            if(e.code === 'KeyT') setLookTargetFromCurrentView();
         });
         
         document.addEventListener('keyup', (e) => {
@@ -169,6 +209,39 @@
             if(e.code === 'KeyA' || e.code === 'ArrowLeft' || e.code === 'KeyQ') moveL = false;
             if(e.code === 'KeyD' || e.code === 'ArrowRight') moveR = false;
         });
+
+        // --- LOOK TARGET SYSTEM ---
+        // Default target: center of model (we'll update after load)
+        let lookTarget = new THREE.Vector3(0, 1, 0);
+
+        function setLookTargetFromCurrentView() {
+            // Cast ray from camera forward to find what we're looking at
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            
+            // For now, just use a point 10 units in front of camera
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            const targetPoint = camera.position.clone().add(direction.multiplyScalar(10));
+            
+            lookTarget.copy(targetPoint);
+            updateLookTargetUI();
+            
+            // Visual feedback
+            alert(`Look target set to:\nX: ${lookTarget.x.toFixed(2)}\nY: ${lookTarget.y.toFixed(2)}\nZ: ${lookTarget.z.toFixed(2)}`);
+        }
+
+        function resetLookTarget() {
+            // Reset to origin or center of model
+            lookTarget.set(0, 1, 0);
+            updateLookTargetUI();
+        }
+
+        function updateLookTargetUI() {
+            document.getElementById('lt-x').innerText = lookTarget.x.toFixed(2);
+            document.getElementById('lt-y').innerText = lookTarget.y.toFixed(2);
+            document.getElementById('lt-z').innerText = lookTarget.z.toFixed(2);
+        }
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -179,72 +252,46 @@
             });
             scene.add(model);
             
-            // Initial Spawn
+            // Set initial look target to center of model
             const box = new THREE.Box3().setFromObject(model);
             const center = box.getCenter(new THREE.Vector3());
+            lookTarget.copy(center);
+            lookTarget.y += 1; // Look slightly above center
+            updateLookTargetUI();
+
+            // Initial spawn position
             controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
-            
-            // Set initial lookAt target to center of model
-            window.lookAtTarget = center.clone();
-            updateLookAtUI();
         }, undefined, function (error) {
             console.error(error);
         });
 
-        // --- LOOKAT SYSTEM ---
-        window.lookAtEnabled = false;
-        window.lookAtTarget = new THREE.Vector3(0, 0, 0);
+        // --- SAVE SYSTEM ---
+        window.slots = { 1: null, 2: null, 3: null };
 
-        window.setLookAtFromCamera = function() {
-            // Raycast forward from camera to find what we're looking at
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-            const intersects = raycaster.intersectObjects(scene.children, true);
+        window.saveSlot = function(id) {
+            const p = controls.getObject().position;
+            window.slots[id] = { x: p.x, y: p.y, z: p.z };
             
-            if (intersects.length > 0) {
-                window.lookAtTarget.copy(intersects[0].point);
-                alert(`LookAt set to:\nX: ${window.lookAtTarget.x.toFixed(2)}\nY: ${window.lookAtTarget.y.toFixed(2)}\nZ: ${window.lookAtTarget.z.toFixed(2)}`);
-            } else {
-                // Fallback: use point 10 units in front of camera
-                const direction = new THREE.Vector3();
-                camera.getWorldDirection(direction);
-                window.lookAtTarget.copy(camera.position).add(direction.multiplyScalar(10));
-                alert(`LookAt set to point in front:\nX: ${window.lookAtTarget.x.toFixed(2)}\nY: ${window.lookAtTarget.y.toFixed(2)}\nZ: ${window.lookAtTarget.z.toFixed(2)}`);
-            }
-            updateLookAtUI();
+            const btns = document.querySelectorAll(`button[onclick="saveSlot(${id})"]`);
+            btns.forEach(b => {
+                b.innerText = "SAVED!";
+                setTimeout(() => b.innerText = `💾 SAVE POS ${id}`, 1000);
+            });
         };
 
-        window.toggleLookAt = function() {
-            window.lookAtEnabled = !window.lookAtEnabled;
-            lookatStatus.innerText = window.lookAtEnabled ? "ON" : "OFF";
-            lookatStatus.style.color = window.lookAtEnabled ? "#0f0" : "red";
+        window.loadSlot = function(id) {
+            if (!window.slots[id]) return alert("Slot empty!");
+            const s = window.slots[id];
+            controls.getObject().position.set(s.x, s.y, s.z);
         };
 
-        window.resetLookAt = function() {
-            window.lookAtEnabled = false;
-            lookatStatus.innerText = "OFF";
-            lookatStatus.style.color = "red";
-            // Reset camera rotation to default
-            camera.rotation.set(0, 0, 0);
-        };
-
-        function updateLookAtUI() {
-            document.getElementById('t-x').innerText = window.lookAtTarget.x.toFixed(3);
-            document.getElementById('t-y').innerText = window.lookAtTarget.y.toFixed(3);
-            document.getElementById('t-z').innerText = window.lookAtTarget.z.toFixed(3);
-        }
-
-        // --- ANIMATION LOOP ---
+        // --- ANIMATION LOOP WITH LOOKAT LOCK ---
         function animate() {
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
-                // Movement relative to camera direction (but only horizontal for walking)
                 const direction = new THREE.Vector3();
                 camera.getWorldDirection(direction);
-                direction.y = 0; // Flatten to ground
-                direction.normalize();
-
                 const right = new THREE.Vector3();
                 right.crossVectors(camera.up, direction).normalize();
 
@@ -252,18 +299,28 @@
                 if (moveB) controls.getObject().position.addScaledVector(direction, -MOVEMENT_SPEED);
                 if (moveL) controls.getObject().position.addScaledVector(right, -MOVEMENT_SPEED);
                 if (moveR) controls.getObject().position.addScaledVector(right, MOVEMENT_SPEED);
-
-                // FORCE CAMERA TO LOOK AT TARGET IF ENABLED
-                if (window.lookAtEnabled) {
-                    camera.lookAt(window.lookAtTarget);
-                }
             }
             
-            // UPDATE UI NUMBERS
+            // FORCE CAMERA TO ALWAYS LOOK AT TARGET
+            camera.lookAt(lookTarget);
+            
+            // UPDATE DEBUG NUMBERS
             const p = controls.getObject().position;
+            const r = camera.rotation;
+            const d = new THREE.Vector3();
+            camera.getWorldDirection(d);
+
             document.getElementById('p-x').innerText = p.x.toFixed(3);
             document.getElementById('p-y').innerText = p.y.toFixed(3);
             document.getElementById('p-z').innerText = p.z.toFixed(3);
+
+            document.getElementById('r-x').innerText = (r.x * 180/Math.PI).toFixed(1) + "°";
+            document.getElementById('r-y').innerText = (r.y * 180/Math.PI).toFixed(1) + "°";
+            document.getElementById('r-z').innerText = (r.z * 180/Math.PI).toFixed(1) + "°";
+
+            document.getElementById('d-x').innerText = d.x.toFixed(3);
+            document.getElementById('d-y').innerText = d.y.toFixed(3);
+            document.getElementById('d-z').innerText = d.z.toFixed(3);
 
             renderer.render(scene, camera);
         }
