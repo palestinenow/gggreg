@@ -2,29 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LookAt Center Mode</title>
+    <title>Always Look At Target</title>
     <style>
         body { margin: 0; overflow: hidden; background: #111; font-family: 'Courier New', Courier, monospace; }
         
         /* DEBUG PANEL */
         #debug-panel {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 320px;
-            background: rgba(0, 0, 0, 0.85);
-            color: #0f0;
-            padding: 15px;
-            border: 1px solid #0f0;
-            border-radius: 4px;
-            font-size: 14px;
-            pointer-events: none;
-            z-index: 100;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            position: absolute; top: 10px; left: 10px; width: 320px;
+            background: rgba(0, 0, 0, 0.85); color: #0f0; padding: 15px;
+            border: 1px solid #0f0; border-radius: 4px; font-size: 14px;
+            pointer-events: none; z-index: 100;
         }
         .row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
-        .label { color: #aaa; }
-        .val { font-weight: bold; }
+        .label { color: #aaa; } .val { font-weight: bold; }
         h3 { margin-top: 0; color: white; border-bottom: 1px solid #0f0; padding-bottom: 5px; }
 
         /* CONTROLS OVERLAY */
@@ -33,7 +23,8 @@
             display: flex; justify-content: center; align-items: center; z-index: 999;
         }
         #instructions {
-            color: white; text-align: center; cursor: pointer; padding: 30px; border: 2px solid #0f0; border-radius: 10px; font-family: sans-serif; background: #000;
+            color: white; text-align: center; cursor: pointer; padding: 30px;
+            border: 2px solid #0f0; border-radius: 10px; font-family: sans-serif; background: #000;
         }
         #crosshair {
             position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
@@ -41,92 +32,37 @@
             pointer-events: none; z-index: 50; box-shadow: 0 0 5px #0f0;
         }
 
-        /* SAVE SLOTS & LOCK BUTTONS */
-        #controls-right {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 100;
+        /* TARGET MARKER (Visual Helper) */
+        #target-marker {
+            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
+            border: 2px solid red; border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 40; opacity: 0.5;
         }
-        .slot-row { display: flex; gap: 5px; }
-        button {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 8px 12px;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: monospace;
-            transition: 0.2s;
-        }
-        button:hover { background: #0f0; color: black; }
-        button.active { background: #0f0; color: black; box-shadow: 0 0 10px #0f0; }
-        
-        #lock-btn {
-            background: #330000;
-            color: #ff0000;
-            border-color: #ff0000;
-        }
-        #lock-btn.locked {
-            background: #003300;
-            color: #0f0;
-            border-color: #0f0;
-        }
-
     </style>
 </head>
 <body>
 
     <!-- DEBUG DATA PANEL -->
     <div id="debug-panel">
-        <h3>📍 POSITION & ROTATION</h3>
+        <h3>📍 CAMERA POSITION</h3>
         <div class="row"><span class="label">POS X:</span> <span class="val" id="p-x">0.00</span></div>
         <div class="row"><span class="label">POS Y:</span> <span class="val" id="p-y">0.00</span></div>
         <div class="row"><span class="label">POS Z:</span> <span class="val" id="p-z">0.00</span></div>
         
-        <div class="row"><span class="label">ROT X (Pitch):</span> <span class="val" id="r-x">0°</span></div>
-        <div class="row"><span class="label">ROT Y (Yaw):</span> <span class="val" id="r-y">0°</span></div>
-        <div class="row"><span class="label">ROT Z (Roll):</span> <span class="val" id="r-z">0°</span></div>
-
-        <h3>🧭 DIRECTION VECTOR</h3>
-        <div class="row"><span class="label">DIR X:</span> <span class="val" id="d-x">0.00</span></div>
-        <div class="row"><span class="label">DIR Y:</span> <span class="val" id="d-y">0.00</span></div>
-        <div class="row"><span class="label">DIR Z:</span> <span class="val" id="d-z">0.00</span></div>
-
-        <h3>⚡ STATUS</h3>
-        <div class="row"><span class="label">MODE:</span> <span class="val" id="mode-val">FREE LOOK</span></div>
-        <div class="row"><span class="label">CENTER:</span> <span class="val" id="center-val">NOT SET</span></div>
-        <div class="row"><span class="label">LOCKED:</span> <span class="val" id="lock-status">NO</span></div>
+        <h3>🎯 FIXED TARGET (Looking At)</h3>
+        <div class="row"><span class="label">TARGET X:</span> <span class="val" style="color:red">-0.006</span></div>
+        <div class="row"><span class="label">TARGET Y:</span> <span class="val" style="color:red">1.041</span></div>
+        <div class="row"><span class="label">TARGET Z:</span> <span class="val" style="color:red">-0.008</span></div>
     </div>
 
     <div id="crosshair"></div>
+    <div id="target-marker"></div> <!-- Red circle showing where you are looking -->
 
     <div id="blocker">
         <div id="instructions">
             <h1 style="color:#0f0">CLICK TO START</h1>
-            <p>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>Mouse → Look Around<br>ESC → Pause</p>
-            <p style="font-size:12px; color:#aaa;">Use "SAVE 1" to set CENTER point<br>Then click "LOCK TO CENTER"</p>
+            <p>Move Mouse to Rotate Around Target<br>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>ESC → Pause</p>
         </div>
-    </div>
-
-    <!-- CONTROLS -->
-    <div id="controls-right">
-        <div class="slot-row">
-            <button onclick="saveSlot(1)">💾 SAVE 1 (CENTER)</button>
-            <button onclick="loadSlot(1)">🚀 LOAD 1</button>
-        </div>
-        <div class="slot-row">
-            <button onclick="saveSlot(2)">💾 SAVE 2</button>
-            <button onclick="loadSlot(2)">🚀 LOAD 2</button>
-        </div>
-        <div class="slot-row">
-            <button onclick="saveSlot(3)">💾 SAVE 3</button>
-            <button onclick="loadSlot(3)">🚀 LOAD 3</button>
-        </div>
-        <button id="lock-btn" onclick="toggleLock()">🔒 LOCK TO CENTER</button>
     </div>
 
     <script type="importmap">
@@ -146,7 +82,6 @@
         // --- SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x111111);
-        scene.fog = new THREE.Fog(0x111111, 10, 50);
         
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -160,26 +95,27 @@
         dirLight.position.set(10, 20, 10);
         scene.add(dirLight);
 
+        // --- THE FIXED TARGET (From your screenshot) ---
+        const targetPos = new THREE.Vector3(-0.006, 1.041, -0.008);
+        
+        // Add a small red sphere at the target so you can see it
+        const geometry = new THREE.SphereGeometry(0.1, 16, 16);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const targetMesh = new THREE.Mesh(geometry, material);
+        targetMesh.position.copy(targetPos);
+        scene.add(targetMesh);
+
         // --- CONTROLS ---
         const controls = new PointerLockControls(camera, document.body);
         const blocker = document.getElementById('blocker');
-        const lockStatus = document.getElementById('lock-status');
-        const modeVal = document.getElementById('mode-val');
-        const centerVal = document.getElementById('center-val');
-        const lockBtn = document.getElementById('lock-btn');
 
         document.addEventListener('click', () => controls.lock());
-        controls.addEventListener('lock', () => {
-            blocker.style.display = 'none';
-            lockStatus.innerText = "YES";
-            lockStatus.style.color = "#0f0";
-        });
-        controls.addEventListener('unlock', () => {
-            blocker.style.display = 'flex';
-            lockStatus.innerText = "NO";
-            lockStatus.style.color = "red";
-        });
+        controls.addEventListener('lock', () => blocker.style.display = 'none');
+        controls.addEventListener('unlock', () => blocker.style.display = 'flex');
         scene.add(controls.getObject());
+
+        // Start camera slightly away from target
+        controls.getObject().position.set(0, 2, 5);
 
         // --- MOVEMENT ---
         let moveF = false, moveB = false, moveL = false, moveR = false;
@@ -203,108 +139,37 @@
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
-            model.traverse((child) => {
-                if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
-            });
             scene.add(model);
-            
-            // Initial Spawn
-            const box = new THREE.Box3().setFromObject(model);
-            const center = box.getCenter(new THREE.Vector3());
-            controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
-        }, undefined, function (error) {
-            console.error(error);
-        });
+        }, undefined, function (error) { console.error(error); });
 
-        // --- SAVE SYSTEM ---
-        window.slots = { 1: null, 2: null, 3: null };
-        window.isLockedToCenter = false;
-
-        window.saveSlot = function(id) {
-            const p = controls.getObject().position;
-            const r = camera.rotation;
-            window.slots[id] = { x: p.x, y: p.y, z: p.z, ry: r.y, rx: r.x };
-            
-            if (id === 1) {
-                centerVal.innerText = `SET (${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)})`;
-                centerVal.style.color = "#0f0";
-            }
-
-            const btns = document.querySelectorAll(`button[onclick="saveSlot(${id})"]`);
-            btns.forEach(b => {
-                b.innerText = "SAVED!";
-                setTimeout(() => b.innerText = id === 1 ? `💾 SAVE 1 (CENTER)` : `💾 SAVE ${id}`, 1000);
-            });
-        };
-
-        window.loadSlot = function(id) {
-            if (!window.slots[id]) return alert("Slot empty!");
-            const s = window.slots[id];
-            controls.getObject().position.set(s.x, s.y, s.z);
-            camera.rotation.set(s.rx, s.ry, 0);
-        };
-
-        // --- LOCK TO CENTER TOGGLE ---
-        window.toggleLock = function() {
-            if (!window.slots[1]) {
-                alert("First, use 'SAVE 1' to set the CENTER point!");
-                return;
-            }
-
-            window.isLockedToCenter = !window.isLockedToCenter;
-            
-            if (window.isLockedToCenter) {
-                lockBtn.innerText = "🔓 UNLOCK FROM CENTER";
-                lockBtn.classList.add('locked');
-                modeVal.innerText = "LOOKAT CENTER";
-                modeVal.style.color = "#0f0";
-            } else {
-                lockBtn.innerText = "🔒 LOCK TO CENTER";
-                lockBtn.classList.remove('locked');
-                modeVal.innerText = "FREE LOOK";
-                modeVal.style.color = "white";
-            }
-        };
-
-        // --- ANIMATION LOOP WITH LOOKAT LOGIC ---
+        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
+                // 1. Calculate Camera Direction
                 const direction = new THREE.Vector3();
                 camera.getWorldDirection(direction);
+                
+                // 2. Calculate Right Vector for Strafing
                 const right = new THREE.Vector3();
                 right.crossVectors(camera.up, direction).normalize();
 
+                // 3. Move Camera
                 if (moveF) controls.getObject().position.addScaledVector(direction, MOVEMENT_SPEED);
                 if (moveB) controls.getObject().position.addScaledVector(direction, -MOVEMENT_SPEED);
                 if (moveL) controls.getObject().position.addScaledVector(right, -MOVEMENT_SPEED);
                 if (moveR) controls.getObject().position.addScaledVector(right, MOVEMENT_SPEED);
 
-                // 👁️ LOOKAT CENTER LOGIC
-                if (window.isLockedToCenter && window.slots[1]) {
-                    const centerPos = new THREE.Vector3(window.slots[1].x, window.slots[1].y, window.slots[1].z);
-                    camera.lookAt(centerPos);
-                }
+                // 4. FORCE CAMERA TO LOOK AT TARGET
+                camera.lookAt(targetPos);
             }
             
-            // UPDATE ALL NUMBERS
+            // Update Debug UI
             const p = controls.getObject().position;
-            const r = camera.rotation;
-            const d = new THREE.Vector3();
-            camera.getWorldDirection(d);
-
             document.getElementById('p-x').innerText = p.x.toFixed(3);
             document.getElementById('p-y').innerText = p.y.toFixed(3);
             document.getElementById('p-z').innerText = p.z.toFixed(3);
-
-            document.getElementById('r-x').innerText = (r.x * 180/Math.PI).toFixed(1) + "°";
-            document.getElementById('r-y').innerText = (r.y * 180/Math.PI).toFixed(1) + "°";
-            document.getElementById('r-z').innerText = (r.z * 180/Math.PI).toFixed(1) + "°";
-
-            document.getElementById('d-x').innerText = d.x.toFixed(3);
-            document.getElementById('d-y').innerText = d.y.toFixed(3);
-            document.getElementById('d-z').innerText = d.z.toFixed(3);
 
             renderer.render(scene, camera);
         }
