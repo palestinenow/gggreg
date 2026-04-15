@@ -1,40 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>3D Walkthrough</title>
+    <title>Simple 3D Walk</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: Arial, sans-serif; }
-        #blocker {
-            position: absolute; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
-            display: flex; justify-content: center; align-items: center; z-index: 10;
-        }
-        #instructions {
-            color: white; text-align: center; cursor: pointer; padding: 20px; border: 2px solid white; border-radius: 10px;
-        }
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
-            background: white; border-radius: 50%; transform: translate(-50%, -50%);
-            pointer-events: none; mix-blend-mode: difference; z-index: 5;
+        body { margin: 0; overflow: hidden; background: #000; }
+        #info {
+            position: absolute; top: 50%; width: 100%; text-align: center;
+            color: white; font-family: Arial; font-size: 20px; pointer-events: none;
+            z-index: 100; text-shadow: 1px 1px 2px black;
         }
     </style>
 </head>
 <body>
+    <div id="info">Click screen to Start<br>WASD to Move | Mouse to Look | ESC to Stop</div>
 
-    <div id="crosshair"></div>
-    
-    <div id="blocker">
-        <div id="instructions">
-            <h1 style="font-size: 36px;">CLICK TO PLAY</h1>
-            <p style="font-size: 18px;">
-                Move: W, A, S, D (or Z, Q, S, D)<br>
-                Look: Mouse<br>
-                Exit: ESC
-            </p>
-        </div>
-    </div>
-
-    <!-- Import Three.js from CDN -->
+    <!-- Load Three.js from a reliable CDN -->
     <script type="importmap">
         {
             "imports": {
@@ -49,134 +29,107 @@
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        let camera, scene, renderer, controls;
+        // 1. Basic Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky blue background so you know it's working
+        scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 2. Lights (Bright so we see colors)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(10, 10, 10);
+        scene.add(dirLight);
+
+        // 3. Controls
+        const controls = new PointerLockControls(camera, document.body);
+        const instructions = document.getElementById('info');
+
+        document.addEventListener('click', () => {
+            controls.lock();
+        });
+
+        controls.addEventListener('lock', () => {
+            instructions.style.display = 'none';
+        });
+
+        controls.addEventListener('unlock', () => {
+            instructions.style.display = 'block';
+        });
+
+        // 4. Movement Variables
         let moveForward = false;
         let moveBackward = false;
         let moveLeft = false;
         let moveRight = false;
-        
-        // Speed settings
-        const speed = 10.0; 
 
-        init();
-        animate();
+        const onKeyDown = (event) => {
+            switch (event.code) {
+                case 'KeyW': case 'ArrowUp': case 'KeyZ': moveForward = true; break;
+                case 'KeyA': case 'ArrowLeft': case 'KeyQ': moveLeft = true; break;
+                case 'KeyS': case 'ArrowDown': moveBackward = true; break;
+                case 'KeyD': case 'ArrowRight': moveRight = true; break;
+            }
+        };
 
-        function init() {
-            // 1. Setup Scene
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x222222); // Dark Gray background
+        const onKeyUp = (event) => {
+            switch (event.code) {
+                case 'KeyW': case 'ArrowUp': case 'KeyZ': moveForward = false; break;
+                case 'KeyA': case 'ArrowLeft': case 'KeyQ': moveLeft = false; break;
+                case 'KeyS': case 'ArrowDown': moveBackward = false; break;
+                case 'KeyD': case 'ArrowRight': moveRight = false; break;
+            }
+        };
+
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('keyup', onKeyUp);
+
+        // 5. Load Model
+        const loader = new GLTFLoader();
+        loader.load('./droid-workshop-kitchen.gltf', function (gltf) {
+            const model = gltf.scene;
+            scene.add(model);
             
-            // Add some fog so distant objects fade nicely
-            scene.fog = new THREE.Fog(0x222222, 0, 70);
-
-            // 2. Setup Camera
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            // Center camera on model
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            camera.position.set(center.x, center.y + 5, center.z + 10);
             
-            // 3. Setup Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+            console.log("Model Loaded");
+        }, undefined, function (error) {
+            console.error(error);
+            instructions.innerText = "ERROR: Could not load model. Check Console (F12).";
+        });
 
-            // 4. Lights (Crucial for seeing colors)
-            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
-            scene.add(hemiLight);
-
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(10, 20, 10);
-            scene.add(dirLight);
-
-            // 5. Controls (FPS Style)
-            controls = new PointerLockControls(camera, document.body);
-
-            const blocker = document.getElementById('blocker');
-            const instructions = document.getElementById('instructions');
-
-            instructions.addEventListener('click', function () {
-                controls.lock();
-            });
-
-            controls.addEventListener('lock', function () {
-                instructions.style.display = 'none';
-                blocker.style.display = 'none';
-            });
-
-            controls.addEventListener('unlock', function () {
-                blocker.style.display = 'flex';
-                instructions.style.display = 'block';
-            });
-
-            scene.add(controls.getObject());
-
-            // 6. Keyboard Inputs (WASD + ZQSD)
-            const onKeyDown = function (event) {
-                switch (event.code) {
-                    case 'ArrowUp': case 'KeyW': case 'KeyZ': moveForward = true; break;
-                    case 'ArrowLeft': case 'KeyA': case 'KeyQ': moveLeft = true; break;
-                    case 'ArrowDown': case 'KeyS': moveBackward = true; break;
-                    case 'ArrowRight': case 'KeyD': moveRight = true; break;
-                }
-            };
-
-            const onKeyUp = function (event) {
-                switch (event.code) {
-                    case 'ArrowUp': case 'KeyW': case 'KeyZ': moveForward = false; break;
-                    case 'ArrowLeft': case 'KeyA': case 'KeyQ': moveLeft = false; break;
-                    case 'ArrowDown': case 'KeyS': moveBackward = false; break;
-                    case 'ArrowRight': case 'KeyD': moveRight = false; break;
-                }
-            };
-
-            document.addEventListener('keydown', onKeyDown);
-            document.addEventListener('keyup', onKeyUp);
-
-            // 7. Load Model
-            const loader = new GLTFLoader();
-            
-            // IMPORTANT: Ensure this filename matches EXACTLY what is in your GitHub repo
-            loader.load('./droid-workshop-kitchen.gltf', function (gltf) {
-                const model = gltf.scene;
-                scene.add(model);
-
-                // Center the player near the model
-                const box = new THREE.Box3().setFromObject(model);
-                const center = box.getCenter(new THREE.Vector3());
-                
-                // Place camera slightly above and back from the center
-                controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
-                
-                console.log("Model Loaded Successfully");
-
-            }, undefined, function (error) {
-                console.error(error);
-                alert("Error loading model. Check console (F12) for details.");
-            });
-
-            window.addEventListener('resize', onWindowResize);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
+        // 6. Animation Loop
         function animate() {
             requestAnimationFrame(animate);
 
             if (controls.isLocked === true) {
-                const delta = 0.015; // Fixed time step for smoothness
-
-                // Move Forward/Back
-                if (moveForward) controls.moveForward(speed * delta);
-                if (moveBackward) controls.moveForward(-speed * delta);
-
-                // Move Left/Right
-                if (moveLeft) controls.moveRight(-speed * delta);
-                if (moveRight) controls.moveRight(speed * delta);
+                // Simple movement logic
+                if (moveForward) controls.moveForward(0.1);
+                if (moveBackward) controls.moveForward(-0.1);
+                if (moveLeft) controls.moveRight(-0.1);
+                if (moveRight) controls.moveRight(0.1);
             }
 
             renderer.render(scene, camera);
         }
+
+        animate();
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
