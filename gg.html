@@ -1,285 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>3D Game Mode - WASD/ZQSD</title>
-  <style>
-    body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
-    canvas { display: block; }
-    
-    /* Crosshair in center */
-    #crosshair {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 10px; height: 10px;
-      background: white;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      mix-blend-mode: difference;
-      z-index: 10;
-    }
-
-    /* Instructions Overlay */
-    #blocker {
-      position: absolute;
-      width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 20;
-    }
-    #instructions {
-      color: white;
-      text-align: center;
-      cursor: pointer;
-      padding: 20px;
-      border: 2px solid white;
-      border-radius: 10px;
-      background: rgba(0,0,0,0.5);
-    }
-    h1 { margin-top: 0; }
-    p { font-size: 18px; }
-    
-    #loading {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      color: white; font-size: 24px; z-index: 30;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>3D Walkthrough</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: Arial, sans-serif; }
+        #blocker {
+            position: absolute; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center; z-index: 10;
+        }
+        #instructions {
+            color: white; text-align: center; cursor: pointer; padding: 20px; border: 2px solid white; border-radius: 10px;
+        }
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
+            background: white; border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; mix-blend-mode: difference; z-index: 5;
+        }
+    </style>
 </head>
 <body>
 
-  <div id="loading">Loading World...</div>
-  
-  <div id="crosshair"></div>
-
-  <div id="blocker">
-    <div id="instructions">
-      <h1>CLICK TO PLAY</h1>
-      <p>
-        Move: <b>W, A, S, D</b> or <b>Z, Q, S, D</b><br>
-        Look: <b>Mouse</b><br>
-        Jump: <b>Space</b><br>
-        Exit: <b>ESC</b>
-      </p>
-    </div>
-  </div>
-
-  <!-- Import Three.js -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
-
-  <script type="module">
-    import * as THREE from 'three';
-    import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-
-    let camera, scene, renderer, controls;
+    <div id="crosshair"></div>
     
-    // Movement State
-    let moveForward = false;
-    let moveBackward = false;
-    let moveLeft = false;
-    let moveRight = false;
-    let canJump = false;
+    <div id="blocker">
+        <div id="instructions">
+            <h1 style="font-size: 36px;">CLICK TO PLAY</h1>
+            <p style="font-size: 18px;">
+                Move: W, A, S, D (or Z, Q, S, D)<br>
+                Look: Mouse<br>
+                Exit: ESC
+            </p>
+        </div>
+    </div>
 
-    let prevTime = performance.now();
-    const velocity = new THREE.Vector3();
-    const direction = new THREE.Vector3();
-
-    init();
-    animate();
-
-    function init() {
-      // 1. Scene Setup
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x1a1a2e);
-      scene.fog = new THREE.Fog(0x1a1a2e, 0, 750);
-
-      // 2. Camera
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-      camera.position.y = 10; // Start height
-
-      // 3. Lights
-      const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 2.5);
-      light.position.set(0.5, 1, 0.75);
-      scene.add(light);
-      
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-      dirLight.position.set(10, 20, 10);
-      dirLight.castShadow = true;
-      scene.add(dirLight);
-
-      // 4. Controls (PointerLock = FPS Style)
-      controls = new PointerLockControls(camera, document.body);
-
-      const blocker = document.getElementById('blocker');
-      const instructions = document.getElementById('instructions');
-
-      // Click to start
-      instructions.addEventListener('click', function () {
-        controls.lock();
-      });
-
-      // When locked (playing)
-      controls.addEventListener('lock', function () {
-        instructions.style.display = 'none';
-        blocker.style.display = 'none';
-      });
-
-      // When unlocked (paused/ESC)
-      controls.addEventListener('unlock', function () {
-        blocker.style.display = 'flex';
-        instructions.style.display = 'block';
-      });
-
-      scene.add(controls.getObject());
-
-      // 5. Keyboard Listeners (Supports WASD and ZQSD)
-      const onKeyDown = function (event) {
-        switch (event.code) {
-          case 'ArrowUp':
-          case 'KeyW':
-          case 'KeyZ': // French AZERTY
-            moveForward = true;
-            break;
-          case 'ArrowLeft':
-          case 'KeyA':
-          case 'KeyQ': // French AZERTY
-            moveLeft = true;
-            break;
-          case 'ArrowDown':
-          case 'KeyS':
-            moveBackward = true;
-            break;
-          case 'ArrowRight':
-          case 'KeyD':
-            moveRight = true;
-            break;
-          case 'Space':
-            if (canJump === true) velocity.y += 350;
-            canJump = false;
-            break;
+    <!-- Import Three.js from CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
         }
-      };
+    </script>
 
-      const onKeyUp = function (event) {
-        switch (event.code) {
-          case 'ArrowUp':
-          case 'KeyW':
-          case 'KeyZ':
-            moveForward = false;
-            break;
-          case 'ArrowLeft':
-          case 'KeyA':
-          case 'KeyQ':
-            moveLeft = false;
-            break;
-          case 'ArrowDown':
-          case 'KeyS':
-            moveBackward = false;
-            break;
-          case 'ArrowRight':
-          case 'KeyD':
-            moveRight = false;
-            break;
-        }
-      };
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-      document.addEventListener('keydown', onKeyDown);
-      document.addEventListener('keyup', onKeyUp);
-
-      // 6. Renderer
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.shadowMap.enabled = true;
-      document.body.appendChild(renderer.domElement);
-
-      // 7. Load Model
-      const loader = new GLTFLoader();
-      loader.load('./droid-workshop-kitchen.gltf', function (gltf) {
-        const model = gltf.scene;
+        let camera, scene, renderer, controls;
+        let moveForward = false;
+        let moveBackward = false;
+        let moveLeft = false;
+        let moveRight = false;
         
-        model.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
+        // Speed settings
+        const speed = 10.0; 
 
-        scene.add(model);
+        init();
+        animate();
 
-        // Find center of model to place player nearby
-        const box = new THREE.Box3().setFromObject(model);
-        const center = box.getCenter(new THREE.Vector3());
-        
-        // Place player slightly above and in front of the model
-        controls.getObject().position.set(center.x, center.y + 5, center.z + 20);
+        function init() {
+            // 1. Setup Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x222222); // Dark Gray background
+            
+            // Add some fog so distant objects fade nicely
+            scene.fog = new THREE.Fog(0x222222, 0, 70);
 
-        document.getElementById('loading').style.display = 'none';
-      }, undefined, function (error) {
-        console.error(error);
-        document.getElementById('loading').innerText = 'Error loading model.';
-      });
+            // 2. Setup Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            // 3. Setup Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
 
-      window.addEventListener('resize', onWindowResize);
-    }
+            // 4. Lights (Crucial for seeing colors)
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+            scene.add(hemiLight);
 
-    function onWindowResize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
 
-    function animate() {
-      requestAnimationFrame(animate);
+            // 5. Controls (FPS Style)
+            controls = new PointerLockControls(camera, document.body);
 
-      const time = performance.now();
+            const blocker = document.getElementById('blocker');
+            const instructions = document.getElementById('instructions');
 
-      if (controls.isLocked === true) {
-        const delta = (time - prevTime) / 1000;
+            instructions.addEventListener('click', function () {
+                controls.lock();
+            });
 
-        // Friction (slow down when not pressing keys)
-        velocity.x -= velocity.x * 10.0 * delta;
-        velocity.z -= velocity.z * 10.0 * delta;
-        velocity.y -= 9.8 * 100.0 * delta; // Gravity
+            controls.addEventListener('lock', function () {
+                instructions.style.display = 'none';
+                blocker.style.display = 'none';
+            });
 
-        direction.z = Number(moveForward) - Number(moveBackward);
-        direction.x = Number(moveRight) - Number(moveLeft);
-        direction.normalize(); // Ensure consistent speed in all directions
+            controls.addEventListener('unlock', function () {
+                blocker.style.display = 'flex';
+                instructions.style.display = 'block';
+            });
 
-        // Acceleration
-        if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
-        if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
+            scene.add(controls.getObject());
 
-        // Apply Movement
-        controls.moveRight(-velocity.x * delta);
-        controls.moveForward(-velocity.z * delta);
+            // 6. Keyboard Inputs (WASD + ZQSD)
+            const onKeyDown = function (event) {
+                switch (event.code) {
+                    case 'ArrowUp': case 'KeyW': case 'KeyZ': moveForward = true; break;
+                    case 'ArrowLeft': case 'KeyA': case 'KeyQ': moveLeft = true; break;
+                    case 'ArrowDown': case 'KeyS': moveBackward = true; break;
+                    case 'ArrowRight': case 'KeyD': moveRight = true; break;
+                }
+            };
 
-        // Vertical Movement (Jump/Gravity)
-        controls.getObject().position.y += (velocity.y * delta); 
+            const onKeyUp = function (event) {
+                switch (event.code) {
+                    case 'ArrowUp': case 'KeyW': case 'KeyZ': moveForward = false; break;
+                    case 'ArrowLeft': case 'KeyA': case 'KeyQ': moveLeft = false; break;
+                    case 'ArrowDown': case 'KeyS': moveBackward = false; break;
+                    case 'ArrowRight': case 'KeyD': moveRight = false; break;
+                }
+            };
 
-        // Simple Floor Collision (Prevent falling through floor)
-        // Adjust '10' if your floor is at a different height
-        if (controls.getObject().position.y < 10) {
-          velocity.y = 0;
-          controls.getObject().position.y = 10;
-          canJump = true;
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+
+            // 7. Load Model
+            const loader = new GLTFLoader();
+            
+            // IMPORTANT: Ensure this filename matches EXACTLY what is in your GitHub repo
+            loader.load('./droid-workshop-kitchen.gltf', function (gltf) {
+                const model = gltf.scene;
+                scene.add(model);
+
+                // Center the player near the model
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                
+                // Place camera slightly above and back from the center
+                controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
+                
+                console.log("Model Loaded Successfully");
+
+            }, undefined, function (error) {
+                console.error(error);
+                alert("Error loading model. Check console (F12) for details.");
+            });
+
+            window.addEventListener('resize', onWindowResize);
         }
-      }
 
-      prevTime = time;
-      renderer.render(scene, camera);
-    }
-  </script>
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (controls.isLocked === true) {
+                const delta = 0.015; // Fixed time step for smoothness
+
+                // Move Forward/Back
+                if (moveForward) controls.moveForward(speed * delta);
+                if (moveBackward) controls.moveForward(-speed * delta);
+
+                // Move Left/Right
+                if (moveLeft) controls.moveRight(-speed * delta);
+                if (moveRight) controls.moveRight(speed * delta);
+            }
+
+            renderer.render(scene, camera);
+        }
+    </script>
 </body>
 </html>
