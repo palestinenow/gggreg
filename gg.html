@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ultimate Dev Mode - Show All</title>
+    <title>LookAt Center Mode</title>
     <style>
         body { margin: 0; overflow: hidden; background: #111; font-family: 'Courier New', Courier, monospace; }
         
@@ -41,8 +41,8 @@
             pointer-events: none; z-index: 50; box-shadow: 0 0 5px #0f0;
         }
 
-        /* SAVE SLOTS */
-        #save-slots {
+        /* SAVE SLOTS & LOCK BUTTONS */
+        #controls-right {
             position: absolute;
             bottom: 20px;
             right: 20px;
@@ -64,6 +64,17 @@
         }
         button:hover { background: #0f0; color: black; }
         button.active { background: #0f0; color: black; box-shadow: 0 0 10px #0f0; }
+        
+        #lock-btn {
+            background: #330000;
+            color: #ff0000;
+            border-color: #ff0000;
+        }
+        #lock-btn.locked {
+            background: #003300;
+            color: #0f0;
+            border-color: #0f0;
+        }
 
     </style>
 </head>
@@ -86,7 +97,8 @@
         <div class="row"><span class="label">DIR Z:</span> <span class="val" id="d-z">0.00</span></div>
 
         <h3>⚡ STATUS</h3>
-        <div class="row"><span class="label">SPEED:</span> <span class="val" id="speed-val">0.2</span></div>
+        <div class="row"><span class="label">MODE:</span> <span class="val" id="mode-val">FREE LOOK</span></div>
+        <div class="row"><span class="label">CENTER:</span> <span class="val" id="center-val">NOT SET</span></div>
         <div class="row"><span class="label">LOCKED:</span> <span class="val" id="lock-status">NO</span></div>
     </div>
 
@@ -94,15 +106,16 @@
 
     <div id="blocker">
         <div id="instructions">
-            <h1 style="color:#0f0">CLICK TO START DEV MODE</h1>
+            <h1 style="color:#0f0">CLICK TO START</h1>
             <p>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>Mouse → Look Around<br>ESC → Pause</p>
+            <p style="font-size:12px; color:#aaa;">Use "SAVE 1" to set CENTER point<br>Then click "LOCK TO CENTER"</p>
         </div>
     </div>
 
-    <!-- 3 SAVE SLOTS -->
-    <div id="save-slots">
+    <!-- CONTROLS -->
+    <div id="controls-right">
         <div class="slot-row">
-            <button onclick="saveSlot(1)">💾 SAVE 1</button>
+            <button onclick="saveSlot(1)">💾 SAVE 1 (CENTER)</button>
             <button onclick="loadSlot(1)">🚀 LOAD 1</button>
         </div>
         <div class="slot-row">
@@ -113,6 +126,7 @@
             <button onclick="saveSlot(3)">💾 SAVE 3</button>
             <button onclick="loadSlot(3)">🚀 LOAD 3</button>
         </div>
+        <button id="lock-btn" onclick="toggleLock()">🔒 LOCK TO CENTER</button>
     </div>
 
     <script type="importmap">
@@ -150,6 +164,9 @@
         const controls = new PointerLockControls(camera, document.body);
         const blocker = document.getElementById('blocker');
         const lockStatus = document.getElementById('lock-status');
+        const modeVal = document.getElementById('mode-val');
+        const centerVal = document.getElementById('center-val');
+        const lockBtn = document.getElementById('lock-btn');
 
         document.addEventListener('click', () => controls.lock());
         controls.addEventListener('lock', () => {
@@ -166,7 +183,7 @@
 
         // --- MOVEMENT ---
         let moveF = false, moveB = false, moveL = false, moveR = false;
-        const MOVEMENT_SPEED = 0.2; // Slow precise speed
+        const MOVEMENT_SPEED = 0.2;
 
         document.addEventListener('keydown', (e) => {
             if(e.code === 'KeyW' || e.code === 'ArrowUp' || e.code === 'KeyZ') moveF = true;
@@ -201,17 +218,22 @@
 
         // --- SAVE SYSTEM ---
         window.slots = { 1: null, 2: null, 3: null };
+        window.isLockedToCenter = false;
 
         window.saveSlot = function(id) {
             const p = controls.getObject().position;
             const r = camera.rotation;
             window.slots[id] = { x: p.x, y: p.y, z: p.z, ry: r.y, rx: r.x };
             
-            // Visual feedback on button
+            if (id === 1) {
+                centerVal.innerText = `SET (${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)})`;
+                centerVal.style.color = "#0f0";
+            }
+
             const btns = document.querySelectorAll(`button[onclick="saveSlot(${id})"]`);
             btns.forEach(b => {
                 b.innerText = "SAVED!";
-                setTimeout(() => b.innerText = `💾 SAVE ${id}`, 1000);
+                setTimeout(() => b.innerText = id === 1 ? `💾 SAVE 1 (CENTER)` : `💾 SAVE ${id}`, 1000);
             });
         };
 
@@ -219,10 +241,32 @@
             if (!window.slots[id]) return alert("Slot empty!");
             const s = window.slots[id];
             controls.getObject().position.set(s.x, s.y, s.z);
-            camera.rotation.set(s.rx, s.ry, 0); // Reset roll to 0 for stability
+            camera.rotation.set(s.rx, s.ry, 0);
         };
 
-        // --- ANIMATION LOOP WITH FULL DEBUG INFO ---
+        // --- LOCK TO CENTER TOGGLE ---
+        window.toggleLock = function() {
+            if (!window.slots[1]) {
+                alert("First, use 'SAVE 1' to set the CENTER point!");
+                return;
+            }
+
+            window.isLockedToCenter = !window.isLockedToCenter;
+            
+            if (window.isLockedToCenter) {
+                lockBtn.innerText = "🔓 UNLOCK FROM CENTER";
+                lockBtn.classList.add('locked');
+                modeVal.innerText = "LOOKAT CENTER";
+                modeVal.style.color = "#0f0";
+            } else {
+                lockBtn.innerText = "🔒 LOCK TO CENTER";
+                lockBtn.classList.remove('locked');
+                modeVal.innerText = "FREE LOOK";
+                modeVal.style.color = "white";
+            }
+        };
+
+        // --- ANIMATION LOOP WITH LOOKAT LOGIC ---
         function animate() {
             requestAnimationFrame(animate);
             
@@ -236,6 +280,12 @@
                 if (moveB) controls.getObject().position.addScaledVector(direction, -MOVEMENT_SPEED);
                 if (moveL) controls.getObject().position.addScaledVector(right, -MOVEMENT_SPEED);
                 if (moveR) controls.getObject().position.addScaledVector(right, MOVEMENT_SPEED);
+
+                // 👁️ LOOKAT CENTER LOGIC
+                if (window.isLockedToCenter && window.slots[1]) {
+                    const centerPos = new THREE.Vector3(window.slots[1].x, window.slots[1].y, window.slots[1].z);
+                    camera.lookAt(centerPos);
+                }
             }
             
             // UPDATE ALL NUMBERS
@@ -244,17 +294,14 @@
             const d = new THREE.Vector3();
             camera.getWorldDirection(d);
 
-            // Position
             document.getElementById('p-x').innerText = p.x.toFixed(3);
             document.getElementById('p-y').innerText = p.y.toFixed(3);
             document.getElementById('p-z').innerText = p.z.toFixed(3);
 
-            // Rotation (Radians to Degrees)
             document.getElementById('r-x').innerText = (r.x * 180/Math.PI).toFixed(1) + "°";
             document.getElementById('r-y').innerText = (r.y * 180/Math.PI).toFixed(1) + "°";
             document.getElementById('r-z').innerText = (r.z * 180/Math.PI).toFixed(1) + "°";
 
-            // Direction Vector
             document.getElementById('d-x').innerText = d.x.toFixed(3);
             document.getElementById('d-y').innerText = d.y.toFixed(3);
             document.getElementById('d-z').innerText = d.z.toFixed(3);
