@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Free Mode - Find New Points</title>
+    <title>Point Collector - Center & Intro</title>
     <style>
         body { margin: 0; overflow: hidden; background: #111; font-family: 'Courier New', Courier, monospace; }
         
@@ -20,7 +20,6 @@
             font-size: 14px;
             pointer-events: none;
             z-index: 100;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
         }
         .row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
         .label { color: #aaa; }
@@ -41,8 +40,8 @@
             pointer-events: none; z-index: 50; box-shadow: 0 0 5px #0f0;
         }
 
-        /* SAVE SLOTS */
-        #save-slots {
+        /* ACTION BUTTONS */
+        #actions {
             position: absolute;
             bottom: 20px;
             right: 20px;
@@ -51,62 +50,60 @@
             gap: 10px;
             z-index: 100;
         }
-        .slot-row { display: flex; gap: 5px; }
         button {
             background: #003300;
             color: #0f0;
             border: 1px solid #0f0;
-            padding: 8px 12px;
+            padding: 10px 20px;
             font-weight: bold;
             cursor: pointer;
             font-family: monospace;
-            transition: 0.2s;
+            font-size: 16px;
         }
         button:hover { background: #0f0; color: black; }
-        button.active { background: #0f0; color: black; box-shadow: 0 0 10px #0f0; }
-
+        
+        #saved-intro {
+            margin-top: 10px;
+            color: yellow;
+            font-size: 12px;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
     <!-- DEBUG DATA PANEL -->
     <div id="debug-panel">
-        <h3>📍 CURRENT POSITION (Find New Points)</h3>
+        <h3>📍 CURRENT POSITION</h3>
         <div class="row"><span class="label">POS X:</span> <span class="val" id="p-x">0.00</span></div>
         <div class="row"><span class="label">POS Y:</span> <span class="val" id="p-y">0.00</span></div>
         <div class="row"><span class="label">POS Z:</span> <span class="val" id="p-z">0.00</span></div>
         
-        <div class="row"><span class="label">ROT Y (Yaw):</span> <span class="val" id="r-y">0°</span></div>
+        <h3>🎯 POINT A: CENTER (FIXED)</h3>
+        <div class="row"><span class="label">X:</span> <span class="val">-0.006</span></div>
+        <div class="row"><span class="label">Y:</span> <span class="val">1.041</span></div>
+        <div class="row"><span class="label">Z:</span> <span class="val">-0.008</span></div>
 
-        <h3 style="color:#ff0">💾 PREVIOUS CENTER POINT</h3>
-        <div class="row"><span class="label">X:</span> <span class="val" style="color:#fff">-0.006</span></div>
-        <div class="row"><span class="label">Y:</span> <span class="val" style="color:#fff">1.041</span></div>
-        <div class="row"><span class="label">Z:</span> <span class="val" style="color:#fff">-0.008</span></div>
+        <div id="saved-intro">
+            <h3>🎬 POINT B: INTRO (SAVED)</h3>
+            <div id="intro-coords"></div>
+        </div>
     </div>
 
     <div id="crosshair"></div>
 
     <div id="blocker">
         <div id="instructions">
-            <h1 style="color:#0f0">CLICK TO START FREE MODE</h1>
-            <p>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>Mouse → Look Anywhere<br><br>Use the panel to find new coordinates!</p>
+            <h1 style="color:#0f0">CLICK TO START</h1>
+            <p>Z / W → Move Forward (Free Look)<br>S → Backward | A/Q ← Left | D → Right<br><br>Find your "Intro" spot and click SAVE.</p>
         </div>
     </div>
 
-    <!-- 3 SAVE SLOTS FOR NEW POINTS -->
-    <div id="save-slots">
-        <div class="slot-row">
-            <button onclick="saveSlot(1)">💾 SAVE POINT 1</button>
-            <button onclick="loadSlot(1)">🚀 LOAD 1</button>
-        </div>
-        <div class="slot-row">
-            <button onclick="saveSlot(2)">💾 SAVE POINT 2</button>
-            <button onclick="loadSlot(2)">🚀 LOAD 2</button>
-        </div>
-        <div class="slot-row">
-            <button onclick="saveSlot(3)">💾 SAVE POINT 3</button>
-            <button onclick="loadSlot(3)">🚀 LOAD 3</button>
-        </div>
+    <!-- ACTIONS -->
+    <div id="actions">
+        <button onclick="saveIntro()">📍 SET POINT B (INTRO)</button>
+        <button onclick="goToCenter()">🚀 JUMP TO CENTER</button>
+        <button onclick="goToIntro()">🚀 JUMP TO INTRO</button>
     </div>
 
     <script type="importmap">
@@ -139,6 +136,13 @@
         dirLight.position.set(10, 20, 10);
         scene.add(dirLight);
 
+        // --- DEFINED POINTS ---
+        // Point A: Center (From your screenshot)
+        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
+        
+        // Point B: Intro (Will be saved by you)
+        let POINT_INTRO = null;
+
         // --- CONTROLS ---
         const controls = new PointerLockControls(camera, document.body);
         const blocker = document.getElementById('blocker');
@@ -149,7 +153,7 @@
         
         scene.add(controls.getObject());
 
-        // --- MOVEMENT ---
+        // --- MOVEMENT (FREE LOOK MODE) ---
         let moveF = false, moveB = false, moveL = false, moveR = false;
         const MOVEMENT_SPEED = 0.2; 
 
@@ -176,35 +180,46 @@
             });
             scene.add(model);
             
-            // Start Position (Reset to a good view)
-            const box = new THREE.Box3().setFromObject(model);
-            const center = box.getCenter(new THREE.Vector3());
-            controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
+            // Start at Center
+            controls.getObject().position.copy(POINT_CENTER).add(new THREE.Vector3(0, 2, 5));
         }, undefined, function (error) {
             console.error(error);
         });
 
-        // --- SAVE SYSTEM FOR NEW POINTS ---
-        window.slots = { 1: null, 2: null, 3: null };
-
-        window.saveSlot = function(id) {
+        // --- BUTTON FUNCTIONS ---
+        
+        // 1. Save Point B (Intro)
+        window.saveIntro = function() {
             const p = controls.getObject().position;
-            const r = camera.rotation;
-            window.slots[id] = { x: p.x, y: p.y, z: p.z, ry: r.y, rx: r.x };
+            POINT_INTRO = p.clone();
             
-            // Visual feedback
-            const btns = document.querySelectorAll(`button[onclick="saveSlot(${id})"]`);
-            btns.forEach(b => {
-                b.innerText = "SAVED!";
-                setTimeout(() => b.innerText = `💾 SAVE POINT ${id}`, 1000);
-            });
+            // Show on screen
+            const introDiv = document.getElementById('saved-intro');
+            const coordsDiv = document.getElementById('intro-coords');
+            introDiv.style.display = 'block';
+            coordsDiv.innerHTML = `
+                X: ${p.x.toFixed(3)}<br>
+                Y: ${p.y.toFixed(3)}<br>
+                Z: ${p.z.toFixed(3)}
+            `;
+            
+            // Log for copying
+            console.log("POINT B SAVED:", { x: p.x, y: p.y, z: p.z });
+            alert("Point B (Intro) Saved! Check the panel or console.");
         };
 
-        window.loadSlot = function(id) {
-            if (!window.slots[id]) return alert("Slot empty!");
-            const s = window.slots[id];
-            controls.getObject().position.set(s.x, s.y, s.z);
-            camera.rotation.set(s.rx, s.ry, 0); 
+        // 2. Jump to Center
+        window.goToCenter = function() {
+            controls.getObject().position.copy(POINT_CENTER).add(new THREE.Vector3(0, 2, 5));
+        };
+
+        // 3. Jump to Intro
+        window.goToIntro = function() {
+            if(POINT_INTRO) {
+                controls.getObject().position.copy(POINT_INTRO);
+            } else {
+                alert("Save Point B first!");
+            }
         };
 
         // --- ANIMATION LOOP ---
@@ -212,13 +227,10 @@
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
+                // Free Look Movement Logic
                 const direction = new THREE.Vector3();
                 camera.getWorldDirection(direction);
                 
-                // Flatten for walking
-                direction.y = 0;
-                direction.normalize();
-
                 const right = new THREE.Vector3();
                 right.crossVectors(camera.up, direction).normalize();
 
@@ -228,14 +240,11 @@
                 if (moveR) controls.getObject().position.addScaledVector(right, MOVEMENT_SPEED);
             }
             
-            // UPDATE DEBUG UI
+            // Update Debug UI
             const p = controls.getObject().position;
-            const r = camera.rotation;
-
             document.getElementById('p-x').innerText = p.x.toFixed(3);
             document.getElementById('p-y').innerText = p.y.toFixed(3);
             document.getElementById('p-z').innerText = p.z.toFixed(3);
-            document.getElementById('r-y').innerText = (r.y * 180/Math.PI).toFixed(1) + "°";
 
             renderer.render(scene, camera);
         }
