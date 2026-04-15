@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fast 3D Walk</title>
+    <title>Fast 3D Walk - New Model</title>
     <style>
         body { margin: 0; overflow: hidden; background: #111; font-family: sans-serif; }
         #blocker {
@@ -31,7 +31,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CLICK TO PLAY</h1>
-            <p>WASD / ZQSD to Move FAST<br>Mouse to Look<br>ESC to Stop</p>
+            <p>WASD / ZQSD to SPRINT<br>Mouse to Look<br>ESC to Stop</p>
         </div>
     </div>
 
@@ -88,8 +88,8 @@
         // --- MOVEMENT VARIABLES ---
         let moveF = false, moveB = false, moveL = false, moveR = false;
         
-        // ⚡ SPEED SETTING: Change this number to make it faster or slower
-        const MOVEMENT_SPEED = 0.8; 
+        // ⚡ SPEED SETTING: Very fast sprint
+        const MOVEMENT_SPEED = 2.5; 
 
         document.addEventListener('keydown', (e) => {
             if(e.code === 'KeyW' || e.code === 'ArrowUp' || e.code === 'KeyZ') moveF = true;
@@ -105,10 +105,10 @@
             if(e.code === 'KeyD' || e.code === 'ArrowRight') moveR = false;
         });
 
-        // --- LOAD MODEL ---
+        // --- LOAD NEW MODEL (.glb) ---
         const loader = new GLTFLoader();
         
-        loader.load('./droid-workshop-kitchen.gltf', function (gltf) {
+        loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
             
             model.traverse((child) => {
@@ -120,7 +120,7 @@
 
             scene.add(model);
             
-            // Center Camera
+            // Center Camera on model
             const box = new THREE.Box3().setFromObject(model);
             const center = box.getCenter(new THREE.Vector3());
             controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
@@ -137,7 +137,6 @@
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
-                // Use the fast speed variable here
                 if(moveF) controls.moveForward(MOVEMENT_SPEED);
                 if(moveB) controls.moveForward(-MOVEMENT_SPEED);
                 if(moveL) controls.moveRight(-MOVEMENT_SPEED);
