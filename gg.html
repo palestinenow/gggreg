@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>True First-Person Movement</title>
+    <title>Fly Mode - Move Where You Look</title>
     <style>
         body { margin: 0; overflow: hidden; background: #111; font-family: sans-serif; }
         #blocker {
@@ -31,7 +31,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CLICK TO PLAY</h1>
-            <p>W / Z → Move FORWARD where you're looking<br>A / Q ← Left | D → Right<br>Mouse → Look Around<br>ESC → Pause</p>
+            <p>Z / W → Fly FORWARD where you're looking<br>S → Backward<br>A / Q ← Left | D → Right<br>Mouse → Look Anywhere<br>ESC → Pause</p>
         </div>
     </div>
 
@@ -130,22 +130,21 @@
             loading.innerText = "Error loading model. Check Console (F12).";
         });
 
-        // --- ANIMATION LOOP WITH TRUE CAMERA-DIRECTION MOVEMENT ---
+        // --- ANIMATION LOOP: TRUE FLY MODE ---
         function animate() {
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
-                // Get camera's forward direction (flattened to horizontal plane)
+                // Get camera's forward direction (FULL 3D - no flattening!)
                 const direction = new THREE.Vector3();
                 camera.getWorldDirection(direction);
-                direction.y = 0; // Ignore vertical component for walking
-                direction.normalize();
+                // DO NOT set direction.y = 0 → we want to fly up/down too!
 
                 // Get camera's right direction (for strafe)
                 const right = new THREE.Vector3();
                 right.crossVectors(camera.up, direction).normalize();
 
-                // Apply movement relative to camera orientation
+                // Apply movement relative to camera orientation — FULL 3D
                 if (moveF) controls.getObject().position.addScaledVector(direction, MOVEMENT_SPEED);
                 if (moveB) controls.getObject().position.addScaledVector(direction, -MOVEMENT_SPEED);
                 if (moveL) controls.getObject().position.addScaledVector(right, -MOVEMENT_SPEED);
