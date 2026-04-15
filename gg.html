@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fixed 3D Kitchen</title>
+    <title>Fast 3D Walk</title>
     <style>
         body { margin: 0; overflow: hidden; background: #111; font-family: sans-serif; }
         #blocker {
@@ -10,22 +10,28 @@
             display: flex; justify-content: center; align-items: center; z-index: 999;
         }
         #instructions {
-            color: white; text-align: center; cursor: pointer; padding: 20px; border: 2px solid #fff;
+            color: white; text-align: center; cursor: pointer; padding: 20px; border: 2px solid #fff; border-radius: 10px;
         }
         #loading {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 24px; z-index: 1000;
+            color: white; font-size: 24px; z-index: 1000; pointer-events: none;
+        }
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
+            background: white; border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; mix-blend-mode: difference; z-index: 50;
         }
     </style>
 </head>
 <body>
 
-    <div id="loading">Loading Textures...</div>
+    <div id="loading">Loading World...</div>
+    <div id="crosshair"></div>
 
     <div id="blocker">
         <div id="instructions">
             <h1>CLICK TO PLAY</h1>
-            <p>WASD to Move | Mouse to Look | ESC to Exit</p>
+            <p>WASD / ZQSD to Move FAST<br>Mouse to Look<br>ESC to Stop</p>
         </div>
     </div>
 
@@ -53,8 +59,8 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // --- LIGHTS (Make it bright so we see colors) ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Very bright ambient
+        // --- LIGHTS ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); 
         scene.add(ambientLight);
         
         const dirLight = new THREE.DirectionalLight(0xffffff, 2);
@@ -65,55 +71,48 @@
         const controls = new PointerLockControls(camera, document.body);
         const blocker = document.getElementById('blocker');
         const instructions = document.getElementById('instructions');
+        const loading = document.getElementById('loading');
 
         instructions.addEventListener('click', () => controls.lock());
+        
         controls.addEventListener('lock', () => {
             blocker.style.display = 'none';
-            document.getElementById('loading').style.display = 'none';
         });
-        controls.addEventListener('unlock', () => blocker.style.display = 'flex');
+        
+        controls.addEventListener('unlock', () => {
+            blocker.style.display = 'flex';
+        });
 
         scene.add(controls.getObject());
 
-        // --- MOVEMENT ---
+        // --- MOVEMENT VARIABLES ---
         let moveF = false, moveB = false, moveL = false, moveR = false;
         
+        // ⚡ SPEED SETTING: Change this number to make it faster or slower
+        const MOVEMENT_SPEED = 0.8; 
+
         document.addEventListener('keydown', (e) => {
-            if(e.code === 'KeyW' || e.code === 'KeyZ') moveF = true;
-            if(e.code === 'KeyS') moveB = true;
-            if(e.code === 'KeyA' || e.code === 'KeyQ') moveL = true;
-            if(e.code === 'KeyD') moveR = true;
+            if(e.code === 'KeyW' || e.code === 'ArrowUp' || e.code === 'KeyZ') moveF = true;
+            if(e.code === 'KeyS' || e.code === 'ArrowDown') moveB = true;
+            if(e.code === 'KeyA' || e.code === 'ArrowLeft' || e.code === 'KeyQ') moveL = true;
+            if(e.code === 'KeyD' || e.code === 'ArrowRight') moveR = true;
         });
         
         document.addEventListener('keyup', (e) => {
-            if(e.code === 'KeyW' || e.code === 'KeyZ') moveF = false;
-            if(e.code === 'KeyS') moveB = false;
-            if(e.code === 'KeyA' || e.code === 'KeyQ') moveL = false;
-            if(e.code === 'KeyD') moveR = false;
+            if(e.code === 'KeyW' || e.code === 'ArrowUp' || e.code === 'KeyZ') moveF = false;
+            if(e.code === 'KeyS' || e.code === 'ArrowDown') moveB = false;
+            if(e.code === 'KeyA' || e.code === 'ArrowLeft' || e.code === 'KeyQ') moveL = false;
+            if(e.code === 'KeyD' || e.code === 'ArrowRight') moveR = false;
         });
 
-        // --- LOAD MODEL WITH TEXTURE FIX ---
+        // --- LOAD MODEL ---
         const loader = new GLTFLoader();
         
-        // This manager helps us fix texture paths automatically
-        const manager = new THREE.LoadingManager();
-        manager.onLoad = function () {
-            console.log('All resources loaded!');
-        };
-
         loader.load('./droid-workshop-kitchen.gltf', function (gltf) {
             const model = gltf.scene;
             
-            // FORCE TEXTURES TO LOAD FROM 'textures/' FOLDER
             model.traverse((child) => {
                 if (child.isMesh) {
-                    if (child.material.map) {
-                        // If texture exists but path is wrong, fix it
-                        // Note: This assumes your .gltf has "uri": "filename.png" 
-                        // and we want it to be "textures/filename.png"
-                        
-                        // We actually rely on the LoadingManager below to redirect requests
-                    }
                     child.castShadow = true;
                     child.receiveShadow = true;
                 }
@@ -121,25 +120,28 @@
 
             scene.add(model);
             
-            // Position Camera
+            // Center Camera
             const box = new THREE.Box3().setFromObject(model);
             const center = box.getCenter(new THREE.Vector3());
             controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
 
+            loading.style.display = 'none'; // Hide loading text when done
+
         }, undefined, function (error) {
             console.error(error);
-            document.getElementById('loading').innerText = "ERROR: Check Console (F12)";
+            loading.innerText = "Error loading model. Check Console (F12).";
         });
 
-        // --- ANIMATION ---
+        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
-                if(moveF) controls.moveForward(0.1);
-                if(moveB) controls.moveForward(-0.1);
-                if(moveL) controls.moveRight(-0.1);
-                if(moveR) controls.moveRight(0.1);
+                // Use the fast speed variable here
+                if(moveF) controls.moveForward(MOVEMENT_SPEED);
+                if(moveB) controls.moveForward(-MOVEMENT_SPEED);
+                if(moveL) controls.moveRight(-MOVEMENT_SPEED);
+                if(moveR) controls.moveRight(MOVEMENT_SPEED);
             }
             
             renderer.render(scene, camera);
