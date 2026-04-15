@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fixed LookAt Mode</title>
+    <title>Free Mode - Find New Points</title>
     <style>
         body { margin: 0; overflow: hidden; background: #111; font-family: 'Courier New', Courier, monospace; }
         
@@ -11,7 +11,7 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            width: 300px;
+            width: 320px;
             background: rgba(0, 0, 0, 0.85);
             color: #0f0;
             padding: 15px;
@@ -20,6 +20,7 @@
             font-size: 14px;
             pointer-events: none;
             z-index: 100;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
         }
         .row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
         .label { color: #aaa; }
@@ -36,32 +37,75 @@
         }
         #crosshair {
             position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
-            background: red; border-radius: 50%; transform: translate(-50%, -50%);
-            pointer-events: none; z-index: 50; box-shadow: 0 0 5px red;
+            background: #0f0; border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 50; box-shadow: 0 0 5px #0f0;
         }
+
+        /* SAVE SLOTS */
+        #save-slots {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+        .slot-row { display: flex; gap: 5px; }
+        button {
+            background: #003300;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+            transition: 0.2s;
+        }
+        button:hover { background: #0f0; color: black; }
+        button.active { background: #0f0; color: black; box-shadow: 0 0 10px #0f0; }
+
     </style>
 </head>
 <body>
 
     <!-- DEBUG DATA PANEL -->
     <div id="debug-panel">
-        <h3>📍 CAMERA POSITION</h3>
+        <h3>📍 CURRENT POSITION (Find New Points)</h3>
         <div class="row"><span class="label">POS X:</span> <span class="val" id="p-x">0.00</span></div>
         <div class="row"><span class="label">POS Y:</span> <span class="val" id="p-y">0.00</span></div>
         <div class="row"><span class="label">POS Z:</span> <span class="val" id="p-z">0.00</span></div>
         
-        <h3>🎯 FIXED TARGET (LOOK AT)</h3>
-        <div class="row"><span class="label">TARGET X:</span> <span class="val" style="color:#fff">-0.006</span></div>
-        <div class="row"><span class="label">TARGET Y:</span> <span class="val" style="color:#fff">1.041</span></div>
-        <div class="row"><span class="label">TARGET Z:</span> <span class="val" style="color:#fff">-0.008</span></div>
+        <div class="row"><span class="label">ROT Y (Yaw):</span> <span class="val" id="r-y">0°</span></div>
+
+        <h3 style="color:#ff0">💾 PREVIOUS CENTER POINT</h3>
+        <div class="row"><span class="label">X:</span> <span class="val" style="color:#fff">-0.006</span></div>
+        <div class="row"><span class="label">Y:</span> <span class="val" style="color:#fff">1.041</span></div>
+        <div class="row"><span class="label">Z:</span> <span class="val" style="color:#fff">-0.008</span></div>
     </div>
 
     <div id="crosshair"></div>
 
     <div id="blocker">
         <div id="instructions">
-            <h1 style="color:#0f0">CLICK TO START</h1>
-            <p>W / Z → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br><br>Camera is LOCKED to target.<br>You orbit around it.</p>
+            <h1 style="color:#0f0">CLICK TO START FREE MODE</h1>
+            <p>Z / W → Move Forward<br>S → Backward | A/Q ← Left | D → Right<br>Mouse → Look Anywhere<br><br>Use the panel to find new coordinates!</p>
+        </div>
+    </div>
+
+    <!-- 3 SAVE SLOTS FOR NEW POINTS -->
+    <div id="save-slots">
+        <div class="slot-row">
+            <button onclick="saveSlot(1)">💾 SAVE POINT 1</button>
+            <button onclick="loadSlot(1)">🚀 LOAD 1</button>
+        </div>
+        <div class="slot-row">
+            <button onclick="saveSlot(2)">💾 SAVE POINT 2</button>
+            <button onclick="loadSlot(2)">🚀 LOAD 2</button>
+        </div>
+        <div class="slot-row">
+            <button onclick="saveSlot(3)">💾 SAVE POINT 3</button>
+            <button onclick="loadSlot(3)">🚀 LOAD 3</button>
         </div>
     </div>
 
@@ -94,9 +138,6 @@
         const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
         dirLight.position.set(10, 20, 10);
         scene.add(dirLight);
-
-        // --- THE FIXED TARGET FROM YOUR SCREENSHOT ---
-        const lookAtTarget = new THREE.Vector3(-0.006, 1.041, -0.008);
 
         // --- CONTROLS ---
         const controls = new PointerLockControls(camera, document.body);
@@ -135,45 +176,66 @@
             });
             scene.add(model);
             
-            // Start Position (Orbiting around the target)
-            controls.getObject().position.set(0, 2, 5); 
+            // Start Position (Reset to a good view)
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
         }, undefined, function (error) {
             console.error(error);
         });
+
+        // --- SAVE SYSTEM FOR NEW POINTS ---
+        window.slots = { 1: null, 2: null, 3: null };
+
+        window.saveSlot = function(id) {
+            const p = controls.getObject().position;
+            const r = camera.rotation;
+            window.slots[id] = { x: p.x, y: p.y, z: p.z, ry: r.y, rx: r.x };
+            
+            // Visual feedback
+            const btns = document.querySelectorAll(`button[onclick="saveSlot(${id})"]`);
+            btns.forEach(b => {
+                b.innerText = "SAVED!";
+                setTimeout(() => b.innerText = `💾 SAVE POINT ${id}`, 1000);
+            });
+        };
+
+        window.loadSlot = function(id) {
+            if (!window.slots[id]) return alert("Slot empty!");
+            const s = window.slots[id];
+            controls.getObject().position.set(s.x, s.y, s.z);
+            camera.rotation.set(s.rx, s.ry, 0); 
+        };
 
         // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
-                // 1. Calculate Movement Direction relative to Camera
-                // We need to know which way is "Forward" relative to where we are LOOKING
                 const direction = new THREE.Vector3();
                 camera.getWorldDirection(direction);
                 
-                // Flatten direction to horizontal plane for walking (so we don't fly up/down)
+                // Flatten for walking
                 direction.y = 0;
                 direction.normalize();
 
                 const right = new THREE.Vector3();
                 right.crossVectors(camera.up, direction).normalize();
 
-                // 2. Apply Movement
                 if (moveF) controls.getObject().position.addScaledVector(direction, MOVEMENT_SPEED);
                 if (moveB) controls.getObject().position.addScaledVector(direction, -MOVEMENT_SPEED);
                 if (moveL) controls.getObject().position.addScaledVector(right, -MOVEMENT_SPEED);
                 if (moveR) controls.getObject().position.addScaledVector(right, MOVEMENT_SPEED);
-
-                // 3. FORCE CAMERA TO LOOK AT TARGET
-                // This overrides any mouse looking. The camera always points to the Vector3 we defined.
-                camera.lookAt(lookAtTarget);
             }
             
-            // Update Debug UI
+            // UPDATE DEBUG UI
             const p = controls.getObject().position;
+            const r = camera.rotation;
+
             document.getElementById('p-x').innerText = p.x.toFixed(3);
             document.getElementById('p-y').innerText = p.y.toFixed(3);
             document.getElementById('p-z').innerText = p.z.toFixed(3);
+            document.getElementById('r-y').innerText = (r.y * 180/Math.PI).toFixed(1) + "°";
 
             renderer.render(scene, camera);
         }
