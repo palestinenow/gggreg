@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Point Collector - Center & Intro</title>
+    <title>Cinematic Orbit Around Tree</title>
     <style>
         body { margin: 0; overflow: hidden; background: #111; font-family: 'Courier New', Courier, monospace; }
         
@@ -36,8 +36,8 @@
         }
         #crosshair {
             position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
-            background: #0f0; border-radius: 50%; transform: translate(-50%, -50%);
-            pointer-events: none; z-index: 50; box-shadow: 0 0 5px #0f0;
+            background: red; border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 50; box-shadow: 0 0 5px red;
         }
 
         /* ACTION BUTTONS */
@@ -54,19 +54,23 @@
             background: #003300;
             color: #0f0;
             border: 1px solid #0f0;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-weight: bold;
             cursor: pointer;
             font-family: monospace;
-            font-size: 16px;
+            font-size: 18px;
+            transition: 0.3s;
         }
-        button:hover { background: #0f0; color: black; }
-        
-        #saved-intro {
-            margin-top: 10px;
+        button:hover { background: #0f0; color: black; transform: scale(1.05); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        #status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
             color: yellow;
-            font-size: 12px;
-            display: none;
+            font-size: 16px;
+            z-index: 100;
         }
     </style>
 </head>
@@ -84,27 +88,26 @@
         <div class="row"><span class="label">Y:</span> <span class="val">1.041</span></div>
         <div class="row"><span class="label">Z:</span> <span class="val">-0.008</span></div>
 
-        <div id="saved-intro">
-            <h3>🎬 POINT B: INTRO (SAVED)</h3>
-            <div id="intro-coords"></div>
-        </div>
+        <h3>🔄 STATION STATUS</h3>
+        <div class="row"><span class="label">CURRENT:</span> <span class="val" id="current-station">Intro</span></div>
+        <div class="row"><span class="label">NEXT:</span> <span class="val" id="next-station">C: First</span></div>
     </div>
 
     <div id="crosshair"></div>
 
     <div id="blocker">
         <div id="instructions">
-            <h1 style="color:#0f0">CLICK TO START</h1>
-            <p>Z / W → Move Forward (Free Look)<br>S → Backward | A/Q ← Left | D → Right<br><br>Find your "Intro" spot and click SAVE.</p>
+            <h1 style="color:#0f0">CLICK TO START CINEMATIC MODE</h1>
+            <p>Camera will orbit the tree.<br>Click "NEXT STATION" to move smoothly between viewpoints.<br>Always looking at the center.</p>
         </div>
     </div>
 
     <!-- ACTIONS -->
     <div id="actions">
-        <button onclick="saveIntro()">📍 SET POINT B (INTRO)</button>
-        <button onclick="goToCenter()">🚀 JUMP TO CENTER</button>
-        <button onclick="goToIntro()">🚀 JUMP TO INTRO</button>
+        <button id="btn-next" onclick="nextStation()">➡️ NEXT STATION</button>
     </div>
+
+    <div id="status">Ready to begin...</div>
 
     <script type="importmap">
         {
@@ -117,7 +120,6 @@
 
     <script type="module">
         import * as THREE from 'three';
-        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
         // --- SETUP ---
@@ -137,39 +139,24 @@
         scene.add(dirLight);
 
         // --- DEFINED POINTS ---
-        // Point A: Center (From your screenshot)
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
-        
-        // Point B: Intro (Will be saved by you)
-        let POINT_INTRO = null;
 
-        // --- CONTROLS ---
-        const controls = new PointerLockControls(camera, document.body);
-        const blocker = document.getElementById('blocker');
+        const STATIONS = [
+            { name: "Intro",     pos: new THREE.Vector3(0.092, 8.581, -0.067) },
+            { name: "C: First",  pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+            { name: "D: 2",      pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+            { name: "E: 3",      pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+            { name: "F: 4",      pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+            { name: "G: 5",      pos: new THREE.Vector3(-3.403, 1.240, -4.008) },
+            { name: "H: 6",      pos: new THREE.Vector3(-4.993, 1.137, 1.629) }
+        ];
 
-        document.addEventListener('click', () => controls.lock());
-        controls.addEventListener('lock', () => blocker.style.display = 'none');
-        controls.addEventListener('unlock', () => blocker.style.display = 'flex');
-        
-        scene.add(controls.getObject());
-
-        // --- MOVEMENT (FREE LOOK MODE) ---
-        let moveF = false, moveB = false, moveL = false, moveR = false;
-        const MOVEMENT_SPEED = 0.2; 
-
-        document.addEventListener('keydown', (e) => {
-            if(e.code === 'KeyW' || e.code === 'ArrowUp' || e.code === 'KeyZ') moveF = true;
-            if(e.code === 'KeyS' || e.code === 'ArrowDown') moveB = true;
-            if(e.code === 'KeyA' || e.code === 'ArrowLeft' || e.code === 'KeyQ') moveL = true;
-            if(e.code === 'KeyD' || e.code === 'ArrowRight') moveR = true;
-        });
-        
-        document.addEventListener('keyup', (e) => {
-            if(e.code === 'KeyW' || e.code === 'ArrowUp' || e.code === 'KeyZ') moveF = false;
-            if(e.code === 'KeyS' || e.code === 'ArrowDown') moveB = false;
-            if(e.code === 'KeyA' || e.code === 'ArrowLeft' || e.code === 'KeyQ') moveL = false;
-            if(e.code === 'KeyD' || e.code === 'ArrowRight') moveR = false;
-        });
+        let currentStationIndex = 0; // Start at Intro
+        let isAnimating = false;
+        let animationProgress = 0;
+        let startPos = new THREE.Vector3();
+        let endPos = new THREE.Vector3();
+        const ANIMATION_DURATION = 3.0; // seconds
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -180,68 +167,70 @@
             });
             scene.add(model);
             
-            // Start at Center
-            controls.getObject().position.copy(POINT_CENTER).add(new THREE.Vector3(0, 2, 5));
+            // Start at Intro
+            camera.position.copy(STATIONS[0].pos);
+            camera.lookAt(POINT_CENTER);
+            updateUI();
         }, undefined, function (error) {
             console.error(error);
         });
 
-        // --- BUTTON FUNCTIONS ---
-        
-        // 1. Save Point B (Intro)
-        window.saveIntro = function() {
-            const p = controls.getObject().position;
-            POINT_INTRO = p.clone();
-            
-            // Show on screen
-            const introDiv = document.getElementById('saved-intro');
-            const coordsDiv = document.getElementById('intro-coords');
-            introDiv.style.display = 'block';
-            coordsDiv.innerHTML = `
-                X: ${p.x.toFixed(3)}<br>
-                Y: ${p.y.toFixed(3)}<br>
-                Z: ${p.z.toFixed(3)}
-            `;
-            
-            // Log for copying
-            console.log("POINT B SAVED:", { x: p.x, y: p.y, z: p.z });
-            alert("Point B (Intro) Saved! Check the panel or console.");
-        };
+        // --- NEXT STATION FUNCTION ---
+        window.nextStation = function() {
+            if (isAnimating) return;
 
-        // 2. Jump to Center
-        window.goToCenter = function() {
-            controls.getObject().position.copy(POINT_CENTER).add(new THREE.Vector3(0, 2, 5));
-        };
-
-        // 3. Jump to Intro
-        window.goToIntro = function() {
-            if(POINT_INTRO) {
-                controls.getObject().position.copy(POINT_INTRO);
+            // If we're at Intro, next is C: First (index 1)
+            // After that, cycle 1→2→3→4→5→6→1→2...
+            if (currentStationIndex === 0) {
+                currentStationIndex = 1;
             } else {
-                alert("Save Point B first!");
+                currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
             }
+
+            startAnimation(STATIONS[currentStationIndex].pos);
+            updateUI();
         };
+
+        function startAnimation(targetPos) {
+            isAnimating = true;
+            animationProgress = 0;
+            startPos.copy(camera.position);
+            endPos.copy(targetPos);
+            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
+        }
+
+        function updateUI() {
+            document.getElementById('current-station').innerText = STATIONS[currentStationIndex].name;
+            let nextIndex = currentStationIndex === 0 ? 1 : (currentStationIndex % (STATIONS.length - 1)) + 1;
+            document.getElementById('next-station').innerText = STATIONS[nextIndex].name;
+        }
+
+        // --- EASING FUNCTION: Ease In Out Cubic ---
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
 
         // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
             
-            if (controls.isLocked) {
-                // Free Look Movement Logic
-                const direction = new THREE.Vector3();
-                camera.getWorldDirection(direction);
-                
-                const right = new THREE.Vector3();
-                right.crossVectors(camera.up, direction).normalize();
+            if (isAnimating) {
+                animationProgress += 0.016 / ANIMATION_DURATION; // assuming 60fps
+                if (animationProgress >= 1) {
+                    animationProgress = 1;
+                    isAnimating = false;
+                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
+                }
 
-                if (moveF) controls.getObject().position.addScaledVector(direction, MOVEMENT_SPEED);
-                if (moveB) controls.getObject().position.addScaledVector(direction, -MOVEMENT_SPEED);
-                if (moveL) controls.getObject().position.addScaledVector(right, -MOVEMENT_SPEED);
-                if (moveR) controls.getObject().position.addScaledVector(right, MOVEMENT_SPEED);
+                const easedT = easeInOutCubic(animationProgress);
+                camera.position.lerpVectors(startPos, endPos, easedT);
+                
+                // ALWAYS LOOK AT CENTER
+                camera.lookAt(POINT_CENTER);
             }
-            
+
             // Update Debug UI
-            const p = controls.getObject().position;
+            const p = camera.position;
             document.getElementById('p-x').innerText = p.x.toFixed(3);
             document.getElementById('p-y').innerText = p.y.toFixed(3);
             document.getElementById('p-z').innerText = p.z.toFixed(3);
