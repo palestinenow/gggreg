@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fast 3D Walk - New Model</title>
+    <title>True First-Person Movement</title>
     <style>
         body { margin: 0; overflow: hidden; background: #111; font-family: sans-serif; }
         #blocker {
@@ -31,7 +31,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CLICK TO PLAY</h1>
-            <p>WASD / ZQSD to SPRINT<br>Mouse to Look<br>ESC to Stop</p>
+            <p>W / Z → Move FORWARD where you're looking<br>A / Q ← Left | D → Right<br>Mouse → Look Around<br>ESC → Pause</p>
         </div>
     </div>
 
@@ -87,8 +87,6 @@
 
         // --- MOVEMENT VARIABLES ---
         let moveF = false, moveB = false, moveL = false, moveR = false;
-        
-        // ⚡ SPEED SETTING: Very fast sprint
         const MOVEMENT_SPEED = 2.5; 
 
         document.addEventListener('keydown', (e) => {
@@ -105,7 +103,7 @@
             if(e.code === 'KeyD' || e.code === 'ArrowRight') moveR = false;
         });
 
-        // --- LOAD NEW MODEL (.glb) ---
+        // --- LOAD MODEL ---
         const loader = new GLTFLoader();
         
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
@@ -125,22 +123,33 @@
             const center = box.getCenter(new THREE.Vector3());
             controls.getObject().position.set(center.x, center.y + 5, center.z + 15);
 
-            loading.style.display = 'none'; // Hide loading text when done
+            loading.style.display = 'none';
 
         }, undefined, function (error) {
             console.error(error);
             loading.innerText = "Error loading model. Check Console (F12).";
         });
 
-        // --- ANIMATION LOOP ---
+        // --- ANIMATION LOOP WITH TRUE CAMERA-DIRECTION MOVEMENT ---
         function animate() {
             requestAnimationFrame(animate);
             
             if (controls.isLocked) {
-                if(moveF) controls.moveForward(MOVEMENT_SPEED);
-                if(moveB) controls.moveForward(-MOVEMENT_SPEED);
-                if(moveL) controls.moveRight(-MOVEMENT_SPEED);
-                if(moveR) controls.moveRight(MOVEMENT_SPEED);
+                // Get camera's forward direction (flattened to horizontal plane)
+                const direction = new THREE.Vector3();
+                camera.getWorldDirection(direction);
+                direction.y = 0; // Ignore vertical component for walking
+                direction.normalize();
+
+                // Get camera's right direction (for strafe)
+                const right = new THREE.Vector3();
+                right.crossVectors(camera.up, direction).normalize();
+
+                // Apply movement relative to camera orientation
+                if (moveF) controls.getObject().position.addScaledVector(direction, MOVEMENT_SPEED);
+                if (moveB) controls.getObject().position.addScaledVector(direction, -MOVEMENT_SPEED);
+                if (moveL) controls.getObject().position.addScaledVector(right, -MOVEMENT_SPEED);
+                if (moveR) controls.getObject().position.addScaledVector(right, MOVEMENT_SPEED);
             }
             
             renderer.render(scene, camera);
