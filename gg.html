@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My 3D Model - Interactive Move</title>
+  <title>My 3D Model - Fixed Colors</title>
   <style>
     body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
     canvas { display: block; }
@@ -14,14 +14,13 @@
       color: white;
       font-size: 24px;
     }
-    /* Potion Buttons */
     .potions {
       position: absolute;
       bottom: 30px;
       left: 0; right: 0;
       display: flex;
       justify-content: space-around;
-      pointer-events: none; /* let clicks pass through to canvas */
+      pointer-events: none;
     }
     .potion-btn {
       width: 60px;
@@ -51,7 +50,6 @@
 <body>
   <div id="loading">Loading 3D world...</div>
 
-  <!-- Potion Buttons -->
   <div class="potions">
     <button class="potion-btn active" data-cam="home">1</button>
     <button class="potion-btn" data-cam="car">2</button>
@@ -59,7 +57,6 @@
     <button class="potion-btn" data-cam="sign">4</button>
   </div>
 
-  <!-- Three.js Import Map -->
   <script type="importmap">
     {
       "imports": {
@@ -74,7 +71,6 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-    // === CAMERA PRESETS (adjust these based on your model!) ===
     const CAMERAS = {
       home:    { pos: [0, 5, 15],   target: [0, 0, 0] },
       car:     { pos: [-5, 2, 8],   target: [-3, 1, -2] },
@@ -85,7 +81,6 @@
     let activeCam = 'home';
     let isAnimating = false;
 
-    // Scene setup
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1a1a2e);
 
@@ -97,36 +92,47 @@
     renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
-    // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.target.set(...CAMERAS.home.target);
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
     dirLight.position.set(5, 10, 7);
     dirLight.castShadow = true;
     scene.add(dirLight);
 
-    // Load GLTF Model
+    // === LOAD MODEL WITH DEBUGGING ===
     const loader = new GLTFLoader();
     loader.load(
       './droid-workshop-kitchen.gltf',
       function (gltf) {
         const model = gltf.scene;
+        let hasTextureIssues = false;
+
         model.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
+
+            if (!child.material.map && child.material.name !== 'default') {
+              console.warn(`⚠️ Mesh "${child.name}" has NO TEXTURE — might appear gray.`);
+              hasTextureIssues = true;
+            } else if (child.material.map) {
+              console.log(`✅ Mesh "${child.name}" has texture loaded.`);
+            }
           }
         });
+
+        if (hasTextureIssues) {
+          alert("Some parts may still be gray — check browser console for details.");
+        }
+
         scene.add(model);
 
-        // Center camera initially
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         controls.target.copy(center);
@@ -136,25 +142,22 @@
       },
       undefined,
       function (error) {
-        console.error('Error loading model:', error);
-        document.getElementById('loading').innerText = 'Failed to load model.';
+        console.error('❌ Error loading model:', error);
+        document.getElementById('loading').innerText = 'Failed to load model. Check console.';
       }
     );
 
-    // Handle Resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // === CAMERA ANIMATION SYSTEM ===
     function moveToCamera(camName) {
       if (isAnimating || camName === activeCam) return;
       isAnimating = true;
       activeCam = camName;
 
-      // Update button UI
       document.querySelectorAll('.potion-btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.cam === camName) btn.classList.add('active');
@@ -167,13 +170,12 @@
       const startTarget = controls.target.clone();
 
       let progress = 0;
-      const duration = 1.5; // seconds
+      const duration = 1.5;
 
       function animateCamera() {
-        progress += 0.016 / duration; // assuming ~60fps
+        progress += 0.016 / duration;
         if (progress >= 1) progress = 1;
 
-        // Smooth interpolation
         camera.position.lerpVectors(startPos, targetPos, progress);
         controls.target.lerpVectors(startTarget, targetLook, progress);
         controls.update();
@@ -188,14 +190,12 @@
       animateCamera();
     }
 
-    // Button Event Listeners
     document.querySelectorAll('.potion-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         moveToCamera(btn.dataset.cam);
       });
     });
 
-    // Animation Loop
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
