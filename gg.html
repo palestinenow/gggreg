@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit Around Tree</title>
+    <title>Cinematic Orbit - Glow Edition</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #111; font-family: 'Courier New', Courier, monospace; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Courier New', Courier, monospace; }
         
         /* DEBUG PANEL */
         #debug-panel {
@@ -12,7 +12,7 @@
             top: 10px;
             left: 10px;
             width: 320px;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.7);
             color: #0f0;
             padding: 15px;
             border: 1px solid #0f0;
@@ -28,12 +28,12 @@
 
         /* CONTROLS OVERLAY */
         #blocker {
-            position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.9);
             display: flex; justify-content: center; align-items: center; z-index: 999;
-            cursor: pointer; /* Show it's clickable */
+            cursor: pointer;
         }
         #instructions {
-            color: white; text-align: center; padding: 30px; border: 2px solid #0f0; border-radius: 10px; font-family: sans-serif; background: #000;
+            color: black; text-align: center; padding: 30px; border: 2px solid #0f0; border-radius: 10px; font-family: sans-serif; background: #fff;
         }
         #crosshair {
             position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
@@ -69,8 +69,16 @@
             position: absolute;
             bottom: 20px;
             left: 20px;
-            color: yellow;
+            color: #333;
             font-size: 16px;
+            z-index: 100;
+        }
+
+        /* BLOOM TOGGLE */
+        #bloom-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
             z-index: 100;
         }
     </style>
@@ -100,7 +108,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1 style="color:#0f0">CLICK ANYWHERE TO START</h1>
-            <p>Camera will orbit the tree.<br>Click "NEXT STATION" to move smoothly between viewpoints.<br>Always looking at the center.</p>
+            <p>Camera will orbit the glowing tree.<br>Click "NEXT STATION" to move smoothly between viewpoints.<br>Always looking at the center.</p>
         </div>
     </div>
 
@@ -109,8 +117,14 @@
         <button id="btn-next" onclick="nextStation()">➡️ NEXT STATION</button>
     </div>
 
+    <!-- BLOOM TOGGLE -->
+    <div id="bloom-toggle">
+        <button onclick="toggleBloom()">✨ GLOW: ON</button>
+    </div>
+
     <div id="status">Ready to begin...</div>
 
+    <!-- IMPORT MAP WITH POST PROCESSING -->
     <script type="importmap">
         {
             "imports": {
@@ -123,24 +137,69 @@
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
         // --- SETUP ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x111111);
+        scene.background = new THREE.Color(0xffffff); // WHITE SKY
         
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- LIGHTS ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.0); 
-        scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-        dirLight.position.set(10, 20, 10);
-        scene.add(dirLight);
+        // --- POST PROCESSING (BLOOM) ---
+        const renderScene = new RenderPass(scene, camera);
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = 0.2;
+        bloomPass.strength = 1.2;   // Glow intensity
+        bloomPass.radius = 0.5;     // Glow spread
 
-        // --- DEFINED POINTS ---
+        const composer = new EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+
+        let bloomEnabled = true;
+
+        window.toggleBloom = function() {
+            bloomEnabled = !bloomEnabled;
+            const btn = document.querySelector('#bloom-toggle button');
+            if (bloomEnabled) {
+                composer.passes[1].enabled = true;
+                btn.innerText = "✨ GLOW: ON";
+                btn.style.background = "#003300";
+            } else {
+                composer.passes[1].enabled = false;
+                btn.innerText = "✨ GLOW: OFF";
+                btn.style.background = "#333";
+            }
+        };
+
+        // --- LIGHTS ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
+        scene.add(ambientLight);
+
+        // Spotlight on center (tree)
+        const spotLight = new THREE.SpotLight(0xffeeff, 2);
+        spotLight.position.set(0, 10, 0);
+        spotLight.angle = Math.PI / 4;
+        spotLight.penumbra = 0.5;
+        spotLight.decay = 1;
+        spotLight.distance = 50;
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+        scene.add(spotLight.target);
+        spotLight.target.position.set(-0.006, 1.041, -0.008); // Point at tree
+
+        // Additional point light at center for glow
+        const centerLight = new THREE.PointLight(0xff00ff, 1, 10);
+        centerLight.position.copy(new THREE.Vector3(-0.006, 1.041, -0.008));
+        scene.add(centerLight);
+
+        // --- DEFINED POINTS (REMOVED H:6) ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
 
         const STATIONS = [
@@ -149,8 +208,8 @@
             { name: "D: 2",      pos: new THREE.Vector3(0.077, 1.301, 5.964) },
             { name: "E: 3",      pos: new THREE.Vector3(5.276, 1.338, 1.737) },
             { name: "F: 4",      pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-            { name: "G: 5",      pos: new THREE.Vector3(-3.403, 1.240, -4.008) },
-            { name: "H: 6",      pos: new THREE.Vector3(-4.993, 1.137, 1.629) }
+            { name: "G: 5",      pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+            // H:6 REMOVED
         ];
 
         let currentStationIndex = 0; // Start at Intro
@@ -165,7 +224,15 @@
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
             model.traverse((child) => {
-                if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
+                if (child.isMesh) { 
+                    child.castShadow = true; 
+                    child.receiveShadow = true; 
+                    // Optional: Make tree emissive for stronger glow
+                    if (child.name.toLowerCase().includes('tree') || child.name.toLowerCase().includes('plant')) {
+                        child.material.emissive = new THREE.Color(0xaa00aa);
+                        child.material.emissiveIntensity = 0.5;
+                    }
+                }
             });
             scene.add(model);
             
@@ -188,7 +255,7 @@
             if (isAnimating) return;
 
             // If we're at Intro, next is C: First (index 1)
-            // After that, cycle 1→2→3→4→5→6→1→2...
+            // After that, cycle 1→2→3→4→5→1→2... (skip Intro after first time)
             if (currentStationIndex === 0) {
                 currentStationIndex = 1;
             } else {
@@ -243,7 +310,12 @@
             document.getElementById('p-y').innerText = p.y.toFixed(3);
             document.getElementById('p-z').innerText = p.z.toFixed(3);
 
-            renderer.render(scene, camera);
+            // RENDER WITH BLOOM
+            if (bloomEnabled) {
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
         }
         animate();
 
@@ -251,6 +323,7 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
 </body>
