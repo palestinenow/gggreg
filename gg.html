@@ -18,8 +18,8 @@
             display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer;
         }
         #instructions {
-            color: black; text-align: center; padding: 30px; border: 1px solid #ddd;
-            border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            color: black; text-align: center; padding: 30px; border: 2px solid #333;
+            border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         h1 { margin: 0 0 10px 0; color: #333; font-size: 56px; font-weight: 700; }
         p { margin: 0; color: #666; font-size: 28px; font-weight: 500; }
@@ -30,13 +30,13 @@
             background: #000; color: #fff; border: none; padding: 15px 40px;
             font-family: 'My Soul', cursive; font-size: 32px; font-weight: 600; cursor: pointer;
             border-radius: 50px; transition: all 0.3s ease; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        button.main-btn:hover { background: #333; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        button.main-btn:hover { background: #333; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
 
         #status { 
             position: absolute; bottom: 40px; left: 40px; 
-            color: #333; font-size: 28px; font-weight: 500; z-index: 100; opacity: 0.6; 
+            color: #333; font-size: 28px; font-weight: 500; z-index: 100; opacity: 0.7; 
         }
     </style>
 </head>
@@ -79,21 +79,21 @@
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
         // --- HELPER TO CREATE MY SOUL TEXT CARDS ---
-        function createElegantCard(textTitle, textSub) {
+        function createTextCard(textTitle, textSub) {
             const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
             const context = canvas.getContext('2d');
             
-            // Load Font for Canvas
+            // Use My Soul Font for Canvas
             context.font = '140px "My Soul"'; 
             
             // NO BACKGROUND - Transparent
             
-            // Title
+            // Text Title
             context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
             context.fillText(textTitle, 512, 400);
             
-            // Subtitle
+            // Text Subtitle
             context.font = '90px "My Soul"'; 
             context.fillStyle = '#eeeeee';
             context.fillText(textSub, 512, 550);
@@ -102,65 +102,54 @@
             const material = new THREE.MeshBasicMaterial({ 
                 map: texture, transparent: true, opacity: 1.0, side: THREE.DoubleSide, depthWrite: false 
             });
-            const geometry = new THREE.PlaneGeometry(3, 3); 
+            const geometry = new THREE.PlaneGeometry(3, 3); // Larger size for readability with script font
             const mesh = new THREE.Mesh(geometry, material);
-            
-            // Store original position for random movement
-            mesh.userData.originalPos = mesh.position.clone();
-            mesh.userData.randomOffset = Math.random() * 1000; 
-            
             return mesh;
         }
 
         // --- CREATE CARDS WITH YOUR EXACT COORDINATES ---
         
         // 1. Intro Card
-        const cardIntro = createElegantCard("Welcome", "Start of Journey");
+        const cardIntro = createTextCard("Welcome", "Start of Journey");
         cardIntro.position.set(0.092, 9.5, -0.067); 
         cardIntro.lookAt(new THREE.Vector3(-0.006, 9.5, -0.008)); 
         const qIntro = cardIntro.quaternion.clone();
 
-        // 2. Card G (Overview) - Placed near G station
-        const cardG = createElegantCard("Overview", "Wide Perspective");
-        cardG.position.set(-3.403, 2.5, -4.008); 
-        cardG.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
-        const qG = cardG.quaternion.clone();
-
-        // 3. Card C - YOUR COORDINATES
-        const cardC = createElegantCard("Viewpoint C", "Detail One");
+        // 2. Card C - YOUR COORDINATES
+        const cardC = createTextCard("Viewpoint C", "Detail One");
         cardC.position.set(-3.49, 1.30, 1.23); 
         cardC.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qC = cardC.quaternion.clone();
 
-        // 4. Card D - Logical position near D station
-        const cardD = createElegantCard("Viewpoint D", "Detail Two");
+        // 3. Card D - Logical position near D station
+        const cardD = createTextCard("Viewpoint D", "Detail Two");
         cardD.position.set(0.077, 1.30, 4.0); 
         cardD.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qD = cardD.quaternion.clone();
 
-        // 5. Card E - YOUR COORDINATES
-        const cardE = createElegantCard("Viewpoint E", "Detail Three");
+        // 4. Card E - YOUR COORDINATES
+        const cardE = createTextCard("Viewpoint E", "Detail Three");
         cardE.position.set(3.77, 1.30, 1.30); 
         cardE.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qE = cardE.quaternion.clone();
 
-        // 6. Card F - YOUR COORDINATES
-        const cardF = createElegantCard("Viewpoint F", "Detail Four");
+        // 5. Card F - YOUR COORDINATES
+        const cardF = createTextCard("Viewpoint F", "Detail Four");
         cardF.position.set(2.21, 1.30, -3.16); 
         cardF.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qF = cardF.quaternion.clone();
 
-        scene.add(cardIntro); scene.add(cardG); scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
+        scene.add(cardIntro); scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
 
         // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: cardIntro, quat: qIntro },
-            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: cardG, quat: qG },
             { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), card: cardC, quat: qC },
             { name: "D: Second", pos: new THREE.Vector3(0.077, 1.301, 5.964), card: cardD, quat: qD },
             { name: "E: Third", pos: new THREE.Vector3(5.276, 1.338, 1.737), card: cardE, quat: qE },
-            { name: "F: Fourth", pos: new THREE.Vector3(3.257, 1.258, -4.664), card: cardF, quat: qF }
+            { name: "F: Fourth", pos: new THREE.Vector3(3.257, 1.258, -4.664), card: cardF, quat: qF },
+            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: null } // Empty station
         ];
 
         let currentStationIndex = 0;
@@ -168,7 +157,7 @@
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 3.0;
+        const ANIMATION_DURATION = 2.5;
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -185,7 +174,10 @@
 
         window.nextStation = function() {
             if (isAnimating) return;
-            currentStationIndex = (currentStationIndex + 1) % STATIONS.length;
+            // Cycle through stations
+            if (currentStationIndex === 0) currentStationIndex = 1;
+            else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
+            
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
         };
@@ -205,34 +197,18 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            const time = Date.now() * 0.001;
-
+            // PURE TEXT LOGIC FOR ALL CARDS
             STATIONS.forEach(station => {
-                if (station.card) {
+                if(station.card) {
                     const dist = camera.position.distanceTo(station.pos);
-                    
                     if (dist < 2.5) {
                         // AT STATION: Face Camera & 100% Opacity
                         station.card.lookAt(camera.position);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
-                        
-                        // Stop floating when focused
-                        if(station.card.userData.originalPos) {
-                             station.card.position.lerp(station.card.userData.originalPos, 0.1);
-                        }
                     } else {
                         // AWAY: Return to Original Rotation & 5% Opacity
-                        if(station.quat) {
-                            station.card.quaternion.slerp(station.quat, 0.1);
-                        }
+                        station.card.quaternion.slerp(station.quat, 0.1);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
-                        
-                        // Random "Shine/Float" Movement when inactive
-                        if(station.card.userData.originalPos && station.card.userData.randomOffset !== undefined) {
-                            const offset = station.card.userData.randomOffset;
-                            station.card.position.y = station.card.userData.originalPos.y + Math.sin(time + offset) * 0.1;
-                            station.card.position.x = station.card.userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
-                        }
                     }
                 }
             });
