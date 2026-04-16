@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Depth of Field</title>
+    <title>Cinematic Flow - Final Polish</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: 'Courier New', Courier, monospace; }
         
@@ -36,13 +36,42 @@
         }
         button.main-btn:hover { background: #0f0; color: black; transform: scale(1.1); box-shadow: 0 0 20px #0f0; }
 
+        /* FLOW CONTROLS PANEL */
         #flow-controls {
             position: absolute; top: 20px; right: 20px;
-            background: rgba(255, 255, 255, 0.9); padding: 15px;
+            background: rgba(255, 255, 255, 0.95); padding: 15px;
             border: 1px solid #ccc; border-radius: 8px; z-index: 100;
-            font-family: sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-family: sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            min-width: 200px;
         }
-        #flow-controls h3 { margin: 0 0 10px 0; font-size: 14px; color: #333; text-transform: uppercase; }
+        #flow-controls h3 { margin: 0 0 15px 0; font-size: 14px; color: #333; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        
+        .control-group { margin-bottom: 12px; }
+        .control-label { display: flex; justify-content: space-between; font-size: 12px; color: #555; margin-bottom: 5px; }
+        
+        /* Slider Styling */
+        input[type=range] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px; width: 16px;
+            border-radius: 50%;
+            background: #0f0;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 5px #0f0;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px;
+            cursor: pointer;
+            background: #ddd;
+            border-radius: 2px;
+        }
+        
+        /* Checkbox Styling */
         .toggle-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; color: #555; }
         .toggle-row input { margin-right: 8px; cursor: pointer; }
         .toggle-row label { cursor: pointer; user-select: none; }
@@ -57,19 +86,32 @@
 
     <div id="debug-panel">
         <div class="row"><span class="label">STATION:</span> <span class="val" id="current-station">Intro</span></div>
-        <div class="row"><span class="label">GLOW:</span> <span class="val" id="glow-val">0%</span></div>
+        <div class="row"><span class="label">GLOW:</span> <span class="val" id="glow-val">10%</span></div>
     </div>
 
     <div id="blocker">
         <div id="instructions">
             <h1 style="color:#0f0; margin:0;">CLICK TO BEGIN</h1>
-            <p style="margin-top:10px;">Cinematic orbit with Depth of Field.<br>Center is sharp, edges are blurry.</p>
+            <p style="margin-top:10px;">Cinematic orbit with adjustable Depth of Field.<br>Use controls top-right to customize.</p>
         </div>
     </div>
 
     <!-- FLOW OPTIONS -->
     <div id="flow-controls">
-        <h3>✨ Flow Effects</h3>
+        <h3>✨ Flow Controls</h3>
+        
+        <!-- Blur Slider -->
+        <div class="control-group">
+            <div class="control-label">
+                <span>Blur Scale (Visor Effect)</span>
+                <span id="blur-val">50%</span>
+            </div>
+            <input type="range" id="blur-slider" min="0" max="100" value="50">
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+
+        <!-- Checkboxes -->
         <div class="toggle-row">
             <input type="checkbox" id="opt-arc" checked>
             <label for="opt-arc">Arcing Camera Path</label>
@@ -81,10 +123,6 @@
         <div class="toggle-row">
             <input type="checkbox" id="opt-rays" checked>
             <label for="opt-rays">Rotating God Rays</label>
-        </div>
-        <div class="toggle-row">
-            <input type="checkbox" id="opt-blur" checked>
-            <label for="opt-blur">Depth of Field (Blur)</label>
         </div>
     </div>
 
@@ -109,7 +147,6 @@
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-        // IMPORT BOKEH PASS FOR DEPTH OF FIELD
         import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
 
         // --- SCENE SETUP ---
@@ -122,7 +159,7 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- POST PROCESSING (BLOOM + BLUR) ---
+        // --- POST PROCESSING ---
         const renderScene = new RenderPass(scene, camera);
 
         // 1. BLOOM (Glow)
@@ -131,11 +168,11 @@
         bloomPass.strength = 0.0;   
         bloomPass.radius = 0.8;
 
-        // 2. BOKEH (Depth of Field / Blur)
+        // 2. BOKEH (Depth of Field)
         const bokehPass = new BokehPass(scene, camera, {
-            focus: 10.0,       // Distance in units where image is sharp
-            aperture: 0.0001,  // Size of aperture (higher = more blur)
-            maxblur: 0.01,     // Maximum blur amount
+            focus: 10.0,
+            aperture: 0.0001,
+            maxblur: 0.01,
             width: window.innerWidth,
             height: window.innerHeight
         });
@@ -143,7 +180,7 @@
         const composer = new EffectComposer(renderer);
         composer.addPass(renderScene);
         composer.addPass(bloomPass);
-        composer.addPass(bokehPass); // Add blur pass
+        composer.addPass(bokehPass);
 
         // --- LIGHTS ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
@@ -163,7 +200,7 @@
         centerLight.position.set(-0.006, 1.041, -0.008);
         scene.add(centerLight);
 
-        // --- FLOW EFFECTS INITIALIZATION ---
+        // --- FLOW EFFECTS ---
         
         // 1. PARTICLES
         const particleCount = 200;
@@ -212,28 +249,43 @@
         let endPos = new THREE.Vector3();
         const ANIMATION_DURATION = 3.0;
 
-        // --- GLOW PULSE SYSTEM ---
+        // --- GLOW PULSE SYSTEM (10% to 80%) ---
         let glowStartTime = Date.now();
         let glowDurationUp = getRandomDuration();
         let glowDurationDown = getRandomDuration();
         let isGlowingUp = true;
+
+        const MIN_GLOW = 0.1; // 10%
+        const MAX_GLOW = 0.8; // 80%
+        const RANGE_GLOW = MAX_GLOW - MIN_GLOW;
 
         function getRandomDuration() { return 7000 + Math.random() * 15000; }
 
         function updateGlow() {
             const now = Date.now();
             const elapsed = now - glowStartTime;
+            
             if (isGlowingUp) {
                 const progress = Math.min(elapsed / glowDurationUp, 1);
-                bloomPass.strength = progress * 2.0;
-                centerLight.intensity = progress * 2.0;
-                document.getElementById('glow-val').innerText = Math.round(progress * 100) + "%";
+                // Map progress 0->1 to MIN_GLOW->MAX_GLOW
+                const currentGlow = MIN_GLOW + (progress * RANGE_GLOW);
+                
+                bloomPass.strength = currentGlow * 2.5; // Scale for visual impact
+                centerLight.intensity = currentGlow * 2.5;
+                
+                document.getElementById('glow-val').innerText = Math.round(currentGlow * 100) + "%";
+                
                 if (progress >= 1) { isGlowingUp = false; glowStartTime = now; glowDurationDown = getRandomDuration(); }
             } else {
                 const progress = Math.min(elapsed / glowDurationDown, 1);
-                bloomPass.strength = (1 - progress) * 2.0;
-                centerLight.intensity = (1 - progress) * 2.0;
-                document.getElementById('glow-val').innerText = Math.round((1 - progress) * 100) + "%";
+                // Map progress 0->1 to MAX_GLOW->MIN_GLOW
+                const currentGlow = MAX_GLOW - (progress * RANGE_GLOW);
+                
+                bloomPass.strength = currentGlow * 2.5;
+                centerLight.intensity = currentGlow * 2.5;
+                
+                document.getElementById('glow-val').innerText = Math.round(currentGlow * 100) + "%";
+                
                 if (progress >= 1) { isGlowingUp = true; glowStartTime = now; glowDurationUp = getRandomDuration(); }
             }
         }
@@ -259,6 +311,17 @@
 
         // --- UI & CONTROLS ---
         document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour started."; });
+
+        // Blur Slider Logic
+        const blurSlider = document.getElementById('blur-slider');
+        const blurValDisplay = document.getElementById('blur-val');
+        
+        blurSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            blurValDisplay.innerText = val + "%";
+            // Update Bokeh aperture based on slider (0 to 0.0002)
+            bokehPass.uniforms['aperture'].value = (val / 100) * 0.0002;
+        });
 
         window.nextStation = function() {
             if (isAnimating) return;
@@ -319,15 +382,9 @@
             } else { godRays.visible = false; }
 
             // UPDATE DEPTH OF FIELD FOCUS
-            // We calculate distance from camera to tree and set focus there
-            // This ensures the tree is ALWAYS sharp, and edges are blurry
-            if (document.getElementById('opt-blur').checked) {
-                bokehPass.enabled = true;
-                const dist = camera.position.distanceTo(POINT_CENTER);
-                bokehPass.uniforms['focus'].value = dist; 
-            } else {
-                bokehPass.enabled = false;
-            }
+            // Always focus on the tree
+            const dist = camera.position.distanceTo(POINT_CENTER);
+            bokehPass.uniforms['focus'].value = dist; 
 
             // Camera Movement
             if (isAnimating) {
