@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit -dseal Glass Effect</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
         #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
-        #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
+        #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; display: flex; gap: 15px; }
         button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         button.main-btn:hover { background: #000; transform: translateY(-2px); }
         #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
@@ -223,7 +223,8 @@
     </div>
 
     <div id="actions">
-        <button class="main-btn" onclick="nextStation()">NEXT STATION ➡️</button>
+        <button class="main-btn" onclick="prevStation()">⬅️ PREVIOUS</button>
+        <button class="main-btn" onclick="nextStation()">NEXT ➡️</button>
     </div>
 
     <div id="status">Ready...</div>
@@ -486,9 +487,9 @@
         }
 
         // --- DYNAMIC BLUR SYSTEM - pulses to 1px then back to 0 ---
-        let blurState = 'waiting'; // waiting, active, fading
+        let blurState = 'waiting';
         let blurStartTime = Date.now();
-        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000; // 4-18s
+        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
         
         function updateBlur() {
             const now = Date.now();
@@ -505,7 +506,7 @@
                 const elapsed = (now - blurStartTime) / 1000;
                 if (elapsed >= 1.0) {
                     blurState = 'waiting';
-                    nextBlurTime = now + 4000 + Math.random() * 14000; // 4-18s
+                    nextBlurTime = now + 4000 + Math.random() * 14000;
                     vignette.style.backdropFilter = 'blur(0px)';
                     blurStatus.textContent = 'Blur: INACTIVE';
                 } else {
@@ -559,14 +560,14 @@
 
         // EXACT CARD POSITIONS
         const cardPositions = {
-            1: { x: -3.61, y: 1.30, z: 1.17 },  // C
-            2: { x: 0.10, y: 1.20, z: 4.00 },   // D
-            3: { x: 3.60, y: 1.25, z: 1.20 },   // E
-            4: { x: 2.20, y: 1.20, z: -3.20 },  // F
-            5: { x: -2.20, y: 1.25, z: -2.70 }  // G
+            1: { x: -3.61, y: 1.30, z: 1.17 },
+            2: { x: 0.10, y: 1.20, z: 4.00 },
+            3: { x: 3.60, y: 1.25, z: 1.20 },
+            4: { x: 2.20, y: 1.20, z: -3.20 },
+            5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
-        // --- CREATE CARDS ---
+        // --- CREATE CARDS (NO BORDER, WHITE TEXT) ---
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -575,25 +576,36 @@
             canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
+            // Transparent background - no fill, just glass effect
+            context.fillStyle = 'rgba(255, 255, 255, 0.15)'; 
             context.fillRect(0, 0, 512, 512);
             
-            context.strokeStyle = '#ffffff'; 
-            context.lineWidth = 20; 
-            context.strokeRect(20, 20, 472, 472);
+            // NO BORDER - removed strokeRect
             
-            context.font = 'bold 50px Arial'; 
-            context.fillStyle = '#333'; 
+            // White text with shadow for clarity
+            context.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            context.shadowBlur = 10;
+            context.shadowOffsetX = 2;
+            context.shadowOffsetY = 2;
+            
+            // Station name - WHITE
+            context.font = 'bold 60px Arial'; 
+            context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
             context.fillText(stationName, 256, 200);
             
-            context.font = '30px Arial'; 
-            context.fillStyle = '#555';
+            // Subtitle - WHITE
+            context.font = '35px Arial'; 
+            context.fillStyle = '#ffffff';
             context.fillText(`Station ${stationIndex}`, 256, 280);
             
-            context.font = '20px Arial';
-            context.fillStyle = '#777';
+            // Additional info - WHITE
+            context.font = '25px Arial';
+            context.fillStyle = '#ffffff';
             context.fillText('Viewpoint', 256, 350);
+            
+            // Reset shadow
+            context.shadowColor = 'transparent';
             
             const pageTexture = new THREE.CanvasTexture(canvas);
             
@@ -664,8 +676,30 @@
 
         window.nextStation = function() {
             if (isAnimating) return;
-            if (currentStationIndex === 0) currentStationIndex = 1;
-            else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
+            if (currentStationIndex === 0) {
+                currentStationIndex = 1;
+            } else if (currentStationIndex < STATIONS.length - 1) {
+                currentStationIndex++;
+            } else {
+                currentStationIndex = 1; // Loop back to first station
+            }
+            startAnimation(STATIONS[currentStationIndex].pos);
+            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
+            
+            if (currentStationIndex > 0) {
+                selectStation(currentStationIndex);
+            }
+        };
+
+        window.prevStation = function() {
+            if (isAnimating) return;
+            if (currentStationIndex === 0) {
+                currentStationIndex = STATIONS.length - 1;
+            } else if (currentStationIndex > 1) {
+                currentStationIndex--;
+            } else {
+                currentStationIndex = STATIONS.length - 1; // Loop to last station
+            }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
@@ -701,7 +735,7 @@
                 if (cards[i]) {
                     if (i === currentStationIndex) {
                         cards[i].lookAt(camera.position);
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.5, 0.1);
+                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.6, 0.1);
                     } else {
                         cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.0, 0.1);
                     }
