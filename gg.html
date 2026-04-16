@@ -50,18 +50,54 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
+        // --- ✨ VISIBLE GLOW ORB (Actually see the glow!) ✨ ---
+        const glowGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff00ff,
+            transparent: true,
+            opacity: 0.9,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+        const glowOrb = new THREE.Mesh(glowGeometry, glowMaterial);
+        glowOrb.position.copy(centerLight.position);
+        scene.add(glowOrb);
+
+        // Add a larger, softer glow halo using a sprite
+        const spriteTexture = new THREE.CanvasTexture(createGlowTexture());
+        const spriteMaterial = new THREE.SpriteMaterial({
+            map: spriteTexture,
+            color: 0xff00ff,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity: 0.6
+        });
+        const glowSprite = new THREE.Sprite(spriteMaterial);
+        glowSprite.position.copy(centerLight.position);
+        glowSprite.scale.set(1.2, 1.2, 1);
+        scene.add(glowSprite);
+
+        function createGlowTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            gradient.addColorStop(0, 'rgba(255, 0, 255, 0.9)');
+            gradient.addColorStop(0.3, 'rgba(255, 0, 255, 0.4)');
+            gradient.addColorStop(1, 'rgba(255, 0, 255, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 128, 128);
+            return canvas;
+        }
+
         // --- REAL GLASS CARD ---
         const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
         const context = canvas.getContext('2d');
         
-        // Draw a semi-transparent white background for the "Frosted" look
         context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
         context.fillRect(0, 0, 512, 512);
-        
-        // Border
         context.strokeStyle = '#ffffff'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
-        
-        // Text
         context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
         context.fillText("INFO", 256, 200);
         context.font = '30px Arial'; context.fillStyle = '#555';
@@ -69,28 +105,22 @@
         
         const pageTexture = new THREE.CanvasTexture(canvas);
         
-        // USE STANDARD MATERIAL WITH HIGH TRANSPARENCY FOR GLASS
         const pageMaterial = new THREE.MeshStandardMaterial({ 
             map: pageTexture,
             transparent: true,
-            opacity: 0.8, // Start high
-            roughness: 0.1, // Smooth like glass
+            opacity: 0.8,
+            roughness: 0.1,
             metalness: 0.1,
             side: THREE.DoubleSide,
-            depthWrite: false, // CRITICAL: Allows seeing through overlapping parts
+            depthWrite: false,
             blending: THREE.NormalBlending
         });
         
         const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
         const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
-        
-        // FIXED POSITION
         floatingPage.position.set(-3.61, 1.30, 1.17);
-        
-        // Initial Rotation
         floatingPage.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const INITIAL_QUATERNION = floatingPage.quaternion.clone();
-        
         scene.add(floatingPage);
 
         // --- STATIONS ---
@@ -111,12 +141,14 @@
         let endPos = new THREE.Vector3();
         const ANIMATION_DURATION = 2.5;
 
-        // --- RANDOM GLOW EFFECT VARIABLES ---
-        let glowState = {
-            isActive: false,
+        // --- ✨ RANDOM GLOW PULSE STATE ✨ ---
+        let glowPulse = {
+            active: false,
             nextTrigger: performance.now() + 2000 + Math.random() * 4000,
             pulseStart: 0,
-            pulseDuration: 0
+            pulseDuration: 0,
+            baseScale: 1,
+            baseOpacity: 0.9
         };
 
         // --- LOAD MODEL ---
@@ -166,43 +198,46 @@
 
         function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
-        // --- RANDOM GLOW PULSE FUNCTION ---
-        function updateRandomGlow(deltaTime) {
+        // --- ✨ UPDATE VISIBLE GLOW PULSE ✨ ---
+        function updateVisibleGlow() {
             const now = performance.now();
             
             // Trigger new random pulse
-            if (!glowState.isActive && now > glowState.nextTrigger) {
-                glowState.isActive = true;
-                glowState.pulseStart = now;
-                glowState.pulseDuration = 300 + Math.random() * 700; // 300-1000ms pulse
+            if (!glowPulse.active && now > glowPulse.nextTrigger) {
+                glowPulse.active = true;
+                glowPulse.pulseStart = now;
+                glowPulse.pulseDuration = 400 + Math.random() * 600; // 400-1000ms
             }
             
-            // Animate active pulse
-            if (glowState.isActive) {
-                const elapsed = now - glowState.pulseStart;
-                if (elapsed < glowState.pulseDuration) {
-                    const t = elapsed / glowState.pulseDuration;
-                    const pulseFactor = 1 + Math.sin(t * Math.PI) * 0.8; // Smooth sine pulse 1x → 1.8x → 1x
+            if (glowPulse.active) {
+                const elapsed = now - glowPulse.pulseStart;
+                if (elapsed < glowPulse.pulseDuration) {
+                    const t = elapsed / glowPulse.pulseDuration;
+                    const pulse = 1 + Math.sin(t * Math.PI) * 0.7; // 1x → 1.7x → 1x
                     
-                    // Pulse the center light intensity
-                    centerLight.intensity = THREE.MathUtils.lerp(centerLight.intensity, 1 * pulseFactor, 0.2);
+                    // Pulse the orb scale
+                    const targetScale = glowPulse.baseScale * pulse;
+                    glowOrb.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.2);
+                    glowSprite.scale.lerp(new THREE.Vector3(1.2 * pulse, 1.2 * pulse, 1), 0.2);
                     
-                    // Optional: subtle emissive pulse on glass card
-                    floatingPage.material.emissiveIntensity = THREE.MathUtils.lerp(
-                        floatingPage.material.emissiveIntensity || 0, 
-                        0.3 * (pulseFactor - 1), 
-                        0.1
-                    );
+                    // Pulse opacity
+                    const targetOpacity = glowPulse.baseOpacity * (0.7 + 0.3 * pulse);
+                    glowOrb.material.opacity = THREE.MathUtils.lerp(glowOrb.material.opacity, targetOpacity, 0.2);
+                    glowSprite.material.opacity = THREE.MathUtils.lerp(glowSprite.material.opacity, targetOpacity * 0.7, 0.2);
+                    
+                    // Also pulse the actual light for illumination
+                    centerLight.intensity = THREE.MathUtils.lerp(centerLight.intensity, 1 * pulse, 0.2);
+                    
                 } else {
-                    // Pulse complete - reset and schedule next random trigger
+                    // Reset after pulse
+                    glowOrb.scale.lerp(new THREE.Vector3(glowPulse.baseScale, glowPulse.baseScale, glowPulse.baseScale), 0.1);
+                    glowSprite.scale.lerp(new THREE.Vector3(1.2, 1.2, 1), 0.1);
+                    glowOrb.material.opacity = THREE.MathUtils.lerp(glowOrb.material.opacity, glowPulse.baseOpacity, 0.1);
+                    glowSprite.material.opacity = THREE.MathUtils.lerp(glowSprite.material.opacity, glowPulse.baseOpacity * 0.7, 0.1);
                     centerLight.intensity = THREE.MathUtils.lerp(centerLight.intensity, 1, 0.1);
-                    floatingPage.material.emissiveIntensity = THREE.MathUtils.lerp(
-                        floatingPage.material.emissiveIntensity || 0, 
-                        0, 
-                        0.1
-                    );
-                    glowState.isActive = false;
-                    glowState.nextTrigger = now + 2000 + Math.random() * 4000; // Next glow in 2-6 seconds
+                    
+                    glowPulse.active = false;
+                    glowPulse.nextTrigger = now + 2000 + Math.random() * 4000; // Next in 2-6s
                 }
             }
         }
@@ -210,27 +245,19 @@
         // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
-            const deltaTime = 16; // Approximate frame time in ms
 
-            // ✨ RANDOM GLOW EFFECT ✨
-            updateRandomGlow(deltaTime);
+            // ✨ Update visible glow pulse ✨
+            updateVisibleGlow();
 
             // GLASS LOGIC
             const distToC = camera.position.distanceTo(STATIONS[1].pos);
             
             if (distToC < 2.5) {
-                // AT STATION C: FROSTED GLASS WINDOW
                 floatingPage.lookAt(camera.position);
-                
-                // Opacity 0.4 means 60% transparent. You see the tree clearly.
                 floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.4, 0.1);
-                
             } else {
-                // AWAY: GHOSTLY / INVISIBLE (5% opacity as requested)
                 floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1);
-                
-                // Opacity 0.05 = 5% visible, 95% transparent
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.05, 0.1);
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.05, 0.1); // 5% opacity
             }
 
             if (isAnimating) {
