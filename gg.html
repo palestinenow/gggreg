@@ -210,7 +210,7 @@
             margin-top: 5px;
         }
 
-        /* HydroRippleButton Styles */
+        /* HydroRippleButton Styles - FIXED Z-INDEX */
         @keyframes ripple-bloom {
             0% { transform: scale(0.9); opacity: 0.8; border-width: 2px; }
             100% { transform: scale(1.4); opacity: 0; border-width: 0px; }
@@ -221,7 +221,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 150;
+            z-index: 300 !important;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.8s ease;
@@ -234,30 +234,34 @@
         
         .hydro-nav {
             display: flex;
-            gap: 40px;
+            gap: 60px;
             align-items: center;
             justify-content: center;
         }
         
         .hydro-btn {
             position: relative;
-            padding: 20px 50px;
+            padding: 24px 60px;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 20px;
             text-transform: uppercase;
-            letter-spacing: 0.3em;
+            letter-spacing: 0.4em;
             overflow: visible;
             border-radius: 60px;
-            border: 1.5px solid rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.15);
             transition: all 0.15s ease-out;
-            background: rgba(15, 25, 35, 0.3);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(20, 30, 40, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             color: white;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            filter: blur(8px);
+            opacity: 0.05;
+            transform: scale(0.98);
+            border-color: rgba(255,255,255,0.05);
         }
         
         .hydro-btn .ripple-container {
@@ -275,14 +279,14 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            border: 1.5px solid rgba(255,255,255,0.5);
+            border: 2px solid rgba(255,255,255,0.6);
             border-radius: 60px;
             animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
         }
         
         .hydro-btn .ripple-delayed {
             animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) 0.15s forwards;
-            border-color: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.3);
         }
         
         .hydro-btn .btn-content {
@@ -290,12 +294,12 @@
             z-index: 10;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
         
         .hydro-btn .arrow {
             transition: transform 0.3s ease;
-            font-size: 20px;
+            font-size: 24px;
         }
         
         .hydro-btn:hover .arrow-left {
@@ -307,14 +311,14 @@
         }
         
         .hydro-btn:hover {
-            border-color: rgba(255,255,255,0.3);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.4);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.25);
         }
         
         .hydro-btn .glass-highlight {
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
             border-radius: 60px;
             opacity: 0;
             transition: opacity 0.5s;
@@ -333,7 +337,7 @@
             left: -75%;
             width: 50%;
             height: 100%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 46%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 54%, transparent 60%);
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.08) 46%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.08) 54%, transparent 60%);
             transition: left 0.8s ease;
             pointer-events: none;
             border-radius: 60px;
@@ -599,10 +603,10 @@
                     const normalizedDist = Math.min(dist / maxDist, 1);
                     const proximity = 1 - normalizedDist;
                     
-                    const currentOpacity = 0.05 + (0.95 * proximity);
+                    const currentOpacity = 0.1 + (0.9 * proximity);
                     const currentBlur = 8 * (1 - proximity);
                     const currentScale = 0.98 + (0.02 * proximity);
-                    const currentBorder = 0.05 + (0.45 * proximity);
+                    const currentBorder = 0.1 + (0.4 * proximity);
                     
                     btn.style.filter = `blur(${currentBlur}px)`;
                     btn.style.opacity = currentOpacity;
