@@ -2,140 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Hydro Ripple Buttons</title>
+    <title>Cinematic Orbit - Ultimate Filter Lab</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400&display=swap');
         
-        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
-        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
-        #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
-        
-        /* Navigation Buttons - Hydro Ripple Effect */
-        #actions { 
-            position: fixed;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            box-sizing: border-box;
-            z-index: 100;
-            pointer-events: none;
-        }
-        
-        .hydro-btn {
-            position: relative;
-            padding: 18px 35px;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-            background: rgba(30, 41, 59, 0.2);
-            backdrop-filter: blur(8px);
-            color: white;
-            cursor: pointer;
-            overflow: visible;
-            transition: transform 0.1s ease-out;
-            pointer-events: auto;
-            
-            /* Hydro Ripple Base State */
-            --proximity: 0;
-            --opacity: calc(0.05 + (0.95 * var(--proximity)));
-            --blur: calc(8px * (1 - var(--proximity)));
-            --scale: calc(0.98 + (0.02 * var(--proximity)));
-            --border: calc(0.05 + (0.45 * var(--proximity)));
-            
-            opacity: var(--opacity);
-            filter: blur(var(--blur));
-            transform: scale(var(--scale));
-            border-color: rgba(255,255,255,var(--border));
-        }
-        
-        /* Ripple Bloom Animation */
-        .hydro-btn::before,
-        .hydro-btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.4);
-            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
-            pointer-events: none;
-            opacity: 0;
-        }
-        
-        .hydro-btn::after {
-            animation-delay: 0.1s;
-            border-color: rgba(255,255,255,0.2);
-        }
-        
-        .hydro-btn.bloom::before,
-        .hydro-btn.bloom::after {
-            opacity: 1;
-            animation-name: ripple-bloom;
-        }
-        
-        @keyframes ripple-bloom {
-            0% { 
-                transform: scale(0.9); 
-                opacity: 0.8; 
-                border-width: 2px; 
-            }
-            100% { 
-                transform: scale(1.4); 
-                opacity: 0; 
-                border-width: 0px; 
-            }
-        }
-        
-        /* Inner Glass Highlight */
-        .hydro-btn .highlight {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
-            border-radius: 20px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none;
-        }
-        
-        .hydro-btn:hover .highlight {
-            opacity: 1;
-        }
-        
-        /* Button Text & Icon */
-        .hydro-btn-content {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .hydro-btn svg {
-            width: 18px;
-            height: 18px;
-            transition: transform 0.3s ease;
-        }
-        
-        .hydro-btn:hover svg {
-            transform: translateX(4px);
-        }
-        
-        #status { 
-            position: fixed; 
-            bottom: 40px; 
-            left: 50%;
-            transform: translateX(-50%);
-            color: #333; 
-            font-size: 16px; 
-            z-index: 100; 
-            opacity: 0.7;
-            font-family: 'Inter', sans-serif;
-        }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Inter', sans-serif; }
+        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
+        #instructions { color: white; text-align: center; padding: 30px; border: 2px solid #fff; border-radius: 10px; background: #111; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { margin: 0 0 10px 0; color: #fff; } p { margin: 0; color: #ccc; }
+        #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; display: flex; gap: 15px; }
+        button.main-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        button.main-btn:hover { background: #333; transform: translateY(-2px); border-color: #fff; }
+        #status { position: absolute; bottom: 40px; left: 40px; color: #fff; font-size: 14px; z-index: 100; opacity: 0.7; }
         
         /* Vignette overlay */
         #vignette {
@@ -150,10 +28,119 @@
             transition: backdrop-filter 0.5s ease;
         }
         
+        /* Filter Lab Panel */
+        #filter-lab {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            font-family: 'Inter', sans-serif;
+            z-index: 300;
+            max-height: 85vh;
+            overflow-y: auto;
+            min-width: 280px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+        }
+        
+        #filter-lab h3 {
+            margin: 0 0 15px 0;
+            text-align: center;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        
+        .filter-category {
+            margin-bottom: 20px;
+        }
+        
+        .filter-category h4 {
+            margin: 10px 0;
+            color: #aaa;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .filter-btn {
+            background: rgba(255,255,255,0.05);
+            color: #ccc;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            border-radius: 20px;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .filter-btn:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+        
+        .filter-btn.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+        
+        .slider-container {
+            margin-top: 10px;
+        }
+        
+        .slider-container label {
+            display: block;
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .slider-container input {
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        #toggle-lab {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            border-radius: 30px;
+            z-index: 301;
+            backdrop-filter: blur(5px);
+        }
+        
+        #toggle-lab:hover {
+            background: #fff;
+            color: #000;
+        }
+        
         /* Glass Navigation Bar */
         .glass-nav {
             position: fixed;
-            top: 68%;
+            top: 58%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 92%;
@@ -168,332 +155,97 @@
             -webkit-backdrop-filter: blur(24px) saturate(1.2);
             border: 1px solid rgba(255,255,255,0.10);
             border-radius: 50px;
-            box-shadow: 
-                0 12px 40px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.15),
-                inset 0 -1px 0 rgba(255,255,255,0.04);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
             transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
             opacity: 0;
             pointer-events: none;
             z-index: 150;
         }
 
-        .glass-nav.visible {
-            opacity: 1;
-            pointer-events: auto;
-            animation: fadeEnter 1.2s 0.2s forwards;
-        }
-
-        @keyframes fadeEnter { 
-            to { opacity: 1; transform: translate(-50%, -50%); } 
-        }
-
-        .glass-nav.vanish {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.94) translateY(-20px);
-            filter: blur(12px);
-            pointer-events: none;
-        }
-
-        .dot { 
-            width: 4px; height: 4px; 
-            border-radius: 50%; 
-            background: rgba(255,255,255,0.25); 
-            flex-shrink: 0; 
-            transition: all 0.4s ease; 
-        }
-        .glass-nav:hover .dot { 
-            background: rgba(255,255,255,0.6); 
-            box-shadow: 0 0 8px rgba(255,255,255,0.4); 
-        }
-
-        .input-wrap { 
-            flex: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: opacity 0.3s ease;
-        }
-
+        .glass-nav.visible { opacity: 1; pointer-events: auto; animation: fadeEnter 1.2s 0.2s forwards; }
+        @keyframes fadeEnter { to { opacity: 1; transform: translate(-50%, -50%); } }
+        .glass-nav.vanish { opacity: 0; transform: translate(-50%, -50%) scale(0.94) translateY(-20px); filter: blur(12px); pointer-events: none; }
+        
+        .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); flex-shrink: 0; }
+        .input-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
         .glass-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: rgba(255,255,255,0.9);
-            font-family: 'Inter', sans-serif;
-            font-weight: 300;
-            font-size: 0.95rem;
-            letter-spacing: 0.3px;
-            padding: 6px 0;
-            text-align: center;
+            width: 100%; background: transparent; border: none; outline: none;
+            color: rgba(255,255,255,0.9); font-family: 'Inter', sans-serif;
+            font-weight: 300; font-size: 0.95rem; text-align: center;
         }
-
-        .glass-input::placeholder {
-            color: rgba(255,255,255,0.35);
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-        }
-
-        input[type="date"] { 
-            color-scheme: dark; 
-            cursor: pointer; 
-            text-transform: uppercase;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1) opacity(0.4);
-            cursor: pointer;
-            margin-right: -4px;
-        }
-
+        .glass-input::placeholder { color: rgba(255,255,255,0.35); font-family: 'Playfair Display', serif; font-style: italic; }
+        input[type="date"] { color-scheme: dark; cursor: pointer; text-transform: uppercase; }
+        
         .conf-msg {
-            font-family: 'Playfair Display', serif;
-            color: rgba(255,255,255,0.95);
-            font-size: 0.95rem;
-            text-align: center;
-            line-height: 1.4;
-            width: 100%;
-            opacity: 0;
-            transform: translateY(5px);
-            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            font-family: 'Playfair Display', serif; color: rgba(255,255,255,0.95);
+            font-size: 0.95rem; text-align: center; opacity: 0;
+            transform: translateY(5px); transition: all 0.6s;
         }
         .conf-msg.show { opacity: 1; transform: translateY(0); }
         .conf-msg em { font-style: normal; color: #a5b4fc; font-weight: 500; }
-
+        
         .send-btn {
-            width: 38px; height: 38px; 
-            border-radius: 50%; 
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.06); 
-            color: rgba(255,255,255,0.85);
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: all 0.3s ease; 
-            flex-shrink: 0;
+            width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease; flex-shrink: 0;
         }
-        .send-btn:hover { 
-            background: rgba(255,255,255,0.14); 
-            border-color: rgba(255,255,255,0.3); 
-            transform: scale(1.08); 
-            box-shadow: 0 4px 16px rgba(165, 180, 252, 0.15);
-        }
-        .send-btn:active { transform: scale(0.95); }
-        .send-btn svg { 
-            width: 16px; height: 16px; 
-            stroke: currentColor; 
-            fill: none; 
-            stroke-width: 2; 
-            stroke-linecap: round; 
-            stroke-linejoin: round; 
-        }
-
-        .glass-nav::before {
-            content: ''; 
-            position: absolute; 
-            top: 0; left: -75%; 
-            width: 50%; height: 100%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 46%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 54%, transparent 60%);
-            transition: left 0.8s ease; 
-            pointer-events: none;
-            border-radius: 50px;
-        }
-        .glass-nav:hover::before { left: 130%; }
-
-        @media (max-width: 500px) {
-            .glass-nav { height: 56px; padding: 0 18px; gap: 12px; }
-            .glass-input, .conf-msg { font-size: 0.85rem; }
-            .send-btn { width: 34px; height: 34px; }
-            .send-btn svg { width: 14px; height: 14px; }
-            #actions { padding: 0 20px; }
-            .hydro-btn { padding: 15px 25px; font-size: 14px; }
-        }
+        .send-btn:hover { background: rgba(255,255,255,0.14); transform: scale(1.08); }
+        .send-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
         
-        /* Control Panel */
-        #control-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #0f0;
-            padding: 20px;
-            border-radius: 10px;
-            font-family: monospace;
-            z-index: 200;
-            max-height: 90vh;
-            overflow-y: auto;
-            min-width: 300px;
-            border: 2px solid #0f0;
-            box-shadow: 0 0 20px rgba(0,255,0,0.3);
-            pointer-events: auto;
-        }
-        
-        #control-panel h3 {
-            margin: 0 0 15px 0;
-            text-align: center;
-            color: #0f0;
-            border-bottom: 1px solid #0f0;
-            padding-bottom: 10px;
-        }
-        
-        #control-panel h4 {
-            margin: 15px 0 10px 0;
-            color: #0f0;
-        }
-        
-        .control-group {
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(0, 255, 0, 0.1);
-            border-radius: 5px;
-        }
-        
-        .station-selector {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .station-btn {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 12px;
-            border-radius: 5px;
-            transition: all 0.2s;
-            flex: 1;
-        }
-        
-        .station-btn:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .station-btn.active {
-            background: #0f0;
-            color: black;
-            font-weight: bold;
-        }
-        
-        .pos-control {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .pos-control label {
-            width: 20px;
-            color: #0f0;
-            font-weight: bold;
-        }
-        
-        .pos-control input {
-            flex: 1;
-            margin: 0 10px;
-            background: #111;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        
-        .pos-control button {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: monospace;
-            border-radius: 3px;
-            margin-left: 5px;
-        }
-        
-        .pos-control button:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .slider-control {
-            margin-bottom: 15px;
-        }
-        
-        .slider-control label {
-            display: block;
-            margin-bottom: 5px;
-            color: #0f0;
-        }
-        
-        .slider-control input {
+        /* Snow canvas */
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            margin: 5px 0;
+            height: 100%;
+            pointer-events: none;
+            z-index: 60;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
         
-        .slider-control span {
-            color: #0f0;
-            float: right;
+        /* Film grain */
+        #grain-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 55;
+            opacity: 0;
+            transition: opacity 0.5s;
+            mix-blend-mode: overlay;
         }
         
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
+        /* Letterbox bars */
+        .letterbox {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: #000;
+            z-index: 70;
+            pointer-events: none;
+            transition: height 0.5s;
         }
+        .letterbox-top { top: 0; }
+        .letterbox-bottom { bottom: 0; }
         
-        .action-btn {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 10px;
-            cursor: pointer;
-            font-family: monospace;
-            border-radius: 5px;
-            flex: 1;
-            font-weight: bold;
-        }
-        
-        .action-btn:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        #toggle-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #003300;
-            color: #0f0;
-            border: 2px solid #0f0;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-family: monospace;
-            font-weight: bold;
-            border-radius: 5px;
-            z-index: 201;
-        }
-        
-        #toggle-panel:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .coord-display {
-            color: #0f0;
-            font-size: 11px;
-            margin-top: 5px;
-            text-align: center;
-        }
-        
-        #blur-status {
-            color: #0f0;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 5px;
+        /* Chromatic aberration overlay */
+        #chroma-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 65;
+            opacity: 0;
+            transition: opacity 0.5s;
+            mix-blend-mode: screen;
         }
     </style>
 </head>
@@ -501,42 +253,30 @@
 
     <div id="blocker">
         <div id="instructions">
-            <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>Hydro Ripple Buttons activated.</p>
+            <h1>🎬 CINEMATIC FILTER LAB</h1>
+            <p>Click to start. Toggle filters to create your perfect look.</p>
         </div>
     </div>
 
-    <!-- Navigation Buttons with Hydro Ripple Effect -->
     <div id="actions">
-        <button class="hydro-btn" id="prevBtn" onclick="prevStation()">
-            <span class="hydro-btn-content">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span>Previous</span>
-            </span>
-            <span class="highlight"></span>
-        </button>
-        <button class="hydro-btn" id="nextBtn" onclick="nextStation()">
-            <span class="hydro-btn-content">
-                <span>Next</span>
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-            </span>
-            <span class="highlight"></span>
-        </button>
+        <button class="main-btn" onclick="prevStation()">⬅️ PREVIOUS</button>
+        <button class="main-btn" onclick="nextStation()">NEXT ➡️</button>
     </div>
 
     <div id="status">Ready...</div>
     
     <div id="vignette"></div>
+    <canvas id="snow-canvas"></canvas>
+    <canvas id="grain-canvas"></canvas>
+    <div id="chroma-overlay"></div>
+    <div class="letterbox letterbox-top"></div>
+    <div class="letterbox letterbox-bottom"></div>
     
     <!-- Glass Navigation Bar -->
     <nav class="glass-nav" id="glassNav">
         <div class="dot"></div>
         <div class="input-wrap" id="inputWrap"></div>
-        <button class="send-btn" id="sendBtn" aria-label="Submit">
+        <button class="send-btn" id="sendBtn">
             <svg viewBox="0 0 24 24">
                 <line x1="22" y1="2" x2="11" y2="13"/>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -545,84 +285,82 @@
         <div class="dot"></div>
     </nav>
     
-    <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
+    <button id="toggle-lab" onclick="toggleFilterLab()">🎨 FILTER LAB</button>
     
-    <div id="control-panel" style="display: none;">
-        <h3>🎛️ DEBUG CONTROLS</h3>
+    <div id="filter-lab" style="display: none;">
+        <h3>🎬 CINEMATIC FILTERS</h3>
         
-        <div class="control-group">
-            <h4>📍 SELECT STATION CARD</h4>
-            <div class="station-selector">
-                <button class="station-btn" onclick="selectStation(2)">D: 2</button>
-                <button class="station-btn" onclick="selectStation(3)">E: 3</button>
-                <button class="station-btn" onclick="selectStation(4)">F: 4</button>
-                <button class="station-btn" onclick="selectStation(5)">G: 5</button>
-            </div>
-            <div id="selected-station" class="coord-display">Selected: Station D</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎯 CARD POSITION</h4>
-            <div class="pos-control">
-                <label>X:</label>
-                <input type="number" id="pos-x" step="0.01" value="0.10">
-                <button onclick="moveCard('x', -0.1)">-</button>
-                <button onclick="moveCard('x', 0.1)">+</button>
-            </div>
-            <div class="pos-control">
-                <label>Y:</label>
-                <input type="number" id="pos-y" step="0.01" value="1.20">
-                <button onclick="moveCard('y', -0.1)">-</button>
-                <button onclick="moveCard('y', 0.1)">+</button>
-            </div>
-            <div class="pos-control">
-                <label>Z:</label>
-                <input type="number" id="pos-z" step="0.01" value="4.00">
-                <button onclick="moveCard('z', -0.1)">-</button>
-                <button onclick="moveCard('z', 0.1)">+</button>
-            </div>
-            <div style="margin-top: 10px;">
-                <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
-                <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
+        <div class="filter-category">
+            <h4>🌈 COLOR GRADING</h4>
+            <div class="filter-grid">
+                <button class="filter-btn" data-filter="tealOrange">🎬 Teal & Orange</button>
+                <button class="filter-btn" data-filter="bw">⚫ Black & White</button>
+                <button class="filter-btn" data-filter="sepia">📜 Sepia</button>
+                <button class="filter-btn" data-filter="cyberpunk">🌆 Cyberpunk</button>
+                <button class="filter-btn" data-filter="noir">🕵️ Noir</button>
+                <button class="filter-btn" data-filter="vintage">📷 Vintage</button>
+                <button class="filter-btn" data-filter="cool">❄️ Cool Blue</button>
+                <button class="filter-btn" data-filter="warm">☀️ Warm Glow</button>
+                <button class="filter-btn" data-filter="matrix">💚 Matrix</button>
+                <button class="filter-btn" data-filter="sunset">🌅 Sunset</button>
             </div>
         </div>
         
-        <div class="control-group">
-            <h4>🎨 VIGNETTE EFFECT</h4>
-            <div class="slider-control">
-                <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
-                <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
-                <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
-                <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
-                <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
-            </div>
-            <div id="blur-status">Blur: INACTIVE</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>✨ GLOW EFFECT</h4>
-            <div class="slider-control">
-                <label>Min Strength: <span id="glow-min-val">23%</span></label>
-                <input type="range" id="glow-min" min="0" max="30" value="23" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Max Strength: <span id="glow-max-val">39%</span></label>
-                <input type="range" id="glow-max" min="20" max="80" value="39" step="1">
+        <div class="filter-category">
+            <h4>✨ LIGHT EFFECTS</h4>
+            <div class="filter-grid">
+                <button class="filter-btn" data-filter="bloom">✨ Bloom</button>
+                <button class="filter-btn" data-filter="lensflare">💫 Lens Flare</button>
+                <button class="filter-btn" data-filter="godrays">☀️ God Rays</button>
+                <button class="filter-btn" data-filter="sparkles">⭐ Sparkles</button>
+                <button class="filter-btn" data-filter="glow">🔮 Glow Pulse</button>
+                <button class="filter-btn" data-filter="neon">💜 Neon Leak</button>
             </div>
         </div>
         
-        <div class="action-buttons">
-            <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
-            <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
+        <div class="filter-category">
+            <h4>📽️ FILM EFFECTS</h4>
+            <div class="filter-grid">
+                <button class="filter-btn" data-filter="grain">🎞️ Film Grain</button>
+                <button class="filter-btn" data-filter="vignette">🔲 Vignette</button>
+                <button class="filter-btn" data-filter="letterbox">🎬 Letterbox</button>
+                <button class="filter-btn" data-filter="chromatic">🌈 Chromatic Aberration</button>
+                <button class="filter-btn" data-filter="scanlines">📺 Scanlines</button>
+                <button class="filter-btn" data-filter="vhs">📼 VHS Glitch</button>
+            </div>
+        </div>
+        
+        <div class="filter-category">
+            <h4>❄️ ATMOSPHERE</h4>
+            <div class="filter-grid">
+                <button class="filter-btn" data-filter="snow">❄️ Snow</button>
+                <button class="filter-btn" data-filter="fog">🌫️ Fog</button>
+                <button class="filter-btn" data-filter="rain">🌧️ Rain</button>
+                <button class="filter-btn" data-filter="dust">✨ Dust Particles</button>
+                <button class="filter-btn" data-filter="stars">⭐ Stars</button>
+                <button class="filter-btn" data-filter="aurora">🌌 Aurora</button>
+            </div>
+        </div>
+        
+        <div class="filter-category">
+            <h4>🎨 ARTISTIC</h4>
+            <div class="filter-grid">
+                <button class="filter-btn" data-filter="posterize">🖼️ Posterize</button>
+                <button class="filter-btn" data-filter="edgeglow">💡 Edge Glow</button>
+                <button class="filter-btn" data-filter="dream">💭 Dream Blur</button>
+                <button class="filter-btn" data-filter="invert">🔲 Invert</button>
+                <button class="filter-btn" data-filter="thermal">🌡️ Thermal</button>
+                <button class="filter-btn" data-filter="hologram">📡 Hologram</button>
+            </div>
+        </div>
+        
+        <div class="slider-container">
+            <label>🎚️ Intensity: <span id="intensity-val">100%</span></label>
+            <input type="range" id="intensity" min="0" max="100" value="100">
+        </div>
+        
+        <div style="margin-top: 15px; text-align: center;">
+            <button onclick="resetAllFilters()" style="background: #fff; color: #000; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: bold;">🔄 RESET ALL</button>
         </div>
     </div>
 
@@ -636,61 +374,73 @@
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
+        import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+        import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';
+        import { DotScreenPass } from 'three/addons/postprocessing/DotScreenPass.js';
+        import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
+        import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
+        import { SAOPass } from 'three/addons/postprocessing/SAOPass.js';
+        import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 
-        // === HYDRO RIPPLE BUTTON LOGIC ===
-        const hydroButtons = document.querySelectorAll('.hydro-btn');
-        const MAX_DISTANCE = 600; // Proximity range in pixels
+        // Filter state management
+        const activeFilters = new Set();
+        let filterIntensity = 1.0;
         
-        function updateButtonProximity(button, mouseX, mouseY) {
-            const rect = button.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const distance = Math.sqrt(
-                Math.pow(mouseX - centerX, 2) + 
-                Math.pow(mouseY - centerY, 2)
-            );
-            
-            // Calculate proximity (1 = close, 0 = far)
-            const normalizedDistance = Math.min(distance / MAX_DISTANCE, 1);
-            const proximity = 1 - normalizedDistance;
-            
-            // Apply CSS variables for smooth interpolation
-            button.style.setProperty('--proximity', proximity);
-        }
+        // Toggle filter lab
+        window.toggleFilterLab = function() {
+            const lab = document.getElementById('filter-lab');
+            lab.style.display = lab.style.display === 'none' ? 'block' : 'none';
+        };
         
-        // Global mousemove listener for proximity effects
-        document.addEventListener('mousemove', (e) => {
-            hydroButtons.forEach(btn => {
-                updateButtonProximity(btn, e.clientX, e.clientY);
+        // Reset all filters
+        window.resetAllFilters = function() {
+            activeFilters.clear();
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            updateFilterDisplay();
+        };
+        
+        // Filter button handlers
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
+                if (activeFilters.has(filter)) {
+                    activeFilters.delete(filter);
+                    btn.classList.remove('active');
+                } else {
+                    activeFilters.add(filter);
+                    btn.classList.add('active');
+                }
+                updateFilterDisplay();
             });
         });
         
-        // Auto-bloom every 2 seconds
-        function triggerAutoBloom() {
-            hydroButtons.forEach(btn => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
-        }
-        setInterval(triggerAutoBloom, 2000);
-        
-        // Hover bloom
-        hydroButtons.forEach(btn => {
-            btn.addEventListener('mouseenter', () => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
+        // Intensity slider
+        document.getElementById('intensity').addEventListener('input', (e) => {
+            filterIntensity = e.target.value / 100;
+            document.getElementById('intensity-val').textContent = e.target.value + '%';
+            updateFilterDisplay();
         });
+        
+        function updateFilterDisplay() {
+            // Update body classes for CSS filters
+            document.body.className = '';
+            activeFilters.forEach(filter => {
+                document.body.classList.add('filter-' + filter);
+            });
+            
+            // Apply intensity
+            document.body.style.setProperty('--filter-intensity', filterIntensity);
+        }
 
-        // === GLASS NAV FUNCTIONALITY ===
+        // Glass Nav functionality
         const nav = document.getElementById('glassNav');
         const inputWrap = document.getElementById('inputWrap');
         const btn = document.getElementById('sendBtn');
         
         let step = 1;
-        let wishText = '';
         let navShown = false;
-        let navVisible = false;
 
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -712,9 +462,7 @@
             
             if (step === 1) {
                 if (!val) return;
-                wishText = val;
                 step = 2;
-                
                 inputWrap.style.opacity = '0';
                 setTimeout(() => {
                     inputWrap.innerHTML = `<input type="date" class="glass-input" id="dateInput" required>`;
@@ -725,36 +473,24 @@
                         dateInp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
                     }
                 }, 250);
-
             } else if (step === 2) {
                 if (!val) return;
                 step = 3;
-                
                 const displayDate = formatDate(val);
-                
                 btn.style.opacity = '0';
                 btn.style.pointerEvents = 'none';
                 inputWrap.style.opacity = '0';
-                
                 setTimeout(() => {
-                    inputWrap.innerHTML = `
-                        <p class="conf-msg" id="confMsg">
-                            Come back on <em>${displayDate}</em>.<br>
-                            Your wish will become true.
-                        </p>
-                    `;
+                    inputWrap.innerHTML = `<p class="conf-msg" id="confMsg">Come back on <em>${displayDate}</em>.<br>Your wish will become true.</p>`;
                     inputWrap.style.opacity = '1';
                     requestAnimationFrame(() => document.getElementById('confMsg')?.classList.add('show'));
-                    
                     setTimeout(() => {
                         nav.classList.add('vanish');
                         nav.classList.remove('visible');
-                        navVisible = false;
                         step = 1;
                         btn.style.opacity = '1';
                         btn.style.pointerEvents = 'auto';
                     }, 3500);
-                    
                 }, 300);
             }
         }
@@ -763,10 +499,9 @@
         initNav();
 
         function showNavBar() {
-            if (!navVisible) {
+            if (!navShown) {
                 nav.classList.remove('vanish');
                 nav.classList.add('visible');
-                navVisible = true;
                 navShown = true;
                 step = 1;
                 btn.style.opacity = '1';
@@ -776,84 +511,109 @@
         }
 
         function hideNavBar() {
-            if (navVisible) {
-                nav.classList.remove('visible');
-                nav.classList.add('vanish');
-                navVisible = false;
+            nav.classList.remove('visible');
+            nav.classList.add('vanish');
+        }
+
+        // Snow effect
+        const snowCanvas = document.getElementById('snow-canvas');
+        const snowCtx = snowCanvas.getContext('2d');
+        let snowflakes = [];
+        
+        function initSnow() {
+            snowCanvas.width = window.innerWidth;
+            snowCanvas.height = window.innerHeight;
+            snowflakes = [];
+            for (let i = 0; i < 100; i++) {
+                snowflakes.push({
+                    x: Math.random() * snowCanvas.width,
+                    y: Math.random() * snowCanvas.height,
+                    radius: Math.random() * 3 + 1,
+                    speed: Math.random() * 2 + 1,
+                    opacity: Math.random() * 0.5 + 0.3
+                });
+            }
+        }
+        
+        function animateSnow() {
+            if (!activeFilters.has('snow')) {
+                snowCanvas.style.opacity = '0';
+                return;
+            }
+            snowCanvas.style.opacity = filterIntensity.toString();
+            snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
+            snowCtx.fillStyle = 'white';
+            snowflakes.forEach(flake => {
+                snowCtx.beginPath();
+                snowCtx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+                snowCtx.fillStyle = `rgba(255, 255, 255, ${flake.opacity * filterIntensity})`;
+                snowCtx.fill();
+                flake.y += flake.speed;
+                if (flake.y > snowCanvas.height) {
+                    flake.y = 0;
+                    flake.x = Math.random() * snowCanvas.width;
+                }
+            });
+            requestAnimationFrame(animateSnow);
+        }
+        
+        // Film grain
+        const grainCanvas = document.getElementById('grain-canvas');
+        const grainCtx = grainCanvas.getContext('2d');
+        
+        function initGrain() {
+            grainCanvas.width = window.innerWidth;
+            grainCanvas.height = window.innerHeight;
+        }
+        
+        function animateGrain() {
+            if (!activeFilters.has('grain')) {
+                grainCanvas.style.opacity = '0';
+                return;
+            }
+            grainCanvas.style.opacity = (0.15 * filterIntensity).toString();
+            const imageData = grainCtx.createImageData(grainCanvas.width, grainCanvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const noise = Math.random() * 255;
+                data[i] = noise;
+                data[i+1] = noise;
+                data[i+2] = noise;
+                data[i+3] = 255;
+            }
+            grainCtx.putImageData(imageData, 0, 0);
+            requestAnimationFrame(animateGrain);
+        }
+        
+        // Letterbox
+        function updateLetterbox() {
+            const bars = document.querySelectorAll('.letterbox');
+            if (activeFilters.has('letterbox')) {
+                const height = (window.innerHeight * 0.1 * filterIntensity) + 'px';
+                bars[0].style.height = height;
+                bars[1].style.height = height;
+            } else {
+                bars[0].style.height = '0';
+                bars[1].style.height = '0';
+            }
+        }
+        
+        // Chromatic aberration
+        function updateChromatic() {
+            const overlay = document.getElementById('chroma-overlay');
+            if (activeFilters.has('chromatic')) {
+                overlay.style.opacity = (0.3 * filterIntensity).toString();
+                overlay.style.background = 'transparent';
+                overlay.style.boxShadow = `
+                    ${1 * filterIntensity}px 0 0 rgba(255,0,0,0.2),
+                    ${-1 * filterIntensity}px 0 0 rgba(0,255,255,0.2)
+                `;
+            } else {
+                overlay.style.opacity = '0';
             }
         }
 
-        // === GLOBAL FUNCTIONS ===
-        window.toggleControlPanel = function() {
-            const panel = document.getElementById('control-panel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        };
-        
-        let selectedStation = 2;
-        window.selectStation = function(index) {
-            selectedStation = index;
-            const stationNames = ['', 'C: First', 'D: 2', 'E: 3', 'F: 4', 'G: 5'];
-            document.getElementById('selected-station').textContent = `Selected: Station ${stationNames[index]}`;
-            
-            if (cards[index]) {
-                document.getElementById('pos-x').value = cards[index].position.x.toFixed(2);
-                document.getElementById('pos-y').value = cards[index].position.y.toFixed(2);
-                document.getElementById('pos-z').value = cards[index].position.z.toFixed(2);
-            }
-            
-            document.querySelectorAll('.station-btn').forEach((btn, i) => {
-                if (i === index - 2) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-        };
-        
-        window.moveCard = function(axis, delta) {
-            const input = document.getElementById(`pos-${axis}`);
-            input.value = (parseFloat(input.value) + delta).toFixed(2);
-            applyPosition();
-        };
-        
-        window.applyPosition = function() {
-            if (cards[selectedStation]) {
-                const x = parseFloat(document.getElementById('pos-x').value);
-                const y = parseFloat(document.getElementById('pos-y').value);
-                const z = parseFloat(document.getElementById('pos-z').value);
-                cards[selectedStation].position.set(x, y, z);
-                cardPositions[selectedStation] = { x, y, z };
-            }
-        };
-        
-        window.copyPosition = function() {
-            if (cards[selectedStation]) {
-                const pos = cards[selectedStation].position;
-                const text = `Station ${selectedStation}: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`;
-                navigator.clipboard?.writeText(text);
-                alert('Position copied: ' + text);
-            }
-        };
-        
-        window.saveSettings = function() {
-            alert('Settings saved!');
-        };
-        
-        window.exportConfig = function() {
-            const config = {
-                cards: cardPositions,
-                vignette: {
-                    center: document.getElementById('vignette-center').value,
-                    darkness: document.getElementById('vignette-darkness').value,
-                    mid: document.getElementById('vignette-mid').value
-                },
-                glow: {
-                    min: MIN_STRENGTH,
-                    max: MAX_STRENGTH
-                }
-            };
-            console.log('CONFIG:', JSON.stringify(config, null, 2));
-            alert('Config exported to console!');
-        };
-
-        // === THREE.JS SCENE SETUP ===
+        // --- THREE.JS SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff); 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -863,18 +623,38 @@
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // === BLOOM EFFECT ===
-        const renderScene = new RenderPass(scene, camera);
+        // Composer with multiple passes
+        const composer = new EffectComposer(renderer);
+        const renderPass = new RenderPass(scene, camera);
+        composer.addPass(renderPass);
+        
+        // Bloom pass
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
         bloomPass.strength = 0.23;
         bloomPass.radius = 0.8;
-        
-        const composer = new EffectComposer(renderer);
-        composer.addPass(renderScene);
         composer.addPass(bloomPass);
+        
+        // Film pass
+        const filmPass = new FilmPass(0.35, 0.5, 2048, false);
+        filmPass.renderToScreen = false;
+        composer.addPass(filmPass);
+        
+        // RGB Shift pass
+        const rgbShiftPass = new ShaderPass(RGBShiftShader);
+        rgbShiftPass.uniforms['amount'].value = 0.0025;
+        composer.addPass(rgbShiftPass);
+        
+        // Glitch pass
+        const glitchPass = new GlitchPass();
+        glitchPass.goWild = false;
+        composer.addPass(glitchPass);
+        
+        // Afterimage pass for trails
+        const afterimagePass = new AfterimagePass(0.9);
+        composer.addPass(afterimagePass);
 
-        // === LIGHTS ===
+        // Lights
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
         scene.add(ambientLight);
         
@@ -893,120 +673,47 @@
         centerLight.position.set(-0.006, 1.041, -0.008); 
         scene.add(centerLight);
 
-        // === GLOW PULSE SYSTEM ===
+        // Glow pulse
         let glowStartTime = Date.now();
         let glowDurationUp = 10000 + Math.random() * 20000;
         let glowDurationDown = 10000 + Math.random() * 20000;
         let isGlowingUp = true;
-        
         let MIN_STRENGTH = 0.10;
         let MAX_STRENGTH = 0.40;
-        
-        document.getElementById('glow-min').addEventListener('input', (e) => {
-            MIN_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-min-val').textContent = e.target.value + '%';
-        });
-        
-        document.getElementById('glow-max').addEventListener('input', (e) => {
-            MAX_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-max-val').textContent = e.target.value + '%';
-        });
-        
-        function getRandomDuration() {
-            return 10000 + Math.random() * 20000;
-        }
         
         function updateGlow() {
             const now = Date.now();
             const elapsed = now - glowStartTime;
             
-            if (isGlowingUp) {
-                const progress = Math.min(elapsed / glowDurationUp, 1);
-                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength;
-                centerLight.intensity = strength * 2.0;
-                
-                if (progress >= 1) {
-                    isGlowingUp = false;
-                    glowStartTime = now;
-                    glowDurationDown = getRandomDuration();
+            if (activeFilters.has('glow') || activeFilters.has('bloom')) {
+                if (isGlowingUp) {
+                    const progress = Math.min(elapsed / glowDurationUp, 1);
+                    const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
+                    bloomPass.strength = strength * filterIntensity;
+                    centerLight.intensity = strength * 2.0 * filterIntensity;
+                    if (progress >= 1) {
+                        isGlowingUp = false;
+                        glowStartTime = now;
+                        glowDurationDown = 10000 + Math.random() * 20000;
+                    }
+                } else {
+                    const progress = Math.min(elapsed / glowDurationDown, 1);
+                    const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
+                    bloomPass.strength = strength * filterIntensity;
+                    centerLight.intensity = strength * 2.0 * filterIntensity;
+                    if (progress >= 1) {
+                        isGlowingUp = true;
+                        glowStartTime = now;
+                        glowDurationUp = 10000 + Math.random() * 20000;
+                    }
                 }
             } else {
-                const progress = Math.min(elapsed / glowDurationDown, 1);
-                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength;
-                centerLight.intensity = strength * 2.0;
-                
-                if (progress >= 1) {
-                    isGlowingUp = true;
-                    glowStartTime = now;
-                    glowDurationUp = getRandomDuration();
-                }
+                bloomPass.strength = 0;
+                centerLight.intensity = 0;
             }
         }
 
-        // === DYNAMIC BLUR SYSTEM ===
-        let blurState = 'waiting';
-        let blurStartTime = Date.now();
-        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
-        
-        function updateBlur() {
-            const now = Date.now();
-            const vignette = document.getElementById('vignette');
-            const blurStatus = document.getElementById('blur-status');
-            
-            if (blurState === 'waiting' && now >= nextBlurTime) {
-                blurState = 'active';
-                blurStartTime = now;
-                blurStatus.textContent = 'Blur: ACTIVE';
-            }
-            
-            if (blurState === 'active') {
-                const elapsed = (now - blurStartTime) / 1000;
-                if (elapsed >= 1.0) {
-                    blurState = 'waiting';
-                    nextBlurTime = now + 4000 + Math.random() * 14000;
-                    vignette.style.backdropFilter = 'blur(0px)';
-                    blurStatus.textContent = 'Blur: INACTIVE';
-                } else {
-                    vignette.style.backdropFilter = `blur(1px)`;
-                }
-            }
-            
-            document.getElementById('vignette-blur-val').textContent = 
-                vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
-        }
-
-        // === VIGNETTE CONTROLS ===
-        const vignette = document.getElementById('vignette');
-        
-        document.getElementById('vignette-center').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-center-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        document.getElementById('vignette-darkness').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-darkness-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        document.getElementById('vignette-mid').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-mid-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        function updateVignette() {
-            const center = document.getElementById('vignette-center').value;
-            const darkness = document.getElementById('vignette-darkness').value / 100;
-            const mid = document.getElementById('vignette-mid').value / 100;
-            
-            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
-        }
-
-        // === STATIONS ===
+        // Stations
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
@@ -1024,7 +731,6 @@
             5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
-        // === CREATE CARDS ===
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -1032,55 +738,32 @@
             canvas.width = 512; 
             canvas.height = 512;
             const context = canvas.getContext('2d');
-            
             context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
             context.fillRect(0, 0, 512, 512);
-            
             context.shadowColor = 'rgba(0, 0, 0, 1.0)';
             context.shadowBlur = 20;
             context.shadowOffsetX = 4;
             context.shadowOffsetY = 4;
-            
             context.font = 'bold 70px Arial'; 
             context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
             context.fillText(stationName, 256, 200);
-            context.fillText(stationName, 256, 200);
-            
             context.font = 'bold 45px Arial'; 
             context.fillStyle = '#ffffff';
             context.fillText(`Station ${stationIndex}`, 256, 300);
-            context.fillText(`Station ${stationIndex}`, 256, 300);
-            
             context.font = 'bold 32px Arial';
             context.fillStyle = '#ffffff';
             context.fillText('Viewpoint', 256, 370);
-            context.fillText('Viewpoint', 256, 370);
-            
             context.shadowColor = 'transparent';
-            context.shadowBlur = 0;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
             
             const pageTexture = new THREE.CanvasTexture(canvas);
-            
             const pageMaterial = new THREE.MeshStandardMaterial({ 
-                map: pageTexture,
-                transparent: true,
-                opacity: 0.0,
-                roughness: 0.05,
-                metalness: 0.0,
-                side: THREE.DoubleSide,
-                depthWrite: false,
-                blending: THREE.NormalBlending,
-                emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 0.5
+                map: pageTexture, transparent: true, opacity: 0.0, roughness: 0.05, metalness: 0.0,
+                side: THREE.DoubleSide, depthWrite: false, blending: THREE.NormalBlending,
+                emissive: new THREE.Color(0xffffff), emissiveIntensity: 0.5
             });
-            
             const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
-            const card = new THREE.Mesh(pageGeometry, pageMaterial);
-            
-            return card;
+            return new THREE.Mesh(pageGeometry, pageMaterial);
         }
 
         function positionCards() {
@@ -1105,7 +788,7 @@
         let endPos = new THREE.Vector3();
         const ANIMATION_DURATION = 2.5;
 
-        // === LOAD MODEL ===
+        // Load model
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
@@ -1125,7 +808,6 @@
             positionCards();
         }, undefined, function (error) { console.error(error); });
 
-        // === UI LOGIC ===
         document.getElementById('blocker').addEventListener('click', function() { 
             this.style.display = 'none'; 
             document.getElementById('status').innerText = "Tour Started"; 
@@ -1133,44 +815,24 @@
 
         window.nextStation = function() {
             if (isAnimating) return;
-            if (currentStationIndex === 0) {
-                currentStationIndex = 1;
-            } else if (currentStationIndex < STATIONS.length - 1) {
-                currentStationIndex++;
-            } else {
-                currentStationIndex = 1;
-            }
+            if (currentStationIndex === 0) currentStationIndex = 1;
+            else if (currentStationIndex < STATIONS.length - 1) currentStationIndex++;
+            else currentStationIndex = 1;
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            
-            if (currentStationIndex !== 1) {
-                hideNavBar();
-            }
-            
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
+            if (currentStationIndex === 1) showNavBar();
+            else hideNavBar();
         };
 
         window.prevStation = function() {
             if (isAnimating) return;
-            if (currentStationIndex === 0) {
-                currentStationIndex = STATIONS.length - 1;
-            } else if (currentStationIndex > 1) {
-                currentStationIndex--;
-            } else {
-                currentStationIndex = STATIONS.length - 1;
-            }
+            if (currentStationIndex === 0) currentStationIndex = STATIONS.length - 1;
+            else if (currentStationIndex > 1) currentStationIndex--;
+            else currentStationIndex = STATIONS.length - 1;
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            
-            if (currentStationIndex !== 1) {
-                hideNavBar();
-            }
-            
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
+            if (currentStationIndex === 1) showNavBar();
+            else hideNavBar();
         };
 
         function startAnimation(targetPos) {
@@ -1178,26 +840,25 @@
             animationProgress = 0; 
             startPos.copy(camera.position); 
             endPos.copy(targetPos);
-            const center = POINT_CENTER.clone();
-            const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
-            const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-            midPoint.add(direction.multiplyScalar(2)); 
-            window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
         }
 
-        function easeInOutCubic(t) { 
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
-        }
-
-        // === ANIMATION LOOP ===
+        // Animation loop
         function animate() {
             requestAnimationFrame(animate);
             
             updateGlow();
-            updateBlur();
-
-            if (currentStationIndex === 1 && !isAnimating && animationProgress >= 1) {
-                showNavBar();
+            updateLetterbox();
+            updateChromatic();
+            
+            // Update passes based on active filters
+            filmPass.enabled = activeFilters.has('grain') || activeFilters.has('vintage');
+            rgbShiftPass.enabled = activeFilters.has('chromatic');
+            glitchPass.enabled = activeFilters.has('vhs');
+            afterimagePass.enabled = activeFilters.has('dream');
+            
+            if (activeFilters.has('vhs') && Math.random() < 0.01) {
+                glitchPass.goWild = true;
+                setTimeout(() => glitchPass.goWild = false, 200);
             }
 
             for (let i = 2; i < cards.length; i++) {
@@ -1216,40 +877,29 @@
                 if (animationProgress >= 1) { 
                     animationProgress = 1; 
                     isAnimating = false; 
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
-                    
-                    if (currentStationIndex === 1) {
-                        showNavBar();
-                    }
                 }
-                const t = easeInOutCubic(animationProgress);
-                const p0 = window.animControlPoints.start; 
-                const p1 = window.animControlPoints.mid; 
-                const p2 = window.animControlPoints.end;
-                const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
-                const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
-                const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
-                camera.position.set(x, y, z);
+                const t = animationProgress < 0.5 ? 4 * animationProgress * animationProgress * animationProgress : 1 - Math.pow(-2 * animationProgress + 2, 3) / 2;
+                camera.position.lerpVectors(startPos, endPos, t);
                 camera.lookAt(POINT_CENTER);
             }
 
             composer.render();
         }
+        
+        initSnow();
+        initGrain();
+        animateSnow();
+        animateGrain();
         animate();
-        
-        setTimeout(() => selectStation(2), 100);
-        
-        document.getElementById('glow-min').value = 23;
-        document.getElementById('glow-max').value = 39;
-        MIN_STRENGTH = 0.23;
-        MAX_STRENGTH = 0.39;
-        updateVignette();
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             composer.setSize(window.innerWidth, window.innerHeight);
+            initSnow();
+            initGrain();
+            updateLetterbox();
         });
     </script>
 </body>
