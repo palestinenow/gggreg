@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - My Soul Font</title>
+    <title>Cinematic Orbit - Pinyon Script & Controls</title>
     
-    <!-- IMPORT MY SOUL FONT -->
+    <!-- IMPORT PINYON SCRIPT FONT -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=My+Soul:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap" rel="stylesheet">
 
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: 'My Soul', cursive; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Pinyon Script', cursive; }
         
         /* START SCREEN */
         #blocker {
@@ -18,26 +18,56 @@
             display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer;
         }
         #instructions {
-            color: black; text-align: center; padding: 30px; border: 2px solid #333;
-            border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            color: black; text-align: center; padding: 30px; border: 1px solid #ddd;
+            border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        h1 { margin: 0 0 10px 0; color: #333; font-size: 56px; font-weight: 700; }
-        p { margin: 0; color: #666; font-size: 28px; font-weight: 500; }
+        h1 { margin: 0 0 10px 0; color: #333; font-size: 64px; font-weight: 400; }
+        p { margin: 0; color: #666; font-size: 32px; }
 
         /* MAIN BUTTON */
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
         button.main-btn {
             background: #000; color: #fff; border: none; padding: 15px 40px;
-            font-family: 'My Soul', cursive; font-size: 32px; font-weight: 600; cursor: pointer;
+            font-family: 'Pinyon Script', cursive; font-size: 36px; cursor: pointer;
             border-radius: 50px; transition: all 0.3s ease; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        button.main-btn:hover { background: #333; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        button.main-btn:hover { background: #333; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
 
         #status { 
             position: absolute; bottom: 40px; left: 40px; 
-            color: #333; font-size: 28px; font-weight: 500; z-index: 100; opacity: 0.7; 
+            color: #333; font-size: 32px; z-index: 100; opacity: 0.6; 
         }
+
+        /* CONTROL PANEL STYLES */
+        #control-panel {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255, 255, 255, 0.95); padding: 20px;
+            border: 1px solid #ddd; border-radius: 10px; z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 220px;
+            font-family: sans-serif; /* Keep controls readable */
+        }
+        #control-panel h3 { margin: 0 0 15px 0; font-size: 14px; color: #333; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .selector { width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        
+        .coord-box {
+            background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 15px;
+            font-size: 12px; color: #555; line-height: 1.5;
+        }
+        
+        .control-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .control-label { font-size: 12px; color: #666; font-weight: bold; }
+        
+        .btn-group { display: flex; gap: 5px; }
+        .ctrl-btn {
+            width: 30px; height: 30px; border: 1px solid #ccc; background: #eee;
+            border-radius: 4px; cursor: pointer; font-weight: bold; color: #333;
+        }
+        .ctrl-btn:hover { background: #ddd; }
+        .ctrl-btn:active { background: #333; color: white; }
+
+        input[type=range] { width: 100px; }
     </style>
 </head>
 <body>
@@ -46,7 +76,37 @@
     <div id="blocker">
         <div id="instructions">
             <h1>Cinematic Tour</h1>
-            <p>Click to start<br>Elegant floating labels</p>
+            <p>Click to start<br>Pinyon Script Edition</p>
+        </div>
+    </div>
+
+    <!-- CONTROL PANEL -->
+    <div id="control-panel">
+        <h3>Edit Card Position & Size</h3>
+        
+        <select class="selector" id="card-selector" onchange="updateSelectedCard()">
+            <option value="C">Card C</option>
+            <option value="D">Card D</option>
+            <option value="E">Card E</option>
+            <option value="F">Card F</option>
+            <option value="G">Card G (Overview)</option>
+        </select>
+
+        <div class="coord-box" id="coord-display">
+            Select a card to edit...
+        </div>
+
+        <div class="control-row">
+            <span class="control-label">Vertical Pos (Y)</span>
+            <div class="btn-group">
+                <button class="ctrl-btn" onclick="moveSelected('up')">▲ Up</button>
+                <button class="ctrl-btn" onclick="moveSelected('down')">▼ Down</button>
+            </div>
+        </div>
+
+        <div class="control-row">
+            <span class="control-label">Text Size</span>
+            <input type="range" min="0.5" max="2.0" step="0.1" value="1.0" id="size-slider" oninput="resizeSelected(this.value)">
         </div>
     </div>
 
@@ -78,23 +138,20 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // --- HELPER TO CREATE MY SOUL TEXT CARDS ---
-        function createTextCard(textTitle, textSub) {
+        // --- GLOBAL VARIABLES FOR CONTROLS ---
+        let selectedCardKey = 'C';
+        let cards = {};
+
+        // --- HELPER TO CREATE PINYON SCRIPT CARDS ---
+        function createCard(textTitle, textSub, x, y, z) {
             const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
             const context = canvas.getContext('2d');
             
-            // Use My Soul Font for Canvas
-            context.font = '140px "My Soul"'; 
-            
-            // NO BACKGROUND - Transparent
-            
-            // Text Title
-            context.fillStyle = '#ffffff'; 
-            context.textAlign = 'center';
+            context.font = '140px "Pinyon Script"'; 
+            context.fillStyle = '#ffffff'; context.textAlign = 'center';
             context.fillText(textTitle, 512, 400);
             
-            // Text Subtitle
-            context.font = '90px "My Soul"'; 
+            context.font = '90px "Pinyon Script"'; 
             context.fillStyle = '#eeeeee';
             context.fillText(textSub, 512, 550);
             
@@ -102,54 +159,61 @@
             const material = new THREE.MeshBasicMaterial({ 
                 map: texture, transparent: true, opacity: 1.0, side: THREE.DoubleSide, depthWrite: false 
             });
-            const geometry = new THREE.PlaneGeometry(3, 3); // Larger size for readability with script font
+            const geometry = new THREE.PlaneGeometry(3, 3); 
             const mesh = new THREE.Mesh(geometry, material);
+            
+            mesh.position.set(x, y, z);
+            mesh.lookAt(new THREE.Vector3(-0.006, y, -0.008)); 
+            
+            // Store data for controls
+            mesh.userData.baseScale = 1.0;
+            
             return mesh;
         }
 
-        // --- CREATE CARDS WITH YOUR EXACT COORDINATES ---
+        // --- CREATE CARDS WITH YOUR COORDINATES ---
         
-        // 1. Intro Card
-        const cardIntro = createTextCard("Welcome", "Start of Journey");
-        cardIntro.position.set(0.092, 9.5, -0.067); 
-        cardIntro.lookAt(new THREE.Vector3(-0.006, 9.5, -0.008)); 
+        // Intro (No control needed, static)
+        const cardIntro = createCard("Welcome", "Start", 0.092, 9.5, -0.067);
         const qIntro = cardIntro.quaternion.clone();
 
-        // 2. Card C - YOUR COORDINATES
-        const cardC = createTextCard("Viewpoint C", "Detail One");
-        cardC.position.set(-3.49, 1.30, 1.23); 
-        cardC.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        // Card C
+        const cardC = createCard("Viewpoint C", "Detail One", -3.49, 1.30, 1.23);
         const qC = cardC.quaternion.clone();
+        cards['C'] = cardC;
 
-        // 3. Card D - Logical position near D station
-        const cardD = createTextCard("Viewpoint D", "Detail Two");
-        cardD.position.set(0.077, 1.30, 4.0); 
-        cardD.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        // Card D
+        const cardD = createCard("Viewpoint D", "Detail Two", 0.077, 1.30, 4.0);
         const qD = cardD.quaternion.clone();
+        cards['D'] = cardD;
 
-        // 4. Card E - YOUR COORDINATES
-        const cardE = createTextCard("Viewpoint E", "Detail Three");
-        cardE.position.set(3.77, 1.30, 1.30); 
-        cardE.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        // Card E
+        const cardE = createCard("Viewpoint E", "Detail Three", 3.77, 1.30, 1.30);
         const qE = cardE.quaternion.clone();
+        cards['E'] = cardE;
 
-        // 5. Card F - YOUR COORDINATES
-        const cardF = createTextCard("Viewpoint F", "Detail Four");
-        cardF.position.set(2.21, 1.30, -3.16); 
-        cardF.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        // Card F
+        const cardF = createCard("Viewpoint F", "Detail Four", 2.21, 1.30, -3.16);
         const qF = cardF.quaternion.clone();
+        cards['F'] = cardF;
 
-        scene.add(cardIntro); scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
+        // Card G (Overview)
+        const cardG = createCard("Overview", "Wide View", -3.403, 2.5, -4.008);
+        const qG = cardG.quaternion.clone();
+        cards['G'] = cardG;
 
-        // --- STATIONS ---
+        scene.add(cardIntro); 
+        scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF); scene.add(cardG);
+
+        // --- STATIONS (NEW PATH: Intro -> G -> C -> D -> E -> F -> Loop G) ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: cardIntro, quat: qIntro },
+            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: cardG, quat: qG },
             { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), card: cardC, quat: qC },
             { name: "D: Second", pos: new THREE.Vector3(0.077, 1.301, 5.964), card: cardD, quat: qD },
             { name: "E: Third", pos: new THREE.Vector3(5.276, 1.338, 1.737), card: cardE, quat: qE },
-            { name: "F: Fourth", pos: new THREE.Vector3(3.257, 1.258, -4.664), card: cardF, quat: qF },
-            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: null } // Empty station
+            { name: "F: Fourth", pos: new THREE.Vector3(3.257, 1.258, -4.664), card: cardF, quat: qF }
         ];
 
         let currentStationIndex = 0;
@@ -157,7 +221,7 @@
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 2.5;
+        const ANIMATION_DURATION = 3.0;
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -172,11 +236,65 @@
         // --- UI LOGIC ---
         document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour Started"; });
 
+        // --- CONTROL FUNCTIONS ---
+        window.updateSelectedCard = function() {
+            selectedCardKey = document.getElementById('card-selector').value;
+            updateCoordDisplay();
+        };
+
+        window.moveSelected = function(dir) {
+            const card = cards[selectedCardKey];
+            if(!card) return;
+            
+            if(dir === 'up') card.position.y += 0.2;
+            if(dir === 'down') card.position.y -= 0.2;
+            
+            // Update quaternion to keep looking at center roughly
+            card.lookAt(new THREE.Vector3(-0.006, card.position.y, -0.008));
+            
+            updateCoordDisplay();
+        };
+
+        window.resizeSelected = function(val) {
+            const card = cards[selectedCardKey];
+            if(!card) return;
+            
+            const scale = parseFloat(val);
+            card.scale.set(scale, scale, scale);
+        };
+
+        function updateCoordDisplay() {
+            const card = cards[selectedCardKey];
+            if(!card) return;
+            
+            const p = card.position;
+            const s = card.scale.x;
+            
+            document.getElementById('coord-display').innerHTML = 
+                `<strong>Card ${selectedCardKey}:</strong><br>` +
+                `X: ${p.x.toFixed(2)}<br>` +
+                `Y: ${p.y.toFixed(2)}<br>` +
+                `Z: ${p.z.toFixed(2)}<br>` +
+                `Size: ${s.toFixed(1)}`;
+                
+            // Update slider to match current size
+            document.getElementById('size-slider').value = s;
+        }
+        
+        // Initialize display
+        updateSelectedCard();
+
         window.nextStation = function() {
             if (isAnimating) return;
-            // Cycle through stations
-            if (currentStationIndex === 0) currentStationIndex = 1;
-            else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
+            
+            // Logic: Intro(0) -> G(1) -> C(2) -> D(3) -> E(4) -> F(5) -> G(1)...
+            if (currentStationIndex === 0) {
+                currentStationIndex = 1; // Go to G
+            } else if (currentStationIndex === 5) {
+                currentStationIndex = 1; // From F go back to G
+            } else {
+                currentStationIndex++; // Normal progression
+            }
             
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
@@ -197,16 +315,14 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // PURE TEXT LOGIC FOR ALL CARDS
+            // Glass Effect Logic
             STATIONS.forEach(station => {
                 if(station.card) {
                     const dist = camera.position.distanceTo(station.pos);
                     if (dist < 2.5) {
-                        // AT STATION: Face Camera & 100% Opacity
                         station.card.lookAt(camera.position);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
                     } else {
-                        // AWAY: Return to Original Rotation & 5% Opacity
                         station.card.quaternion.slerp(station.quat, 0.1);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
                     }
