@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Flow - Button Control</title>
+    <title>Cinematic Flow - Brute Force Blur</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: 'Courier New', Courier, monospace; }
         
@@ -107,11 +107,11 @@
         <div class="control-group">
             <div class="control-label">Blur Scale (Visor Effect)</div>
             <div class="blur-buttons">
-                <button class="blur-btn" onclick="setBlur(0)">0%</button>
-                <button class="blur-btn" onclick="setBlur(0.25)">25%</button>
-                <button class="blur-btn active" onclick="setBlur(0.5)">50%</button>
-                <button class="blur-btn" onclick="setBlur(0.75)">75%</button>
-                <button class="blur-btn" onclick="setBlur(1.0)">100%</button>
+                <button class="blur-btn active" onclick="setBlurLevel(0)">0%</button>
+                <button class="blur-btn" onclick="setBlurLevel(1)">25%</button>
+                <button class="blur-btn" onclick="setBlurLevel(2)">50%</button>
+                <button class="blur-btn" onclick="setBlurLevel(3)">75%</button>
+                <button class="blur-btn" onclick="setBlurLevel(4)">100%</button>
             </div>
         </div>
 
@@ -165,28 +165,40 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- POST PROCESSING ---
-        const renderScene = new RenderPass(scene, camera);
+        // --- POST PROCESSING INITIALIZATION ---
+        let composer, bloomPass, bokehPass;
+        
+        // Define Blur Levels (Aperture values)
+        // 0: Sharp, 1: Low, 2: Med, 3: High, 4: Max
+        const BLUR_LEVELS = [0.0, 0.0001, 0.0002, 0.0003, 0.0004];
+        let currentBlurIndex = 0;
 
-        // 1. BLOOM (Glow)
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.1;
-        bloomPass.strength = 0.0;   
-        bloomPass.radius = 0.8;
+        function initPostProcessing() {
+            const renderScene = new RenderPass(scene, camera);
+            
+            bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+            bloomPass.threshold = 0.1;
+            bloomPass.strength = 0.0;   
+            bloomPass.radius = 0.8;
 
-        // 2. BOKEH (Depth of Field)
-        const bokehPass = new BokehPass(scene, camera, {
-            focus: 10.0,
-            aperture: 0.00015, // Default to 50% approx
-            maxblur: 0.015,
-            width: window.innerWidth,
-            height: window.innerHeight
-        });
+            // Initialize with current blur level
+            const aperture = BLUR_LEVELS[currentBlurIndex];
+            bokehPass = new BokehPass(scene, camera, {
+                focus: 10.0,
+                aperture: aperture,
+                maxblur: 0.015,
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
 
-        const composer = new EffectComposer(renderer);
-        composer.addPass(renderScene);
-        composer.addPass(bloomPass);
-        composer.addPass(bokehPass);
+            composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
+            composer.addPass(bokehPass);
+        }
+
+        // Call init
+        initPostProcessing();
 
         // --- LIGHTS ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
@@ -316,26 +328,35 @@
         // --- UI & CONTROLS ---
         document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour started."; });
 
-        // --- BLUR BUTTON LOGIC ---
-        window.setBlur = function(level) {
-            // level is 0, 0.25, 0.5, 0.75, or 1.0
+        // --- BRUTE FORCE BLUR UPDATE ---
+        window.setBlurLevel = function(index) {
+            currentBlurIndex = index;
             
-            // Update UI Buttons
+            // Update UI
             const buttons = document.querySelectorAll('.blur-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
+            buttons.forEach((btn, i) => {
+                if(i === index) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+
+            // Re-create Bokeh Pass with new aperture
+            // This forces the GPU to pick up the new value
+            const aperture = BLUR_LEVELS[index];
             
-            // Find the button that matches the level and activate it
-            // We map the float level back to index for simplicity or just check innerText
-            // Simple approach: highlight based on click context
-            event.target.classList.add('active');
-
-            // Calculate Aperture: Max 0.0003 for 100%
-            const maxAperture = 0.0003;
-            const newAperture = level * maxAperture;
-
-            if(bokehPass.uniforms && bokehPass.uniforms['aperture']) {
-                bokehPass.uniforms['aperture'].value = newAperture;
-            }
+            // Remove old pass
+            composer.passes.pop(); 
+            
+            // Create new pass
+            bokehPass = new BokehPass(scene, camera, {
+                focus: 10.0,
+                aperture: aperture,
+                maxblur: 0.015,
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+            
+            // Add new pass
+            composer.addPass(bokehPass);
         };
 
         window.nextStation = function() {
@@ -397,6 +418,7 @@
             } else { godRays.visible = false; }
 
             // UPDATE DEPTH OF FIELD FOCUS
+            // Always focus on the tree so it stays sharp while edges blur
             const dist = camera.position.distanceTo(POINT_CENTER);
             if(bokehPass.uniforms && bokehPass.uniforms['focus']) {
                 bokehPass.uniforms['focus'].value = dist;
