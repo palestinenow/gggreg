@@ -2,45 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Premium Glass Card</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
-        
-        /* START SCREEN */
-        #blocker {
-            position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95);
-            display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer;
-        }
-        #instructions {
-            color: black; text-align: center; padding: 30px; border: 2px solid #333;
-            border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        h1 { margin: 0 0 10px 0; color: #333; }
-        p { margin: 0; color: #666; }
-
-        /* MAIN BUTTON */
+        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
+        #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
-        button.main-btn {
-            background: #333; color: #fff; border: none; padding: 15px 30px;
-            font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px;
-            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+        button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         button.main-btn:hover { background: #000; transform: translateY(-2px); }
-
         #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
     </style>
 </head>
 <body>
 
-    <!-- START SCREEN -->
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>The card is made of premium frosted glass.</p>
+            <p>Click to start.<br>The card is now real frosted glass.</p>
         </div>
     </div>
 
-    <!-- MAIN ACTION -->
     <div id="actions">
         <button class="main-btn" onclick="nextStation()">NEXT STATION ➡️</button>
     </div>
@@ -68,45 +50,44 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // --- PREMIUM GLASS CARD ---
-        const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
+        // --- REAL GLASS CARD ---
+        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
         const context = canvas.getContext('2d');
         
-        // Transparent Background for Canvas (so only text/border exists)
-        // context.clearRect(0,0,1024,1024); 
+        // Draw a semi-transparent white background for the "Frosted" look
+        context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
+        context.fillRect(0, 0, 512, 512);
         
         // Border
-        context.strokeStyle = '#ffffff'; context.lineWidth = 30; context.strokeRect(50, 50, 924, 924);
+        context.strokeStyle = '#ffffff'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
         
         // Text
-        context.font = 'bold 100px Arial'; context.fillStyle = '#ffffff'; context.textAlign = 'center';
-        context.shadowColor = "rgba(0,0,0,0.5)"; context.shadowBlur = 10;
-        context.fillText("INFO", 512, 400);
-        context.font = '60px Arial'; context.fillStyle = '#eeeeee';
-        context.fillText("Viewpoint C", 512, 550);
+        context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
+        context.fillText("INFO", 256, 200);
+        context.font = '30px Arial'; context.fillStyle = '#555';
+        context.fillText("Viewpoint C", 256, 280);
         
         const pageTexture = new THREE.CanvasTexture(canvas);
         
-        // USE MESH PHYSICAL MATERIAL FOR REAL GLASS EFFECT
-        const pageMaterial = new THREE.MeshPhysicalMaterial({
+        // USE STANDARD MATERIAL WITH HIGH TRANSPARENCY FOR GLASS
+        const pageMaterial = new THREE.MeshStandardMaterial({ 
             map: pageTexture,
             transparent: true,
-            opacity: 0.5, // Start semi-transparent
-            transmission: 0.9, // High transmission = see-through like glass
-            roughness: 0.2,    // Low roughness = smooth/clear, High = frosted
-            thickness: 0.5,    // Simulates volume of glass
-            ior: 1.5,          // Index of Refraction for glass
+            opacity: 0.8, // Start high
+            roughness: 0.1, // Smooth like glass
+            metalness: 0.1,
             side: THREE.DoubleSide,
-            color: 0xffffff
+            depthWrite: false, // CRITICAL: Allows seeing through overlapping parts
+            blending: THREE.NormalBlending
         });
         
         const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
         const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
         
-        // FIXED POSITION FROM YOUR SCREENSHOT
+        // FIXED POSITION
         floatingPage.position.set(-3.61, 1.30, 1.17);
         
-        // Initial Rotation: Face the center/tree
+        // Initial Rotation
         floatingPage.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const INITIAL_QUATERNION = floatingPage.quaternion.clone();
         
@@ -166,29 +147,22 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // PREMIUM GLASS LOGIC
+            // GLASS LOGIC
             const distToC = camera.position.distanceTo(STATIONS[1].pos);
             
             if (distToC < 2.5) {
-                // AT STATION C: Soft Glass Window
-                // You can see the tree behind it, but the text is clear
+                // AT STATION C: FROSTED GLASS WINDOW
                 floatingPage.lookAt(camera.position);
                 
-                // Smoothly transition to Soft Glass
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.6, 0.1);
-                floatingPage.material.transmission = THREE.MathUtils.lerp(floatingPage.material.transmission, 0.9, 0.1);
-                floatingPage.material.roughness = THREE.MathUtils.lerp(floatingPage.material.roughness, 0.1, 0.1); // Clearer
+                // Opacity 0.4 means 60% transparent. You see the tree clearly.
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.4, 0.1);
                 
             } else {
-                // AWAY: Ghostly / Too Soft
+                // AWAY: GHOSTLY / INVISIBLE
                 floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1);
                 
-                // Extremely low opacity (5%)
+                // Opacity 0.05 means 95% transparent. Almost gone.
                 floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.05, 0.1);
-                
-                // Keep high transmission so it looks like air
-                floatingPage.material.transmission = THREE.MathUtils.lerp(floatingPage.material.transmission, 1.0, 0.1);
-                floatingPage.material.roughness = THREE.MathUtils.lerp(floatingPage.material.roughness, 0.8, 0.1); // More frosted
             }
 
             if (isAnimating) {
