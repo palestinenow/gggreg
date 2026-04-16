@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Smart Glass Card</title>
+    <title>Cinematic Orbit - Smart Glass Card (Fixed)</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         
@@ -43,15 +43,9 @@
             font-size: 11px; margin-bottom: 10px; color: #555; line-height: 1.4;
         }
         
-        /* D-PAD GRID */
-        .d-pad {
-            display: grid;
-            grid-template-columns: repeat(3, 30px);
-            grid-template-rows: repeat(3, 30px);
-            gap: 4px;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
+        .control-group { margin-bottom: 8px; text-align: center; }
+        .depth-btns { display: flex; justify-content: center; gap: 10px; margin-bottom: 5px; }
+        .xy-btns { display: grid; grid-template-columns: 30px 30px 30px; gap: 4px; justify-content: center; }
         
         .ctrl-btn {
             width: 30px; height: 30px;
@@ -63,35 +57,6 @@
         }
         .ctrl-btn:hover { background: #ddd; }
         .ctrl-btn:active { background: #333; color: white; }
-        
-        /* Grid Positions */
-        .btn-fwd { grid-column: 2; grid-row: 1; } /* Forward */
-        .btn-left { grid-column: 1; grid-row: 2; }
-        .btn-back { grid-column: 2; grid-row: 2; } /* Backward */
-        .btn-right { grid-column: 3; grid-row: 2; }
-        .btn-up { grid-column: 2; grid-row: 3; }   /* Up */
-        .btn-down { grid-column: 2; grid-row: 4; } /* Down - Wait, let's adjust grid */
-
-        /* Revised Grid for 6 buttons: Fwd, Back, Left, Right, Up, Down */
-        .d-pad-6 {
-            display: grid;
-            grid-template-columns: repeat(3, 30px);
-            grid-template-rows: repeat(3, 30px);
-            gap: 4px;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        .pos-fwd { grid-column: 2; grid-row: 1; }
-        .pos-left { grid-column: 1; grid-row: 2; }
-        .pos-right { grid-column: 3; grid-row: 2; }
-        .pos-back { grid-column: 2; grid-row: 2; }
-        .pos-up { grid-column: 2; grid-row: 3; }
-        /* We need a separate spot for Down or use a different layout. Let's do Cross + Depth */
-        
-        /* Simple Layout: Vertical Stack for Depth, Horizontal for XY */
-        .control-group { margin-bottom: 8px; text-align: center; }
-        .depth-btns { display: flex; justify-content: center; gap: 10px; margin-bottom: 5px; }
-        .xy-btns { display: grid; grid-template-columns: 30px 30px 30px; gap: 4px; justify-content: center; }
         
         .reset-btn {
             width: 100%; padding: 8px;
@@ -117,7 +82,7 @@
         <h3>Card Position</h3>
         <div class="coord-display" id="coord-text">X: 0.00<br>Y: 0.00<br>Z: 0.00</div>
         
-        <!-- Depth Control (Forward/Back) -->
+        <!-- Depth Control -->
         <div class="control-group">
             <div style="font-size:10px; color:#999; margin-bottom:2px;">DEPTH</div>
             <div class="depth-btns">
@@ -182,7 +147,6 @@
         
         const pageTexture = new THREE.CanvasTexture(canvas);
         
-        // Use MeshStandardMaterial for transparency/glass effect
         const pageMaterial = new THREE.MeshStandardMaterial({ 
             map: pageTexture, 
             transparent: true, 
@@ -199,10 +163,10 @@
         const DEFAULT_POS = new THREE.Vector3(-5.325, 2.5, 1.727);
         floatingPage.position.copy(DEFAULT_POS);
         
-        // Initial Rotation: Face the center (Tree)
+        // Set Initial Rotation using Quaternion (Fixes the crash)
+        // We make it look at the center initially
         floatingPage.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
-        // Store initial rotation to return to it
-        const INITIAL_ROTATION = floatingPage.rotation.clone();
+        const INITIAL_QUATERNION = floatingPage.quaternion.clone();
         
         scene.add(floatingPage);
 
@@ -237,21 +201,18 @@
         // --- UI LOGIC ---
         document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour Started"; });
 
-        // --- CARD MOVEMENT & SMART BEHAVIOR ---
+        // --- CARD MOVEMENT ---
         const MOVE_STEP = 0.2;
 
         window.moveCard = function(direction) {
-            // Get camera direction for Forward/Back logic
             const camDir = new THREE.Vector3();
             camera.getWorldDirection(camDir);
-            camDir.y = 0; // Keep movement horizontal for depth
+            camDir.y = 0; 
             camDir.normalize();
 
-            if(direction === 'fwd') {
-                floatingPage.position.addScaledVector(camDir, MOVE_STEP);
-            } else if(direction === 'back') {
-                floatingPage.position.addScaledVector(camDir, -MOVE_STEP);
-            } else if(direction === 'up') floatingPage.position.y += MOVE_STEP;
+            if(direction === 'fwd') floatingPage.position.addScaledVector(camDir, MOVE_STEP);
+            else if(direction === 'back') floatingPage.position.addScaledVector(camDir, -MOVE_STEP);
+            else if(direction === 'up') floatingPage.position.y += MOVE_STEP;
             else if(direction === 'down') floatingPage.position.y -= MOVE_STEP;
             else if(direction === 'left') floatingPage.position.x -= MOVE_STEP;
             else if(direction === 'right') floatingPage.position.x += MOVE_STEP;
@@ -261,7 +222,7 @@
 
         window.resetCard = function() {
             floatingPage.position.copy(DEFAULT_POS);
-            floatingPage.rotation.copy(INITIAL_ROTATION);
+            floatingPage.quaternion.copy(INITIAL_QUATERNION);
             floatingPage.material.opacity = 1.0;
             updateCoordDisplay();
         };
@@ -296,18 +257,17 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // SMART CARD LOGIC
-            // Check if we are at Station C (Index 1) or close to it
+            // SMART CARD LOGIC (FIXED WITH QUATERNIONS)
             const distToC = camera.position.distanceTo(STATIONS[1].pos);
             
             if (distToC < 2.0) {
-                // WE ARE AT STATION C: Make card Opaque and Face Camera
+                // AT STATION C: Face Camera & Opaque
                 floatingPage.lookAt(camera.position);
                 floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 1.0, 0.1);
             } else {
-                // WE ARE AWAY: Make card Transparent (Glass) and Return to Original Rotation
-                floatingPage.rotation.slerp(INITIAL_ROTATION, 0.1);
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.3, 0.1); // 0.3 is glass-like
+                // AWAY: Return to Initial Rotation & Transparent
+                floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1); // Smooth rotation fix
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.3, 0.1);
             }
 
             if (isAnimating) {
