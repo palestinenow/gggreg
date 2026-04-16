@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - fff</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
@@ -50,20 +50,14 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // --- RANDOM SHINE EFFECT ---
-        // Store all materials for random shine
+        // --- PURE WHITE SHINE EFFECT ---
+        // Store all materials for shine
         const allMaterials = [];
         
-        // Create a bright point light that moves randomly for shine effect
-        const shineLight = new THREE.PointLight(0xffffff, 0);
-        shineLight.position.set(0, 5, 5);
-        scene.add(shineLight);
-        
-        // Create multiple random shine lights
+        // Create white shine lights
         const shineLights = [];
-        const colors = [0xffaa00, 0xff66ff, 0x66ffff, 0xffff00, 0xff4444, 0x44ff44];
-        for (let i = 0; i < 4; i++) {
-            const light = new THREE.PointLight(colors[i % colors.length], 0);
+        for (let i = 0; i < 5; i++) {
+            const light = new THREE.PointLight(0xffffff, 0);
             light.position.set(
                 (Math.random() - 0.5) * 10,
                 Math.random() * 8 + 2,
@@ -74,7 +68,6 @@
                 light: light,
                 phase: Math.random() * Math.PI * 2,
                 speed: 0.5 + Math.random() * 2,
-                color: colors[i % colors.length],
                 baseIntensity: 0
             });
         }
@@ -83,14 +76,11 @@
         const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
         const context = canvas.getContext('2d');
         
-        // Draw a semi-transparent white background for the "Frosted" look
         context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
         context.fillRect(0, 0, 512, 512);
         
-        // Border
         context.strokeStyle = '#ffffff'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
         
-        // Text
         context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
         context.fillText("INFO", 256, 200);
         context.font = '30px Arial'; context.fillStyle = '#555';
@@ -98,7 +88,6 @@
         
         const pageTexture = new THREE.CanvasTexture(canvas);
         
-        // USE STANDARD MATERIAL WITH HIGH TRANSPARENCY FOR GLASS
         const pageMaterial = new THREE.MeshStandardMaterial({ 
             map: pageTexture,
             transparent: true,
@@ -113,10 +102,8 @@
         const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
         const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
         
-        // FIXED POSITION
         floatingPage.position.set(-3.61, 1.30, 1.17);
         
-        // Initial Rotation
         floatingPage.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const INITIAL_QUATERNION = floatingPage.quaternion.clone();
         
@@ -140,7 +127,6 @@
         let endPos = new THREE.Vector3();
         const ANIMATION_DURATION = 2.5;
         
-        // Store tree materials for glow animation
         const treeMaterials = [];
 
         // --- LOAD MODEL ---
@@ -152,7 +138,6 @@
                     child.castShadow = true; 
                     child.receiveShadow = true;
                     
-                    // Store material for shine effects
                     if (child.material) {
                         if (Array.isArray(child.material)) {
                             child.material.forEach(mat => allMaterials.push(mat));
@@ -202,13 +187,12 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
 
-        // Clock for time-based animation
         const clock = new THREE.Clock();
         
         // Random shine state
         let nextShineTime = 0;
         let currentShineIntensity = 0;
-        let shineDecaySpeed = 2.0;
+        const shineDecaySpeed = 2.0;
 
         // --- ANIMATION LOOP ---
         function animate() {
@@ -217,7 +201,7 @@
             const delta = clock.getDelta();
             const elapsedTime = performance.now() * 0.001;
 
-            // --- PULSATING GLOW EFFECT FOR TREES ---
+            // --- PULSATING GLOW FOR TREES ---
             if (treeMaterials.length > 0) {
                 const glowIntensity = 0.3 + Math.sin(elapsedTime * 2.0) * 0.35;
                 treeMaterials.forEach(material => {
@@ -225,79 +209,39 @@
                 });
             }
 
-            // --- RANDOM SHINE EFFECT ---
-            // Trigger random shine at unpredictable intervals
+            // --- PURE WHITE RANDOM SHINE ---
             if (elapsedTime > nextShineTime) {
-                // Random time until next shine (between 0.5 and 3 seconds)
-                nextShineTime = elapsedTime + 0.5 + Math.random() * 2.5;
+                // Random interval between shines (0.3 to 2 seconds)
+                nextShineTime = elapsedTime + 0.3 + Math.random() * 1.7;
                 
                 // Random shine intensity
-                currentShineIntensity = 0.5 + Math.random() * 1.5;
+                currentShineIntensity = 0.3 + Math.random() * 1.2;
                 
-                // Randomly move shine lights
+                // Randomly position shine lights
                 shineLights.forEach(shineData => {
-                    // Random new position
                     shineData.light.position.set(
                         (Math.random() - 0.5) * 12,
                         Math.random() * 8 + 3,
                         (Math.random() - 0.5) * 12
                     );
                     
-                    // Random color shift
-                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                    shineData.light.color.setHex(randomColor);
-                    
-                    // Random intensity spike
-                    shineData.baseIntensity = 0.3 + Math.random() * 1.2;
-                });
-                
-                // Also make materials slightly more reflective during shine
-                allMaterials.forEach(material => {
-                    if (material.roughness !== undefined) {
-                        material.roughness = Math.max(0.1, material.roughness - 0.1);
-                    }
-                    if (material.metalness !== undefined) {
-                        material.metalness = Math.min(0.8, material.metalness + 0.1);
-                    }
+                    // Random intensity for each light
+                    shineData.baseIntensity = 0.2 + Math.random() * 1.0;
                 });
             }
             
             // Decay shine intensity
             currentShineIntensity = Math.max(0, currentShineIntensity - delta * shineDecaySpeed);
             
-            // Apply shine to lights
+            // Apply pure white shine to lights
             shineLights.forEach(shineData => {
-                // Add sine wave modulation to the random intensity
-                const sinMod = Math.sin(elapsedTime * shineData.speed + shineData.phase) * 0.3;
+                const sinMod = Math.sin(elapsedTime * shineData.speed + shineData.phase) * 0.2;
                 shineData.light.intensity = Math.max(0, currentShineIntensity * (shineData.baseIntensity + sinMod));
                 
-                // Slight position wobble
-                shineData.light.position.x += Math.sin(elapsedTime * 2 + shineData.phase) * 0.01;
-                shineData.light.position.z += Math.cos(elapsedTime * 1.5 + shineData.phase) * 0.01;
+                // Subtle position movement
+                shineData.light.position.x += Math.sin(elapsedTime * 1.5 + shineData.phase) * 0.005;
+                shineData.light.position.z += Math.cos(elapsedTime * 1.8 + shineData.phase) * 0.005;
             });
-            
-            // Also add random emissive sparks to all materials
-            if (currentShineIntensity > 0.1) {
-                allMaterials.forEach(material => {
-                    if (material.emissive && !treeMaterials.includes(material)) {
-                        // Temporary emissive boost for non-tree materials
-                        const sparkColor = new THREE.Color(
-                            0.5 + Math.random() * 0.5,
-                            0.5 + Math.random() * 0.5,
-                            0.8 + Math.random() * 0.4
-                        );
-                        material.emissive = sparkColor;
-                        material.emissiveIntensity = currentShineIntensity * 0.3;
-                    }
-                });
-            } else {
-                // Reset non-tree materials emissive
-                allMaterials.forEach(material => {
-                    if (material.emissive && !treeMaterials.includes(material)) {
-                        material.emissiveIntensity = 0;
-                    }
-                });
-            }
 
             // GLASS LOGIC
             const distToC = camera.position.distanceTo(STATIONS[1].pos);
