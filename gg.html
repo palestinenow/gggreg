@@ -393,15 +393,15 @@
             alert('Config exported to console!');
         };
 
-        // --- EXTREMELY SUBTLE MOUSE PARALLAX ---
+        // --- MICROSCOPIC MOUSE PARALLAX ---
         let mouseX = 0;
         let mouseY = 0;
         let targetMouseX = 0;
         let targetMouseY = 0;
         
-        // Ultra-small movement limits
-        const MAX_OFFSET_X = 0.02;
-        const MAX_OFFSET_Y = 0.015;
+        // Almost invisible movement limits
+        const MAX_OFFSET_X = 0.005;
+        const MAX_OFFSET_Y = 0.003;
         
         document.addEventListener('mousemove', (e) => {
             targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -745,17 +745,17 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
         
-        // Extremely subtle mouse movement
+        // Microscopic mouse movement - almost invisible
         function updateMouseParallax() {
-            mouseX += (targetMouseX - mouseX) * 0.01;
-            mouseY += (targetMouseY - mouseY) * 0.01;
+            mouseX += (targetMouseX - mouseX) * 0.005;
+            mouseY += (targetMouseY - mouseY) * 0.005;
         }
         
         function applyParallax() {
             if (isAnimating) return;
             
-            const clampedX = Math.max(-1, Math.min(1, mouseX));
-            const clampedY = Math.max(-1, Math.min(1, mouseY));
+            const clampedX = Math.max(-1, Math.min(1, mouseX)) * 0.5;
+            const clampedY = Math.max(-1, Math.min(1, mouseY)) * 0.5;
             
             const offsetX = clampedX * MAX_OFFSET_X;
             const offsetY = clampedY * MAX_OFFSET_Y;
