@@ -2,16 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinefdsrbit - Real Glass Effect</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400&display=swap');
         
-        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; cursor: pointer; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
+        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
         #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
+        #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; display: flex; gap: 15px; }
+        button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        button.main-btn:hover { background: #000; transform: translateY(-2px); }
+        #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
         
-        #status { position: absolute; bottom: 40px; left: 40px; color: #fff; font-size: 14px; z-index: 1000; opacity: 0.7; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        
+        /* Vignette overlay */
         #vignette {
             position: fixed;
             top: 0;
@@ -19,90 +23,199 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 2;
+            z-index: 50;
             background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);
+            transition: backdrop-filter 0.5s ease;
         }
         
-        /* SIMPLE VISIBLE BUTTONS */
-        .simple-nav {
-            position: fixed !important;
-            bottom: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, 50%) !important;
-            z-index: 10000 !important;
-            display: flex !important;
-            gap: 30px !important;
-            opacity: 0 !important;
-            transition: opacity 0.5s ease !important;
-            pointer-events: none !important;
+        /* Glass Navigation Bar */
+        .glass-nav {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 92%;
+            max-width: 680px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 24px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 50px;
+            box-shadow: 
+                0 12px 40px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.15),
+                inset 0 -1px 0 rgba(255,255,255,0.04);
+            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 150;
         }
-        
-        .simple-nav.visible {
-            opacity: 1 !important;
-            pointer-events: auto !important;
+
+        .glass-nav.visible {
+            opacity: 1;
+            pointer-events: auto;
+            animation: fadeEnter 1.2s 0.2s forwards;
         }
-        
-        .simple-btn {
-            padding: 20px 50px !important;
-            font-size: 24px !important;
-            font-weight: bold !important;
-            text-transform: uppercase !important;
-            letter-spacing: 4px !important;
-            background: rgba(0, 0, 0, 0.8) !important;
-            color: white !important;
-            border: 3px solid white !important;
-            border-radius: 60px !important;
-            cursor: pointer !important;
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
-            box-shadow: 0 0 30px rgba(255,255,255,0.3) !important;
-            transition: all 0.3s ease !important;
+
+        @keyframes fadeEnter { 
+            to { opacity: 1; transform: translate(-50%, -50%); } 
         }
-        
-        .simple-btn:hover {
-            background: white !important;
-            color: black !important;
-            transform: scale(1.1) !important;
-            box-shadow: 0 0 50px rgba(255,255,255,0.5) !important;
+
+        .glass-nav.vanish {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.94) translateY(-20px);
+            filter: blur(12px);
+            pointer-events: none;
         }
-        
-        #toggle-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #003300;
-            color: #0f0;
-            border: 2px solid #0f0;
-            padding: 10px 20px;
+
+        .dot { 
+            width: 4px; height: 4px; 
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.25); 
+            flex-shrink: 0; 
+            transition: all 0.4s ease; 
+        }
+        .glass-nav:hover .dot { 
+            background: rgba(255,255,255,0.6); 
+            box-shadow: 0 0 8px rgba(255,255,255,0.4); 
+        }
+
+        .input-wrap { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .glass-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: rgba(255,255,255,0.9);
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+            padding: 6px 0;
+            text-align: center;
+        }
+
+        .glass-input::placeholder {
+            color: rgba(255,255,255,0.35);
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+
+        input[type="date"] { 
+            color-scheme: dark; 
+            cursor: pointer; 
+            text-transform: uppercase;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) opacity(0.4);
             cursor: pointer;
-            font-family: monospace;
-            font-weight: bold;
-            border-radius: 5px;
-            z-index: 10001;
+            margin-right: -4px;
+        }
+
+        .conf-msg {
+            font-family: 'Playfair Display', serif;
+            color: rgba(255,255,255,0.95);
+            font-size: 0.95rem;
+            text-align: center;
+            line-height: 1.4;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .conf-msg.show { opacity: 1; transform: translateY(0); }
+        .conf-msg em { font-style: normal; color: #a5b4fc; font-weight: 500; }
+
+        .send-btn {
+            width: 38px; height: 38px; 
+            border-radius: 50%; 
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06); 
+            color: rgba(255,255,255,0.85);
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: all 0.3s ease; 
+            flex-shrink: 0;
+        }
+        .send-btn:hover { 
+            background: rgba(255,255,255,0.14); 
+            border-color: rgba(255,255,255,0.3); 
+            transform: scale(1.08); 
+            box-shadow: 0 4px 16px rgba(165, 180, 252, 0.15);
+        }
+        .send-btn:active { transform: scale(0.95); }
+        .send-btn svg { 
+            width: 16px; height: 16px; 
+            stroke: currentColor; 
+            fill: none; 
+            stroke-width: 2; 
+            stroke-linecap: round; 
+            stroke-linejoin: round; 
+        }
+
+        .glass-nav::before {
+            content: ''; 
+            position: absolute; 
+            top: 0; left: -75%; 
+            width: 50%; height: 100%;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 46%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 54%, transparent 60%);
+            transition: left 0.8s ease; 
+            pointer-events: none;
+            border-radius: 50px;
+        }
+        .glass-nav:hover::before { left: 130%; }
+
+        @media (max-width: 500px) {
+            .glass-nav { height: 56px; padding: 0 18px; gap: 12px; }
+            .glass-input, .conf-msg { font-size: 0.85rem; }
+            .send-btn { width: 34px; height: 34px; }
+            .send-btn svg { width: 14px; height: 14px; }
         }
         
-        #toggle-panel:hover {
-            background: #0f0;
-            color: black;
-        }
-        
+        /* Control Panel */
         #control-panel {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.8);
             color: #0f0;
             padding: 20px;
             border-radius: 10px;
             font-family: monospace;
-            z-index: 10002;
+            z-index: 200;
             max-height: 90vh;
             overflow-y: auto;
             min-width: 300px;
             border: 2px solid #0f0;
             box-shadow: 0 0 20px rgba(0,255,0,0.3);
             pointer-events: auto;
-            display: none;
+        }
+        
+        #control-panel h3 {
+            margin: 0 0 15px 0;
+            text-align: center;
+            color: #0f0;
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 10px;
+        }
+        
+        #control-panel h4 {
+            margin: 15px 0 10px 0;
+            color: #0f0;
         }
         
         .control-group {
@@ -110,6 +223,13 @@
             padding: 10px;
             background: rgba(0, 255, 0, 0.1);
             border-radius: 5px;
+        }
+        
+        .station-selector {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
         
         .station-btn {
@@ -125,9 +245,15 @@
             flex: 1;
         }
         
-        .station-btn:hover, .station-btn.active {
+        .station-btn:hover {
             background: #0f0;
             color: black;
+        }
+        
+        .station-btn.active {
+            background: #0f0;
+            color: black;
+            font-weight: bold;
         }
         
         .pos-control {
@@ -161,6 +287,12 @@
             cursor: pointer;
             font-family: monospace;
             border-radius: 3px;
+            margin-left: 5px;
+        }
+        
+        .pos-control button:hover {
+            background: #0f0;
+            color: black;
         }
         
         .slider-control {
@@ -176,6 +308,17 @@
         .slider-control input {
             width: 100%;
             margin: 5px 0;
+        }
+        
+        .slider-control span {
+            color: #0f0;
+            float: right;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
         }
         
         .action-btn {
@@ -194,6 +337,40 @@
             background: #0f0;
             color: black;
         }
+        
+        #toggle-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #003300;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+            border-radius: 5px;
+            z-index: 201;
+        }
+        
+        #toggle-panel:hover {
+            background: #0f0;
+            color: black;
+        }
+        
+        .coord-display {
+            color: #0f0;
+            font-size: 11px;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        #blur-status {
+            color: #0f0;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -201,37 +378,50 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.</p>
+            <p>Click to start.<br>The card is now real frosted glass.</p>
         </div>
+    </div>
+
+    <div id="actions">
+        <button class="main-btn" onclick="prevStation()">⬅️ PREVIOUS</button>
+        <button class="main-btn" onclick="nextStation()">NEXT ➡️</button>
     </div>
 
     <div id="status">Ready...</div>
     
     <div id="vignette"></div>
     
-    <!-- SIMPLE VISIBLE BUTTONS -->
-    <div class="simple-nav" id="simpleNav">
-        <button class="simple-btn" onclick="window.hydroPrev()">← PREVIOUS</button>
-        <button class="simple-btn" onclick="window.hydroNext()">NEXT →</button>
-    </div>
+    <!-- Glass Navigation Bar for Station C -->
+    <nav class="glass-nav" id="glassNav">
+        <div class="dot"></div>
+        <div class="input-wrap" id="inputWrap"></div>
+        <button class="send-btn" id="sendBtn" aria-label="Submit">
+            <svg viewBox="0 0 24 24">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+        </button>
+        <div class="dot"></div>
+    </nav>
     
     <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
     
-    <div id="control-panel">
-        <h3 style="color:#0f0; text-align:center;">🎛️ DEBUG CONTROLS</h3>
+    <div id="control-panel" style="display: none;">
+        <h3>🎛️ DEBUG CONTROLS</h3>
         
         <div class="control-group">
-            <h4 style="color:#0f0;">📍 SELECT STATION CARD</h4>
-            <div style="display:flex; gap:5px;">
+            <h4>📍 SELECT STATION CARD</h4>
+            <div class="station-selector">
                 <button class="station-btn" onclick="selectStation(2)">D: 2</button>
                 <button class="station-btn" onclick="selectStation(3)">E: 3</button>
                 <button class="station-btn" onclick="selectStation(4)">F: 4</button>
                 <button class="station-btn" onclick="selectStation(5)">G: 5</button>
             </div>
+            <div id="selected-station" class="coord-display">Selected: Station D</div>
         </div>
         
         <div class="control-group">
-            <h4 style="color:#0f0;">🎯 CARD POSITION</h4>
+            <h4>🎯 CARD POSITION</h4>
             <div class="pos-control">
                 <label>X:</label>
                 <input type="number" id="pos-x" step="0.01" value="0.10">
@@ -250,10 +440,48 @@
                 <button onclick="moveCard('z', -0.1)">-</button>
                 <button onclick="moveCard('z', 0.1)">+</button>
             </div>
-            <div style="margin-top:10px; display:flex; gap:10px;">
-                <button class="action-btn" onclick="applyPosition()">✅ Apply</button>
-                <button class="action-btn" onclick="copyPosition()">📋 Copy</button>
+            <div style="margin-top: 10px;">
+                <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
+                <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
             </div>
+        </div>
+        
+        <div class="control-group">
+            <h4>🎨 VIGNETTE EFFECT</h4>
+            <div class="slider-control">
+                <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
+                <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
+            </div>
+            <div class="slider-control">
+                <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
+                <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
+            </div>
+            <div class="slider-control">
+                <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
+                <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
+            </div>
+            <div class="slider-control">
+                <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
+                <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
+            </div>
+            <div id="blur-status">Blur: INACTIVE</div>
+        </div>
+        
+        <div class="control-group">
+            <h4>✨ GLOW EFFECT</h4>
+            <div class="slider-control">
+                <label>Min Strength: <span id="glow-min-val">23%</span></label>
+                <input type="range" id="glow-min" min="0" max="30" value="23" step="1">
+            </div>
+            <div class="slider-control">
+                <label>Max Strength: <span id="glow-max-val">39%</span></label>
+                <input type="range" id="glow-max" min="20" max="80" value="39" step="1">
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
+            <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
         </div>
     </div>
 
@@ -268,6 +496,102 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
+        // Glass Nav functionality
+        const nav = document.getElementById('glassNav');
+        const inputWrap = document.getElementById('inputWrap');
+        const btn = document.getElementById('sendBtn');
+        
+        let step = 1;
+        let wishText = '';
+        let navActive = false;
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString + 'T00:00:00').toLocaleDateString('en-US', options);
+        }
+
+        function initNav() {
+            inputWrap.innerHTML = `<input type="text" class="glass-input" id="mainInput" placeholder="You are in front of the tree of life. Make a wish..." autocomplete="off">`;
+            const inp = document.getElementById('mainInput');
+            if (inp) {
+                inp.focus();
+                inp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
+            }
+        }
+
+        function handleSend() {
+            const inp = document.querySelector('.glass-input');
+            const val = inp?.value.trim();
+            
+            if (step === 1) {
+                if (!val) return;
+                wishText = val;
+                step = 2;
+                
+                inputWrap.style.opacity = '0';
+                setTimeout(() => {
+                    inputWrap.innerHTML = `<input type="date" class="glass-input" id="dateInput" required>`;
+                    inputWrap.style.opacity = '1';
+                    const dateInp = document.getElementById('dateInput');
+                    if (dateInp) {
+                        dateInp.focus();
+                        dateInp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
+                    }
+                }, 250);
+
+            } else if (step === 2) {
+                if (!val) return;
+                step = 3;
+                
+                const displayDate = formatDate(val);
+                
+                btn.style.opacity = '0';
+                btn.style.pointerEvents = 'none';
+                inputWrap.style.opacity = '0';
+                
+                setTimeout(() => {
+                    inputWrap.innerHTML = `
+                        <p class="conf-msg" id="confMsg">
+                            Come back on <em>${displayDate}</em>.<br>
+                            Your wish will become true.
+                        </p>
+                    `;
+                    inputWrap.style.opacity = '1';
+                    requestAnimationFrame(() => document.getElementById('confMsg')?.classList.add('show'));
+                    
+                    setTimeout(() => {
+                        nav.classList.add('vanish');
+                        nav.classList.remove('visible');
+                        navActive = false;
+                        step = 1;
+                        btn.style.opacity = '1';
+                        btn.style.pointerEvents = 'auto';
+                    }, 3500);
+                    
+                }, 300);
+            }
+        }
+
+        btn.addEventListener('click', handleSend);
+        initNav();
+
+        function showNavBar() {
+            nav.classList.remove('vanish');
+            nav.classList.add('visible');
+            navActive = true;
+            step = 1;
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+            initNav();
+        }
+
+        function hideNavBar() {
+            nav.classList.remove('visible');
+            nav.classList.add('vanish');
+            navActive = false;
+        }
+
+        // Make functions globally available
         window.toggleControlPanel = function() {
             const panel = document.getElementById('control-panel');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -276,11 +600,15 @@
         let selectedStation = 2;
         window.selectStation = function(index) {
             selectedStation = index;
+            const stationNames = ['', 'C: First', 'D: 2', 'E: 3', 'F: 4', 'G: 5'];
+            document.getElementById('selected-station').textContent = `Selected: Station ${stationNames[index]}`;
+            
             if (cards[index]) {
                 document.getElementById('pos-x').value = cards[index].position.x.toFixed(2);
                 document.getElementById('pos-y').value = cards[index].position.y.toFixed(2);
                 document.getElementById('pos-z').value = cards[index].position.z.toFixed(2);
             }
+            
             document.querySelectorAll('.station-btn').forEach((btn, i) => {
                 if (i === index - 2) btn.classList.add('active');
                 else btn.classList.remove('active');
@@ -308,16 +636,29 @@
                 const pos = cards[selectedStation].position;
                 const text = `Station ${selectedStation}: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`;
                 navigator.clipboard?.writeText(text);
-                alert('Position copied!');
+                alert('Position copied: ' + text);
             }
         };
-
-        window.hydroPrev = function() {
-            prevStation();
+        
+        window.saveSettings = function() {
+            alert('Settings saved!');
         };
         
-        window.hydroNext = function() {
-            nextStation();
+        window.exportConfig = function() {
+            const config = {
+                cards: cardPositions,
+                vignette: {
+                    center: document.getElementById('vignette-center').value,
+                    darkness: document.getElementById('vignette-darkness').value,
+                    mid: document.getElementById('vignette-mid').value
+                },
+                glow: {
+                    min: MIN_STRENGTH,
+                    max: MAX_STRENGTH
+                }
+            };
+            console.log('CONFIG:', JSON.stringify(config, null, 2));
+            alert('Config exported to console!');
         };
 
         // --- SCENE SETUP ---
@@ -328,22 +669,20 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
-        renderer.domElement.style.position = 'fixed';
-        renderer.domElement.style.top = '0';
-        renderer.domElement.style.left = '0';
-        renderer.domElement.style.zIndex = '1';
         document.body.appendChild(renderer.domElement);
 
+        // --- BLOOM EFFECT ---
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
-        bloomPass.strength = 0.3;
+        bloomPass.strength = 0.23;
         bloomPass.radius = 0.8;
         
         const composer = new EffectComposer(renderer);
         composer.addPass(renderScene);
         composer.addPass(bloomPass);
 
+        // --- LIGHTS ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
         scene.add(ambientLight);
         
@@ -358,9 +697,122 @@
         spotLight.target.position.set(-0.006, 1.041, -0.008);
         scene.add(spotLight.target);
         
-        const centerLight = new THREE.PointLight(0xff00ff, 0.5, 10); 
+        const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10); 
         centerLight.position.set(-0.006, 1.041, -0.008); 
         scene.add(centerLight);
+
+        // --- GLOW PULSE SYSTEM ---
+        let glowStartTime = Date.now();
+        let glowDurationUp = 10000 + Math.random() * 20000;
+        let glowDurationDown = 10000 + Math.random() * 20000;
+        let isGlowingUp = true;
+        
+        let MIN_STRENGTH = 0.10;
+        let MAX_STRENGTH = 0.40;
+        
+        document.getElementById('glow-min').addEventListener('input', (e) => {
+            MIN_STRENGTH = e.target.value / 100;
+            document.getElementById('glow-min-val').textContent = e.target.value + '%';
+        });
+        
+        document.getElementById('glow-max').addEventListener('input', (e) => {
+            MAX_STRENGTH = e.target.value / 100;
+            document.getElementById('glow-max-val').textContent = e.target.value + '%';
+        });
+        
+        function getRandomDuration() {
+            return 10000 + Math.random() * 20000;
+        }
+        
+        function updateGlow() {
+            const now = Date.now();
+            const elapsed = now - glowStartTime;
+            
+            if (isGlowingUp) {
+                const progress = Math.min(elapsed / glowDurationUp, 1);
+                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
+                bloomPass.strength = strength;
+                centerLight.intensity = strength * 2.0;
+                
+                if (progress >= 1) {
+                    isGlowingUp = false;
+                    glowStartTime = now;
+                    glowDurationDown = getRandomDuration();
+                }
+            } else {
+                const progress = Math.min(elapsed / glowDurationDown, 1);
+                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
+                bloomPass.strength = strength;
+                centerLight.intensity = strength * 2.0;
+                
+                if (progress >= 1) {
+                    isGlowingUp = true;
+                    glowStartTime = now;
+                    glowDurationUp = getRandomDuration();
+                }
+            }
+        }
+
+        // --- DYNAMIC BLUR SYSTEM ---
+        let blurState = 'waiting';
+        let blurStartTime = Date.now();
+        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
+        
+        function updateBlur() {
+            const now = Date.now();
+            const vignette = document.getElementById('vignette');
+            const blurStatus = document.getElementById('blur-status');
+            
+            if (blurState === 'waiting' && now >= nextBlurTime) {
+                blurState = 'active';
+                blurStartTime = now;
+                blurStatus.textContent = 'Blur: ACTIVE';
+            }
+            
+            if (blurState === 'active') {
+                const elapsed = (now - blurStartTime) / 1000;
+                if (elapsed >= 1.0) {
+                    blurState = 'waiting';
+                    nextBlurTime = now + 4000 + Math.random() * 14000;
+                    vignette.style.backdropFilter = 'blur(0px)';
+                    blurStatus.textContent = 'Blur: INACTIVE';
+                } else {
+                    vignette.style.backdropFilter = `blur(1px)`;
+                }
+            }
+            
+            document.getElementById('vignette-blur-val').textContent = 
+                vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
+        }
+
+        // --- VIGNETTE CONTROLS ---
+        const vignette = document.getElementById('vignette');
+        
+        document.getElementById('vignette-center').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('vignette-center-val').textContent = val + '%';
+            updateVignette();
+        });
+        
+        document.getElementById('vignette-darkness').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('vignette-darkness-val').textContent = val + '%';
+            updateVignette();
+        });
+        
+        document.getElementById('vignette-mid').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('vignette-mid-val').textContent = val + '%';
+            updateVignette();
+        });
+        
+        function updateVignette() {
+            const center = document.getElementById('vignette-center').value;
+            const darkness = document.getElementById('vignette-darkness').value / 100;
+            const mid = document.getElementById('vignette-mid').value / 100;
+            
+            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
+        }
 
         // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
@@ -380,6 +832,7 @@
             5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
+        // --- CREATE CARDS ---
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -388,7 +841,7 @@
             canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            context.fillStyle = 'rgba(255, 255, 255, 0.1)'; 
+            context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
             context.fillRect(0, 0, 512, 512);
             
             context.shadowColor = 'rgba(0, 0, 0, 1.0)';
@@ -400,16 +853,22 @@
             context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
             context.fillText(stationName, 256, 200);
+            context.fillText(stationName, 256, 200);
             
             context.font = 'bold 45px Arial'; 
             context.fillStyle = '#ffffff';
+            context.fillText(`Station ${stationIndex}`, 256, 300);
             context.fillText(`Station ${stationIndex}`, 256, 300);
             
             context.font = 'bold 32px Arial';
             context.fillStyle = '#ffffff';
             context.fillText('Viewpoint', 256, 370);
+            context.fillText('Viewpoint', 256, 370);
             
             context.shadowColor = 'transparent';
+            context.shadowBlur = 0;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
             
             const pageTexture = new THREE.CanvasTexture(canvas);
             
@@ -427,12 +886,9 @@
             });
             
             const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
-            return new THREE.Mesh(pageGeometry, pageMaterial);
-        }
-
-        for (let i = 2; i < STATIONS.length; i++) {
-            cards[i] = createCard(STATIONS[i].name, i);
-            scene.add(cards[i]);
+            const card = new THREE.Mesh(pageGeometry, pageMaterial);
+            
+            return card;
         }
 
         function positionCards() {
@@ -444,6 +900,12 @@
             }
         }
 
+        for (let i = 2; i < STATIONS.length; i++) {
+            const card = createCard(STATIONS[i].name, i);
+            cards[i] = card;
+            scene.add(card);
+        }
+
         let currentStationIndex = 0;
         let isAnimating = false;
         let animationProgress = 0;
@@ -451,6 +913,7 @@
         let endPos = new THREE.Vector3();
         const ANIMATION_DURATION = 2.5;
 
+        // --- LOAD MODEL ---
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
@@ -470,20 +933,11 @@
             positionCards();
         }, undefined, function (error) { console.error(error); });
 
+        // --- UI LOGIC ---
         document.getElementById('blocker').addEventListener('click', function() { 
             this.style.display = 'none'; 
-            document.getElementById('status').innerText = "Tour Started - Go to Station C for navigation"; 
+            document.getElementById('status').innerText = "Tour Started"; 
         });
-
-        function updateNavVisibility() {
-            const nav = document.getElementById('simpleNav');
-            if (currentStationIndex === 1) {
-                nav.classList.add('visible');
-                document.getElementById('status').innerText = "Station C: Empty - Use buttons to navigate";
-            } else {
-                nav.classList.remove('visible');
-            }
-        }
 
         window.nextStation = function() {
             if (isAnimating) return;
@@ -496,9 +950,15 @@
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            updateNavVisibility();
             
-            if (currentStationIndex >= 2) selectStation(currentStationIndex);
+            if (currentStationIndex === 1) {
+                showNavBar();
+            } else {
+                hideNavBar();
+                if (currentStationIndex >= 2) {
+                    selectStation(currentStationIndex);
+                }
+            }
         };
 
         window.prevStation = function() {
@@ -512,9 +972,15 @@
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            updateNavVisibility();
             
-            if (currentStationIndex >= 2) selectStation(currentStationIndex);
+            if (currentStationIndex === 1) {
+                showNavBar();
+            } else {
+                hideNavBar();
+                if (currentStationIndex >= 2) {
+                    selectStation(currentStationIndex);
+                }
+            }
         };
 
         function startAnimation(targetPos) {
@@ -533,8 +999,12 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
 
+        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
+            
+            updateGlow();
+            updateBlur();
 
             for (let i = 2; i < cards.length; i++) {
                 if (cards[i]) {
@@ -570,7 +1040,12 @@
         animate();
         
         setTimeout(() => selectStation(2), 100);
-        positionCards();
+        
+        document.getElementById('glow-min').value = 23;
+        document.getElementById('glow-max').value = 39;
+        MIN_STRENGTH = 0.23;
+        MAX_STRENGTH = 0.39;
+        updateVignette();
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
