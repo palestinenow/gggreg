@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Fixed Card</title>
+    <title>Cinematic Orbit - Movable Card</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         
@@ -18,41 +18,69 @@
         h1 { margin: 0 0 10px 0; color: #333; }
         p { margin: 0; color: #666; }
 
-        /* ONLY ONE BUTTON */
+        /* MAIN BUTTON */
         #actions {
-            position: absolute;
-            bottom: 40px;
-            right: 40px;
-            z-index: 100;
+            position: absolute; bottom: 40px; right: 40px; z-index: 100;
         }
         button.main-btn {
-            background: #333;
-            color: #fff;
-            border: none;
-            padding: 15px 30px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 18px;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            letter-spacing: 1px;
+            background: #333; color: #fff; border: none; padding: 15px 30px;
+            font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px;
+            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        button.main-btn:hover { 
-            background: #000; 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
+        button.main-btn:hover { background: #000; transform: translateY(-2px); }
 
         #status {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            color: #333;
-            font-size: 14px;
-            z-index: 100;
-            opacity: 0.7;
+            position: absolute; bottom: 40px; left: 40px;
+            color: #333; font-size: 14px; z-index: 100; opacity: 0.7;
         }
+
+        /* CARD CONTROLS PANEL */
+        #card-controls {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255, 255, 255, 0.95); padding: 15px;
+            border: 1px solid #ddd; border-radius: 8px; z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-family: monospace;
+        }
+        #card-controls h3 { margin: 0 0 10px 0; font-size: 14px; color: #333; text-transform: uppercase; }
+        
+        .coord-display {
+            background: #f0f0f0; padding: 8px; border-radius: 4px;
+            font-size: 12px; margin-bottom: 10px; color: #555;
+        }
+        
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 30px);
+            grid-template-rows: repeat(2, 30px);
+            gap: 5px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .ctrl-btn {
+            width: 30px; height: 30px;
+            background: #eee; border: 1px solid #ccc;
+            border-radius: 4px; cursor: pointer;
+            font-weight: bold; color: #333;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ctrl-btn:hover { background: #ddd; }
+        .ctrl-btn:active { background: #333; color: white; }
+        
+        /* Grid positions for D-Pad */
+        .btn-up { grid-column: 2; grid-row: 1; }
+        .btn-left { grid-column: 1; grid-row: 2; }
+        .btn-down { grid-column: 2; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
+
+        .reset-btn {
+            width: 100%; padding: 8px;
+            background: #ffdddd; border: 1px solid #ffcccc;
+            color: #cc0000; cursor: pointer; border-radius: 4px;
+            font-size: 12px; font-weight: bold;
+        }
+        .reset-btn:hover { background: #ffcccc; }
     </style>
 </head>
 <body>
@@ -61,11 +89,26 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click anywhere to start.<br>Use the button to move between viewpoints.</p>
+            <p>Click anywhere to start.<br>Use controls top-right to move the info card.</p>
         </div>
     </div>
 
-    <!-- ONLY ONE BUTTON -->
+    <!-- CARD CONTROLS -->
+    <div id="card-controls">
+        <h3>Card Position</h3>
+        <div class="coord-display" id="coord-text">X: 0.00<br>Y: 0.00<br>Z: 0.00</div>
+        
+        <div class="d-pad">
+            <button class="ctrl-btn btn-up" onclick="moveCard('up')">▲</button>
+            <button class="ctrl-btn btn-left" onclick="moveCard('left')">◀</button>
+            <button class="ctrl-btn btn-down" onclick="moveCard('down')">▼</button>
+            <button class="ctrl-btn btn-right" onclick="moveCard('right')">▶</button>
+        </div>
+        
+        <button class="reset-btn" onclick="resetCard()">RESET POSITION</button>
+    </div>
+
+    <!-- MAIN ACTION -->
     <div id="actions">
         <button class="main-btn" onclick="nextStation()">NEXT STATION ➡️</button>
     </div>
@@ -73,12 +116,7 @@
     <div id="status">Ready...</div>
 
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
     </script>
 
     <script type="module">
@@ -88,77 +126,45 @@
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff); 
-        
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
         // --- LIGHTS ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
-        scene.add(ambientLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
+        const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
+        const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        const spotLight = new THREE.SpotLight(0xffeeff, 2);
-        spotLight.position.set(0, 10, 0);
-        spotLight.angle = Math.PI / 4;
-        spotLight.penumbra = 0.5;
-        spotLight.decay = 1;
-        spotLight.distance = 50;
-        spotLight.castShadow = true;
-        scene.add(spotLight);
-        spotLight.target.position.set(-0.006, 1.041, -0.008);
-
-        const centerLight = new THREE.PointLight(0xff00ff, 1, 10);
-        centerLight.position.set(-0.006, 1.041, -0.008);
-        scene.add(centerLight);
-
-        // --- FLOATING PAGE (FIXED SIZE & POSITION) ---
-        const canvas = document.createElement('canvas');
-        canvas.width = 512; canvas.height = 512;
+        // --- FLOATING PAGE ---
+        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
         const context = canvas.getContext('2d');
-        
-        // Clean White Card Design
-        context.fillStyle = '#ffffff'; 
-        context.fillRect(0, 0, 512, 512);
-        
-        // Subtle Border
-        context.strokeStyle = '#dddddd'; 
-        context.lineWidth = 20; 
-        context.strokeRect(20, 20, 472, 472);
-        
-        // Text
-        context.font = 'bold 50px Arial'; 
-        context.fillStyle = '#333'; 
-        context.textAlign = 'center';
+        context.fillStyle = '#ffffff'; context.fillRect(0, 0, 512, 512);
+        context.strokeStyle = '#dddddd'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
+        context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
         context.fillText("INFO", 256, 200);
-        
-        context.font = '30px Arial'; 
-        context.fillStyle = '#666'; 
+        context.font = '30px Arial'; context.fillStyle = '#666';
         context.fillText("Viewpoint C", 256, 280);
-        context.fillText("Always Facing You", 256, 320);
         
         const pageTexture = new THREE.CanvasTexture(canvas);
-        
-        // FIXED: Smaller Size (1.5 instead of 3)
         const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
         const pageMaterial = new THREE.MeshBasicMaterial({ map: pageTexture, transparent: true, side: THREE.DoubleSide });
         const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
         
-        // FIXED: Lower Position (Y=2.5 instead of Y=3) and slightly adjusted X/Z to center it better
-        floatingPage.position.set(-5.325, 2.5, 1.727); 
-        
+        // Default Position (Station C)
+        const DEFAULT_POS = new THREE.Vector3(-5.325, 2.5, 1.727);
+        floatingPage.position.copy(DEFAULT_POS);
         scene.add(floatingPage);
 
         // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
-            { name: "Intro",     pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First",  pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-            { name: "D: 2",      pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-            { name: "E: 3",      pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-            { name: "F: 4",      pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-            { name: "G: 5",      pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
+            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
         let currentStationIndex = 0;
@@ -172,51 +178,54 @@
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
-            model.traverse((child) => {
-                if (child.isMesh) { 
-                    child.castShadow = true; 
-                    child.receiveShadow = true; 
-                    if (child.name.toLowerCase().includes('tree')) {
-                        child.material.emissive = new THREE.Color(0xaa00aa);
-                        child.material.emissiveIntensity = 0.5;
-                    }
-                }
-            });
+            model.traverse((child) => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; if (child.name.toLowerCase().includes('tree')) { child.material.emissive = new THREE.Color(0xaa00aa); child.material.emissiveIntensity = 0.5; } } });
             scene.add(model);
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
         }, undefined, function (error) { console.error(error); });
 
         // --- UI LOGIC ---
-        document.getElementById('blocker').addEventListener('click', function() { 
-            this.style.display = 'none'; 
-            document.getElementById('status').innerText = "Tour Started"; 
-        });
+        document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour Started"; });
+
+        // --- CARD MOVEMENT LOGIC ---
+        const MOVE_STEP = 0.2; // How much it moves per click
+
+        window.moveCard = function(direction) {
+            if(direction === 'up') floatingPage.position.y += MOVE_STEP;
+            if(direction === 'down') floatingPage.position.y -= MOVE_STEP;
+            if(direction === 'left') floatingPage.position.x -= MOVE_STEP;
+            if(direction === 'right') floatingPage.position.x += MOVE_STEP;
+            updateCoordDisplay();
+        };
+
+        window.resetCard = function() {
+            floatingPage.position.copy(DEFAULT_POS);
+            updateCoordDisplay();
+        };
+
+        function updateCoordDisplay() {
+            const p = floatingPage.position;
+            document.getElementById('coord-text').innerHTML = 
+                `X: ${p.x.toFixed(2)}<br>Y: ${p.y.toFixed(2)}<br>Z: ${p.z.toFixed(2)}`;
+        }
+        
+        // Initialize display
+        updateCoordDisplay();
 
         window.nextStation = function() {
             if (isAnimating) return;
-            
-            if (currentStationIndex === 0) {
-                currentStationIndex = 1;
-            } else {
-                currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
-            }
-            
+            if (currentStationIndex === 0) currentStationIndex = 1;
+            else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
         };
 
         function startAnimation(targetPos) {
-            isAnimating = true;
-            animationProgress = 0;
-            startPos.copy(camera.position);
-            endPos.copy(targetPos);
-            
+            isAnimating = true; animationProgress = 0; startPos.copy(camera.position); endPos.copy(targetPos);
             const center = POINT_CENTER.clone();
             const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
             const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
             midPoint.add(direction.multiplyScalar(2)); 
-            
             window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
         }
 
@@ -231,23 +240,12 @@
 
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
-                
-                if (animationProgress >= 1) {
-                    animationProgress = 1;
-                    isAnimating = false;
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
-                }
-
+                if (animationProgress >= 1) { animationProgress = 1; isAnimating = false; document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; }
                 const t = easeInOutCubic(animationProgress);
-                
-                const p0 = window.animControlPoints.start;
-                const p1 = window.animControlPoints.mid;
-                const p2 = window.animControlPoints.end;
-                
+                const p0 = window.animControlPoints.start; const p1 = window.animControlPoints.mid; const p2 = window.animControlPoints.end;
                 const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
                 const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
                 const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
-                
                 camera.position.set(x, y, z);
                 camera.lookAt(POINT_CENTER);
             }
