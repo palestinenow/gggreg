@@ -2,25 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Real Glass Effect</title>
+    <title>Cinefdsrbit - Real Glass Effect</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
         
-        /* Canvas is behind everything */
-        canvas {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            z-index: 1 !important;
-        }
-        
-        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
+        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; cursor: pointer; }
         #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
         
-        #status { position: absolute; bottom: 40px; left: 40px; color: #fff; font-size: 14px; z-index: 100; opacity: 0.7; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        #status { position: absolute; bottom: 40px; left: 40px; color: #fff; font-size: 14px; z-index: 1000; opacity: 0.7; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         
-        /* Vignette overlay - above canvas */
         #vignette {
             position: fixed;
             top: 0;
@@ -30,39 +21,88 @@
             pointer-events: none;
             z-index: 2;
             background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);
-            transition: backdrop-filter 0.5s ease;
         }
         
-        /* Control Panel - above everything */
+        /* SIMPLE VISIBLE BUTTONS */
+        .simple-nav {
+            position: fixed !important;
+            bottom: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, 50%) !important;
+            z-index: 10000 !important;
+            display: flex !important;
+            gap: 30px !important;
+            opacity: 0 !important;
+            transition: opacity 0.5s ease !important;
+            pointer-events: none !important;
+        }
+        
+        .simple-nav.visible {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        
+        .simple-btn {
+            padding: 20px 50px !important;
+            font-size: 24px !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            letter-spacing: 4px !important;
+            background: rgba(0, 0, 0, 0.8) !important;
+            color: white !important;
+            border: 3px solid white !important;
+            border-radius: 60px !important;
+            cursor: pointer !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            box-shadow: 0 0 30px rgba(255,255,255,0.3) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .simple-btn:hover {
+            background: white !important;
+            color: black !important;
+            transform: scale(1.1) !important;
+            box-shadow: 0 0 50px rgba(255,255,255,0.5) !important;
+        }
+        
+        #toggle-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #003300;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+            border-radius: 5px;
+            z-index: 10001;
+        }
+        
+        #toggle-panel:hover {
+            background: #0f0;
+            color: black;
+        }
+        
         #control-panel {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             color: #0f0;
             padding: 20px;
             border-radius: 10px;
             font-family: monospace;
-            z-index: 200;
+            z-index: 10002;
             max-height: 90vh;
             overflow-y: auto;
             min-width: 300px;
             border: 2px solid #0f0;
             box-shadow: 0 0 20px rgba(0,255,0,0.3);
             pointer-events: auto;
-        }
-        
-        #control-panel h3 {
-            margin: 0 0 15px 0;
-            text-align: center;
-            color: #0f0;
-            border-bottom: 1px solid #0f0;
-            padding-bottom: 10px;
-        }
-        
-        #control-panel h4 {
-            margin: 15px 0 10px 0;
-            color: #0f0;
+            display: none;
         }
         
         .control-group {
@@ -70,13 +110,6 @@
             padding: 10px;
             background: rgba(0, 255, 0, 0.1);
             border-radius: 5px;
-        }
-        
-        .station-selector {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
         }
         
         .station-btn {
@@ -92,15 +125,9 @@
             flex: 1;
         }
         
-        .station-btn:hover {
+        .station-btn:hover, .station-btn.active {
             background: #0f0;
             color: black;
-        }
-        
-        .station-btn.active {
-            background: #0f0;
-            color: black;
-            font-weight: bold;
         }
         
         .pos-control {
@@ -134,12 +161,6 @@
             cursor: pointer;
             font-family: monospace;
             border-radius: 3px;
-            margin-left: 5px;
-        }
-        
-        .pos-control button:hover {
-            background: #0f0;
-            color: black;
         }
         
         .slider-control {
@@ -155,17 +176,6 @@
         .slider-control input {
             width: 100%;
             margin: 5px 0;
-        }
-        
-        .slider-control span {
-            color: #0f0;
-            float: right;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
         }
         
         .action-btn {
@@ -184,177 +194,6 @@
             background: #0f0;
             color: black;
         }
-        
-        #toggle-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #003300;
-            color: #0f0;
-            border: 2px solid #0f0;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-family: monospace;
-            font-weight: bold;
-            border-radius: 5px;
-            z-index: 201;
-        }
-        
-        #toggle-panel:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .coord-display {
-            color: #0f0;
-            font-size: 11px;
-            margin-top: 5px;
-            text-align: center;
-        }
-        
-        #blur-status {
-            color: #0f0;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 5px;
-        }
-
-        /* HydroRippleButton Styles - HIGH Z-INDEX */
-        @keyframes ripple-bloom {
-            0% { transform: scale(0.9); opacity: 0.8; border-width: 2px; }
-            100% { transform: scale(1.5); opacity: 0; border-width: 0px; }
-        }
-        
-        .hydro-nav-container {
-            position: fixed !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            z-index: 1000 !important;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.8s ease;
-        }
-        
-        .hydro-nav-container.visible {
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        
-        .hydro-nav {
-            display: flex;
-            gap: 80px;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .hydro-btn {
-            position: relative;
-            padding: 20px 50px;
-            font-weight: bold;
-            font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 0.3em;
-            overflow: visible;
-            border-radius: 50px;
-            border: 2px solid rgba(255,255,255,0.3);
-            transition: all 0.15s ease-out;
-            background: rgba(30, 40, 50, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            color: white;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            opacity: 0.8;
-            transform: scale(1);
-        }
-        
-        .hydro-btn .ripple-container {
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            border-radius: 50px;
-        }
-        
-        .hydro-btn .ripple {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 2px solid rgba(255,255,255,0.8);
-            border-radius: 50px;
-            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
-        }
-        
-        .hydro-btn .ripple-delayed {
-            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) 0.15s forwards;
-            border-color: rgba(255,255,255,0.4);
-        }
-        
-        .hydro-btn .btn-content {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .hydro-btn .arrow {
-            transition: transform 0.3s ease;
-            font-size: 20px;
-        }
-        
-        .hydro-btn:hover .arrow-left {
-            transform: translateX(-5px);
-        }
-        
-        .hydro-btn:hover .arrow-right {
-            transform: translateX(5px);
-        }
-        
-        .hydro-btn:hover {
-            border-color: rgba(255,255,255,0.6);
-            background: rgba(40, 50, 60, 0.8);
-            opacity: 1;
-            transform: scale(1.05);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
-        }
-        
-        .hydro-btn .glass-highlight {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
-            border-radius: 50px;
-            opacity: 0;
-            transition: opacity 0.5s;
-            pointer-events: none;
-        }
-        
-        .hydro-btn:hover .glass-highlight {
-            opacity: 1;
-        }
-        
-        .hydro-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -75%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.1) 46%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.1) 54%, transparent 60%);
-            transition: left 0.8s ease;
-            pointer-events: none;
-            border-radius: 50px;
-        }
-        
-        .hydro-btn:hover::before {
-            left: 130%;
-        }
     </style>
 </head>
 <body>
@@ -362,7 +201,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>The card is now real frosted glass.</p>
+            <p>Click to start.</p>
         </div>
     </div>
 
@@ -370,52 +209,29 @@
     
     <div id="vignette"></div>
     
-    <!-- HydroRippleButton Navigation - VISIBLE AT STATION C -->
-    <div class="hydro-nav-container" id="hydroNav">
-        <div class="hydro-nav">
-            <button class="hydro-btn" id="hydroPrevBtn" onclick="window.hydroPrev()">
-                <span class="ripple-container">
-                    <span class="ripple"></span>
-                    <span class="ripple-delayed"></span>
-                </span>
-                <span class="glass-highlight"></span>
-                <span class="btn-content">
-                    <span class="arrow arrow-left">←</span>
-                    PREVIOUS
-                </span>
-            </button>
-            <button class="hydro-btn" id="hydroNextBtn" onclick="window.hydroNext()">
-                <span class="ripple-container">
-                    <span class="ripple"></span>
-                    <span class="ripple-delayed"></span>
-                </span>
-                <span class="glass-highlight"></span>
-                <span class="btn-content">
-                    NEXT
-                    <span class="arrow arrow-right">→</span>
-                </span>
-            </button>
-        </div>
+    <!-- SIMPLE VISIBLE BUTTONS -->
+    <div class="simple-nav" id="simpleNav">
+        <button class="simple-btn" onclick="window.hydroPrev()">← PREVIOUS</button>
+        <button class="simple-btn" onclick="window.hydroNext()">NEXT →</button>
     </div>
     
     <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
     
-    <div id="control-panel" style="display: none;">
-        <h3>🎛️ DEBUG CONTROLS</h3>
+    <div id="control-panel">
+        <h3 style="color:#0f0; text-align:center;">🎛️ DEBUG CONTROLS</h3>
         
         <div class="control-group">
-            <h4>📍 SELECT STATION CARD</h4>
-            <div class="station-selector">
+            <h4 style="color:#0f0;">📍 SELECT STATION CARD</h4>
+            <div style="display:flex; gap:5px;">
                 <button class="station-btn" onclick="selectStation(2)">D: 2</button>
                 <button class="station-btn" onclick="selectStation(3)">E: 3</button>
                 <button class="station-btn" onclick="selectStation(4)">F: 4</button>
                 <button class="station-btn" onclick="selectStation(5)">G: 5</button>
             </div>
-            <div id="selected-station" class="coord-display">Selected: Station D</div>
         </div>
         
         <div class="control-group">
-            <h4>🎯 CARD POSITION</h4>
+            <h4 style="color:#0f0;">🎯 CARD POSITION</h4>
             <div class="pos-control">
                 <label>X:</label>
                 <input type="number" id="pos-x" step="0.01" value="0.10">
@@ -434,48 +250,10 @@
                 <button onclick="moveCard('z', -0.1)">-</button>
                 <button onclick="moveCard('z', 0.1)">+</button>
             </div>
-            <div style="margin-top: 10px;">
-                <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
-                <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
+            <div style="margin-top:10px; display:flex; gap:10px;">
+                <button class="action-btn" onclick="applyPosition()">✅ Apply</button>
+                <button class="action-btn" onclick="copyPosition()">📋 Copy</button>
             </div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎨 VIGNETTE EFFECT</h4>
-            <div class="slider-control">
-                <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
-                <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
-                <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
-                <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
-                <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
-            </div>
-            <div id="blur-status">Blur: INACTIVE</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>✨ GLOW EFFECT</h4>
-            <div class="slider-control">
-                <label>Min Strength: <span id="glow-min-val">23%</span></label>
-                <input type="range" id="glow-min" min="0" max="30" value="23" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Max Strength: <span id="glow-max-val">39%</span></label>
-                <input type="range" id="glow-max" min="20" max="80" value="39" step="1">
-            </div>
-        </div>
-        
-        <div class="action-buttons">
-            <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
-            <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
         </div>
     </div>
 
@@ -490,7 +268,6 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-        // Make functions globally available
         window.toggleControlPanel = function() {
             const panel = document.getElementById('control-panel');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -499,15 +276,11 @@
         let selectedStation = 2;
         window.selectStation = function(index) {
             selectedStation = index;
-            const stationNames = ['', 'C: First', 'D: 2', 'E: 3', 'F: 4', 'G: 5'];
-            document.getElementById('selected-station').textContent = `Selected: Station ${stationNames[index]}`;
-            
             if (cards[index]) {
                 document.getElementById('pos-x').value = cards[index].position.x.toFixed(2);
                 document.getElementById('pos-y').value = cards[index].position.y.toFixed(2);
                 document.getElementById('pos-z').value = cards[index].position.z.toFixed(2);
             }
-            
             document.querySelectorAll('.station-btn').forEach((btn, i) => {
                 if (i === index - 2) btn.classList.add('active');
                 else btn.classList.remove('active');
@@ -535,69 +308,17 @@
                 const pos = cards[selectedStation].position;
                 const text = `Station ${selectedStation}: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`;
                 navigator.clipboard?.writeText(text);
-                alert('Position copied: ' + text);
+                alert('Position copied!');
             }
         };
-        
-        window.saveSettings = function() {
-            alert('Settings saved!');
-        };
-        
-        window.exportConfig = function() {
-            const config = {
-                cards: cardPositions,
-                vignette: {
-                    center: document.getElementById('vignette-center').value,
-                    darkness: document.getElementById('vignette-darkness').value,
-                    mid: document.getElementById('vignette-mid').value
-                },
-                glow: {
-                    min: MIN_STRENGTH,
-                    max: MAX_STRENGTH
-                }
-            };
-            console.log('CONFIG:', JSON.stringify(config, null, 2));
-            alert('Config exported to console!');
-        };
 
-        // Hydro navigation functions
         window.hydroPrev = function() {
-            triggerRipple('hydroPrevBtn');
-            setTimeout(() => prevStation(), 100);
+            prevStation();
         };
         
         window.hydroNext = function() {
-            triggerRipple('hydroNextBtn');
-            setTimeout(() => nextStation(), 100);
+            nextStation();
         };
-        
-        function triggerRipple(btnId) {
-            const btn = document.getElementById(btnId);
-            if (!btn) return;
-            const container = btn.querySelector('.ripple-container');
-            const oldRipples = container.querySelectorAll('.ripple, .ripple-delayed');
-            oldRipples.forEach(r => r.remove());
-            
-            const ripple1 = document.createElement('span');
-            ripple1.className = 'ripple';
-            const ripple2 = document.createElement('span');
-            ripple2.className = 'ripple-delayed';
-            container.appendChild(ripple1);
-            container.appendChild(ripple2);
-            
-            setTimeout(() => {
-                ripple1.remove();
-                ripple2.remove();
-            }, 1500);
-        }
-
-        // Auto bloom for hydro buttons
-        setInterval(() => {
-            if (currentStationIndex === 1) {
-                triggerRipple('hydroPrevBtn');
-                triggerRipple('hydroNextBtn');
-            }
-        }, 2000);
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
@@ -607,26 +328,22 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
-        
-        // Ensure canvas is behind everything
         renderer.domElement.style.position = 'fixed';
         renderer.domElement.style.top = '0';
         renderer.domElement.style.left = '0';
         renderer.domElement.style.zIndex = '1';
+        document.body.appendChild(renderer.domElement);
 
-        // --- BLOOM EFFECT ---
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
-        bloomPass.strength = 0.23;
+        bloomPass.strength = 0.3;
         bloomPass.radius = 0.8;
         
         const composer = new EffectComposer(renderer);
         composer.addPass(renderScene);
         composer.addPass(bloomPass);
 
-        // --- LIGHTS ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
         scene.add(ambientLight);
         
@@ -641,122 +358,9 @@
         spotLight.target.position.set(-0.006, 1.041, -0.008);
         scene.add(spotLight.target);
         
-        const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10); 
+        const centerLight = new THREE.PointLight(0xff00ff, 0.5, 10); 
         centerLight.position.set(-0.006, 1.041, -0.008); 
         scene.add(centerLight);
-
-        // --- GLOW PULSE SYSTEM ---
-        let glowStartTime = Date.now();
-        let glowDurationUp = 10000 + Math.random() * 20000;
-        let glowDurationDown = 10000 + Math.random() * 20000;
-        let isGlowingUp = true;
-        
-        let MIN_STRENGTH = 0.10;
-        let MAX_STRENGTH = 0.40;
-        
-        document.getElementById('glow-min').addEventListener('input', (e) => {
-            MIN_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-min-val').textContent = e.target.value + '%';
-        });
-        
-        document.getElementById('glow-max').addEventListener('input', (e) => {
-            MAX_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-max-val').textContent = e.target.value + '%';
-        });
-        
-        function getRandomDuration() {
-            return 10000 + Math.random() * 20000;
-        }
-        
-        function updateGlow() {
-            const now = Date.now();
-            const elapsed = now - glowStartTime;
-            
-            if (isGlowingUp) {
-                const progress = Math.min(elapsed / glowDurationUp, 1);
-                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength;
-                centerLight.intensity = strength * 2.0;
-                
-                if (progress >= 1) {
-                    isGlowingUp = false;
-                    glowStartTime = now;
-                    glowDurationDown = getRandomDuration();
-                }
-            } else {
-                const progress = Math.min(elapsed / glowDurationDown, 1);
-                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength;
-                centerLight.intensity = strength * 2.0;
-                
-                if (progress >= 1) {
-                    isGlowingUp = true;
-                    glowStartTime = now;
-                    glowDurationUp = getRandomDuration();
-                }
-            }
-        }
-
-        // --- DYNAMIC BLUR SYSTEM ---
-        let blurState = 'waiting';
-        let blurStartTime = Date.now();
-        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
-        
-        function updateBlur() {
-            const now = Date.now();
-            const vignette = document.getElementById('vignette');
-            const blurStatus = document.getElementById('blur-status');
-            
-            if (blurState === 'waiting' && now >= nextBlurTime) {
-                blurState = 'active';
-                blurStartTime = now;
-                blurStatus.textContent = 'Blur: ACTIVE';
-            }
-            
-            if (blurState === 'active') {
-                const elapsed = (now - blurStartTime) / 1000;
-                if (elapsed >= 1.0) {
-                    blurState = 'waiting';
-                    nextBlurTime = now + 4000 + Math.random() * 14000;
-                    vignette.style.backdropFilter = 'blur(0px)';
-                    blurStatus.textContent = 'Blur: INACTIVE';
-                } else {
-                    vignette.style.backdropFilter = `blur(1px)`;
-                }
-            }
-            
-            document.getElementById('vignette-blur-val').textContent = 
-                vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
-        }
-
-        // --- VIGNETTE CONTROLS ---
-        const vignette = document.getElementById('vignette');
-        
-        document.getElementById('vignette-center').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-center-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        document.getElementById('vignette-darkness').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-darkness-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        document.getElementById('vignette-mid').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-mid-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        function updateVignette() {
-            const center = document.getElementById('vignette-center').value;
-            const darkness = document.getElementById('vignette-darkness').value / 100;
-            const mid = document.getElementById('vignette-mid').value / 100;
-            
-            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
-        }
 
         // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
@@ -776,7 +380,6 @@
             5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
-        // --- CREATE CARDS ---
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -785,7 +388,7 @@
             canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
+            context.fillStyle = 'rgba(255, 255, 255, 0.1)'; 
             context.fillRect(0, 0, 512, 512);
             
             context.shadowColor = 'rgba(0, 0, 0, 1.0)';
@@ -797,22 +400,16 @@
             context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
             context.fillText(stationName, 256, 200);
-            context.fillText(stationName, 256, 200);
             
             context.font = 'bold 45px Arial'; 
             context.fillStyle = '#ffffff';
-            context.fillText(`Station ${stationIndex}`, 256, 300);
             context.fillText(`Station ${stationIndex}`, 256, 300);
             
             context.font = 'bold 32px Arial';
             context.fillStyle = '#ffffff';
             context.fillText('Viewpoint', 256, 370);
-            context.fillText('Viewpoint', 256, 370);
             
             context.shadowColor = 'transparent';
-            context.shadowBlur = 0;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
             
             const pageTexture = new THREE.CanvasTexture(canvas);
             
@@ -830,9 +427,12 @@
             });
             
             const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
-            const card = new THREE.Mesh(pageGeometry, pageMaterial);
-            
-            return card;
+            return new THREE.Mesh(pageGeometry, pageMaterial);
+        }
+
+        for (let i = 2; i < STATIONS.length; i++) {
+            cards[i] = createCard(STATIONS[i].name, i);
+            scene.add(cards[i]);
         }
 
         function positionCards() {
@@ -844,12 +444,6 @@
             }
         }
 
-        for (let i = 2; i < STATIONS.length; i++) {
-            const card = createCard(STATIONS[i].name, i);
-            cards[i] = card;
-            scene.add(card);
-        }
-
         let currentStationIndex = 0;
         let isAnimating = false;
         let animationProgress = 0;
@@ -857,7 +451,6 @@
         let endPos = new THREE.Vector3();
         const ANIMATION_DURATION = 2.5;
 
-        // --- LOAD MODEL ---
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
@@ -877,18 +470,18 @@
             positionCards();
         }, undefined, function (error) { console.error(error); });
 
-        // --- UI LOGIC ---
         document.getElementById('blocker').addEventListener('click', function() { 
             this.style.display = 'none'; 
-            document.getElementById('status').innerText = "Tour Started"; 
+            document.getElementById('status').innerText = "Tour Started - Go to Station C for navigation"; 
         });
 
-        function updateHydroNavVisibility() {
-            const hydroNav = document.getElementById('hydroNav');
+        function updateNavVisibility() {
+            const nav = document.getElementById('simpleNav');
             if (currentStationIndex === 1) {
-                hydroNav.classList.add('visible');
+                nav.classList.add('visible');
+                document.getElementById('status').innerText = "Station C: Empty - Use buttons to navigate";
             } else {
-                hydroNav.classList.remove('visible');
+                nav.classList.remove('visible');
             }
         }
 
@@ -903,11 +496,9 @@
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            updateHydroNavVisibility();
+            updateNavVisibility();
             
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
+            if (currentStationIndex >= 2) selectStation(currentStationIndex);
         };
 
         window.prevStation = function() {
@@ -921,11 +512,9 @@
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            updateHydroNavVisibility();
+            updateNavVisibility();
             
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
+            if (currentStationIndex >= 2) selectStation(currentStationIndex);
         };
 
         function startAnimation(targetPos) {
@@ -944,12 +533,8 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
 
-        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
-            
-            updateGlow();
-            updateBlur();
 
             for (let i = 2; i < cards.length; i++) {
                 if (cards[i]) {
@@ -985,12 +570,7 @@
         animate();
         
         setTimeout(() => selectStation(2), 100);
-        
-        document.getElementById('glow-min').value = 23;
-        document.getElementById('glow-max').value = 39;
-        MIN_STRENGTH = 0.23;
-        MAX_STRENGTH = 0.39;
-        updateVignette();
+        positionCards();
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
