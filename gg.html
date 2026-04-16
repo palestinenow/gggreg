@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Flow - Fixed Blur Slider</title>
+    <title>Cinematic Flow - Button Control</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: 'Courier New', Courier, monospace; }
         
@@ -47,29 +47,31 @@
         #flow-controls h3 { margin: 0 0 15px 0; font-size: 14px; color: #333; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
         .control-group { margin-bottom: 15px; }
-        .control-label { display: flex; justify-content: space-between; font-size: 12px; color: #555; margin-bottom: 5px; font-weight: bold; }
+        .control-label { font-size: 12px; color: #555; margin-bottom: 8px; font-weight: bold; }
         
-        /* Slider Styling */
-        input[type=range] {
-            width: 100%;
-            -webkit-appearance: none;
-            background: transparent;
+        /* Blur Buttons Grid */
+        .blur-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
         }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 18px; width: 18px;
-            border-radius: 50%;
+        .blur-btn {
+            background: #eee;
+            border: 1px solid #ccc;
+            padding: 8px 0;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+            color: #555;
+        }
+        .blur-btn:hover { background: #ddd; }
+        .blur-btn.active {
             background: #0f0;
-            cursor: pointer;
-            margin-top: -7px;
+            color: white;
+            border-color: #0f0;
             box-shadow: 0 0 5px #0f0;
-            border: 2px solid white;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 4px;
-            cursor: pointer;
-            background: #ddd;
-            border-radius: 2px;
         }
         
         /* Checkbox Styling */
@@ -93,7 +95,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1 style="color:#0f0; margin:0;">CLICK TO BEGIN</h1>
-            <p style="margin-top:10px;">Cinematic orbit with adjustable Depth of Field.<br>Use the "Blur Scale" slider to control the visor effect.</p>
+            <p style="margin-top:10px;">Cinematic orbit with adjustable Depth of Field.<br>Use the buttons above to set blur intensity.</p>
         </div>
     </div>
 
@@ -101,13 +103,16 @@
     <div id="flow-controls">
         <h3>✨ Flow Controls</h3>
         
-        <!-- Blur Slider -->
+        <!-- Blur Buttons -->
         <div class="control-group">
-            <div class="control-label">
-                <span>Blur Scale (Visor Effect)</span>
-                <span id="blur-val">50%</span>
+            <div class="control-label">Blur Scale (Visor Effect)</div>
+            <div class="blur-buttons">
+                <button class="blur-btn" onclick="setBlur(0)">0%</button>
+                <button class="blur-btn" onclick="setBlur(0.25)">25%</button>
+                <button class="blur-btn active" onclick="setBlur(0.5)">50%</button>
+                <button class="blur-btn" onclick="setBlur(0.75)">75%</button>
+                <button class="blur-btn" onclick="setBlur(1.0)">100%</button>
             </div>
-            <input type="range" id="blur-slider" min="0" max="100" value="50">
         </div>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
@@ -170,11 +175,10 @@
         bloomPass.radius = 0.8;
 
         // 2. BOKEH (Depth of Field)
-        // We set initial aperture to 0.0001 (moderate blur)
         const bokehPass = new BokehPass(scene, camera, {
             focus: 10.0,
-            aperture: 0.0001, 
-            maxblur: 0.015, // Slightly increased max blur for better effect
+            aperture: 0.00015, // Default to 50% approx
+            maxblur: 0.015,
             width: window.innerWidth,
             height: window.innerHeight
         });
@@ -312,31 +316,27 @@
         // --- UI & CONTROLS ---
         document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour started."; });
 
-        // --- FIX FOR SLIDER ---
-        const blurSlider = document.getElementById('blur-slider');
-        const blurValDisplay = document.getElementById('blur-val');
-        
-        // Function to update blur immediately
-        function updateBlur() {
-            const val = parseInt(blurSlider.value);
-            blurValDisplay.innerText = val + "%";
+        // --- BLUR BUTTON LOGIC ---
+        window.setBlur = function(level) {
+            // level is 0, 0.25, 0.5, 0.75, or 1.0
             
-            // Map 0-100 to Aperture 0.0 - 0.0003
-            // 0.0003 is quite blurry, good for "visor" effect
-            const newAperture = (val / 100) * 0.0003;
+            // Update UI Buttons
+            const buttons = document.querySelectorAll('.blur-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
             
-            // Directly set the uniform
+            // Find the button that matches the level and activate it
+            // We map the float level back to index for simplicity or just check innerText
+            // Simple approach: highlight based on click context
+            event.target.classList.add('active');
+
+            // Calculate Aperture: Max 0.0003 for 100%
+            const maxAperture = 0.0003;
+            const newAperture = level * maxAperture;
+
             if(bokehPass.uniforms && bokehPass.uniforms['aperture']) {
                 bokehPass.uniforms['aperture'].value = newAperture;
             }
-        }
-
-        // Listen for changes
-        blurSlider.addEventListener('input', updateBlur);
-        blurSlider.addEventListener('change', updateBlur);
-        
-        // Initialize blur on load
-        updateBlur();
+        };
 
         window.nextStation = function() {
             if (isAnimating) return;
@@ -397,7 +397,6 @@
             } else { godRays.visible = false; }
 
             // UPDATE DEPTH OF FIELD FOCUS
-            // Always focus on the tree so it stays sharp while edges blur
             const dist = camera.position.distanceTo(POINT_CENTER);
             if(bokehPass.uniforms && bokehPass.uniforms['focus']) {
                 bokehPass.uniforms['focus'].value = dist;
