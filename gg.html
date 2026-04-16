@@ -208,6 +208,7 @@
             const time = Date.now() * 0.001;
 
             STATIONS.forEach(station => {
+                // FIX: Only animate if the station has a card
                 if(station.card) {
                     const dist = camera.position.distanceTo(station.pos);
                     
