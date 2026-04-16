@@ -292,23 +292,30 @@
 
             // Glass Effect & Random Blur/Shine Logic
             STATIONS.forEach(station => {
-                if(station.card) {
+                // FIX: Only animate if the station has a card AND userData exists
+                if(station.card && station.card.userData) {
                     const dist = camera.position.distanceTo(station.pos);
                     if (dist < 2.5) {
                         // AT STATION: Face Camera & 100% Opacity (Glass Background Visible)
                         station.card.lookAt(camera.position);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
                         // Stop random movement when focused
-                        station.card.position.lerp(station.userData.originalPos, 0.1);
+                        if(station.card.userData.originalPos) {
+                            station.card.position.lerp(station.card.userData.originalPos, 0.1);
+                        }
                     } else {
                         // AWAY: Return to Original Rotation & 5% Opacity (Ghostly)
-                        station.card.quaternion.slerp(station.quat, 0.1);
+                        if(station.quat) {
+                            station.card.quaternion.slerp(station.quat, 0.1);
+                        }
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
                         
                         // RANDOM SHINE/FLOAT EFFECT
-                        const offset = station.userData.randomOffset;
-                        station.card.position.y = station.userData.originalPos.y + Math.sin(time + offset) * 0.1;
-                        station.card.position.x = station.userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
+                        if(station.card.userData.originalPos && station.card.userData.randomOffset !== undefined) {
+                            const offset = station.card.userData.randomOffset;
+                            station.card.position.y = station.card.userData.originalPos.y + Math.sin(time + offset) * 0.1;
+                            station.card.position.x = station.card.userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
+                        }
                     }
                 }
             });
