@@ -28,10 +28,10 @@
             transition: backdrop-filter 0.5s ease;
         }
         
-        /* Glass Navigation Bar */
+        /* Glass Navigation Bar - Positioned lower */
         .glass-nav {
             position: fixed;
-            top: 50%;
+            top: 58%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 92%;
@@ -391,7 +391,7 @@
     
     <div id="vignette"></div>
     
-    <!-- Glass Navigation Bar for Station C -->
+    <!-- Glass Navigation Bar - Shows only once at Station C -->
     <nav class="glass-nav" id="glassNav">
         <div class="dot"></div>
         <div class="input-wrap" id="inputWrap"></div>
@@ -503,7 +503,7 @@
         
         let step = 1;
         let wishText = '';
-        let navActive = false;
+        let navShown = false; // Track if nav has been shown
 
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -562,7 +562,6 @@
                     setTimeout(() => {
                         nav.classList.add('vanish');
                         nav.classList.remove('visible');
-                        navActive = false;
                         step = 1;
                         btn.style.opacity = '1';
                         btn.style.pointerEvents = 'auto';
@@ -576,19 +575,20 @@
         initNav();
 
         function showNavBar() {
-            nav.classList.remove('vanish');
-            nav.classList.add('visible');
-            navActive = true;
-            step = 1;
-            btn.style.opacity = '1';
-            btn.style.pointerEvents = 'auto';
-            initNav();
+            if (!navShown) {
+                nav.classList.remove('vanish');
+                nav.classList.add('visible');
+                navShown = true;
+                step = 1;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                initNav();
+            }
         }
 
         function hideNavBar() {
             nav.classList.remove('visible');
             nav.classList.add('vanish');
-            navActive = false;
         }
 
         // Make functions globally available
