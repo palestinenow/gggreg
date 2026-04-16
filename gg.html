@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Fixed Glass Card</title>
+    <title>Cinematic Orbit - Premium Glass Card</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         
@@ -36,7 +36,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>The card is fixed in place. It turns to frosted glass when you leave.</p>
+            <p>Click to start.<br>The card is made of premium frosted glass.</p>
         </div>
     </div>
 
@@ -68,39 +68,42 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // --- FIXED GLASS CARD ---
-        // Create a high-res canvas for better blur effect
+        // --- PREMIUM GLASS CARD ---
         const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
         const context = canvas.getContext('2d');
         
-        // White Background
-        context.fillStyle = '#ffffff'; context.fillRect(0, 0, 1024, 1024);
+        // Transparent Background for Canvas (so only text/border exists)
+        // context.clearRect(0,0,1024,1024); 
         
         // Border
-        context.strokeStyle = '#cccccc'; context.lineWidth = 40; context.strokeRect(50, 50, 924, 924);
+        context.strokeStyle = '#ffffff'; context.lineWidth = 30; context.strokeRect(50, 50, 924, 924);
         
         // Text
-        context.font = 'bold 100px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
+        context.font = 'bold 100px Arial'; context.fillStyle = '#ffffff'; context.textAlign = 'center';
+        context.shadowColor = "rgba(0,0,0,0.5)"; context.shadowBlur = 10;
         context.fillText("INFO", 512, 400);
-        context.font = '60px Arial'; context.fillStyle = '#666';
+        context.font = '60px Arial'; context.fillStyle = '#eeeeee';
         context.fillText("Viewpoint C", 512, 550);
         
         const pageTexture = new THREE.CanvasTexture(canvas);
         
-        const pageMaterial = new THREE.MeshStandardMaterial({ 
-            map: pageTexture, 
-            transparent: true, 
-            opacity: 1.0,
+        // USE MESH PHYSICAL MATERIAL FOR REAL GLASS EFFECT
+        const pageMaterial = new THREE.MeshPhysicalMaterial({
+            map: pageTexture,
+            transparent: true,
+            opacity: 0.5, // Start semi-transparent
+            transmission: 0.9, // High transmission = see-through like glass
+            roughness: 0.2,    // Low roughness = smooth/clear, High = frosted
+            thickness: 0.5,    // Simulates volume of glass
+            ior: 1.5,          // Index of Refraction for glass
             side: THREE.DoubleSide,
-            roughness: 0.1, // Smooth glass
-            metalness: 0.0
+            color: 0xffffff
         });
         
         const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
         const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
         
         // FIXED POSITION FROM YOUR SCREENSHOT
-        // X: -3.61, Y: 1.30, Z: 1.17
         floatingPage.position.set(-3.61, 1.30, 1.17);
         
         // Initial Rotation: Face the center/tree
@@ -163,23 +166,29 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // SMART GLASS LOGIC
+            // PREMIUM GLASS LOGIC
             const distToC = camera.position.distanceTo(STATIONS[1].pos);
             
             if (distToC < 2.5) {
-                // AT STATION C: Clear & Opaque
+                // AT STATION C: Soft Glass Window
+                // You can see the tree behind it, but the text is clear
                 floatingPage.lookAt(camera.position);
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 1.0, 0.1);
-                floatingPage.material.color.setHex(0xffffff); // White
+                
+                // Smoothly transition to Soft Glass
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.6, 0.1);
+                floatingPage.material.transmission = THREE.MathUtils.lerp(floatingPage.material.transmission, 0.9, 0.1);
+                floatingPage.material.roughness = THREE.MathUtils.lerp(floatingPage.material.roughness, 0.1, 0.1); // Clearer
+                
             } else {
-                // AWAY: Frosted Glass & Blurry
+                // AWAY: Ghostly / Too Soft
                 floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1);
                 
-                // Make it very transparent (0.1) to look like glass
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.1, 0.1);
+                // Extremely low opacity (5%)
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.05, 0.1);
                 
-                // Tint it slightly blue/grey to look like thick glass
-                floatingPage.material.color.setHex(0xeefbff);
+                // Keep high transmission so it looks like air
+                floatingPage.material.transmission = THREE.MathUtils.lerp(floatingPage.material.transmission, 1.0, 0.1);
+                floatingPage.material.roughness = THREE.MathUtils.lerp(floatingPage.material.roughness, 0.8, 0.1); // More frosted
             }
 
             if (isAnimating) {
