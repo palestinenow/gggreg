@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Multi-Glass Cards</title>
+    <title>Cinematic Orbit - Full Card Control</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         
@@ -34,7 +34,7 @@
             position: absolute; top: 20px; right: 20px;
             background: rgba(255, 255, 255, 0.95); padding: 15px;
             border: 1px solid #ddd; border-radius: 8px; z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-family: monospace; width: 160px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-family: monospace; width: 180px;
         }
         #card-controls h3 { margin: 0 0 10px 0; font-size: 14px; color: #333; text-transform: uppercase; }
         
@@ -48,9 +48,13 @@
             font-size: 11px; margin-bottom: 10px; color: #555; line-height: 1.4;
         }
         
-        .control-group { margin-bottom: 8px; text-align: center; }
-        .depth-btns { display: flex; justify-content: center; gap: 10px; margin-bottom: 5px; }
-        .xy-btns { display: grid; grid-template-columns: 30px 30px 30px; gap: 4px; justify-content: center; }
+        .control-group { margin-bottom: 12px; text-align: center; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .control-group:last-child { border-bottom: none; }
+        
+        .label-text { font-size: 10px; color: #999; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .btn-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 4px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 30px); gap: 4px; justify-content: center; }
         
         .ctrl-btn {
             width: 30px; height: 30px;
@@ -78,7 +82,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>Use controls to position cards for C, D, E, F.</p>
+            <p>Click to start.<br>Use controls to position cards C, D, E, F.</p>
         </div>
     </div>
 
@@ -94,22 +98,23 @@
 
         <div class="coord-display" id="coord-text">X: 0.00<br>Y: 0.00<br>Z: 0.00</div>
         
-        <!-- Depth Control -->
+        <!-- Depth Control (Forward/Back) -->
         <div class="control-group">
-            <div style="font-size:10px; color:#999; margin-bottom:2px;">DEPTH</div>
-            <div class="depth-btns">
+            <div class="label-text">Depth (Look Direction)</div>
+            <div class="btn-row">
                 <button class="ctrl-btn" onclick="moveSelectedCard('fwd')">⬆️ Fwd</button>
                 <button class="ctrl-btn" onclick="moveSelectedCard('back')">⬇️ Back</button>
             </div>
         </div>
 
-        <!-- XY Control -->
+        <!-- XY Control (Up/Down/Left/Right) -->
         <div class="control-group">
-            <div style="font-size:10px; color:#999; margin-bottom:2px;">POSITION</div>
-            <div class="xy-btns">
+            <div class="label-text">Position (World Axis)</div>
+            <div class="btn-grid">
                 <div></div>
                 <button class="ctrl-btn" onclick="moveSelectedCard('up')">▲</button>
                 <div></div>
+                
                 <button class="ctrl-btn" onclick="moveSelectedCard('left')">◀</button>
                 <button class="ctrl-btn" onclick="moveSelectedCard('down')">▼</button>
                 <button class="ctrl-btn" onclick="moveSelectedCard('right')">▶</button>
@@ -248,16 +253,25 @@
 
         const MOVE_STEP = 0.2;
         window.moveSelectedCard = function(direction) {
-            const camDir = new THREE.Vector3();
-            camera.getWorldDirection(camDir);
-            camDir.y = 0; camDir.normalize();
-
-            if(direction === 'fwd') selectedCardObj.position.addScaledVector(camDir, MOVE_STEP);
-            else if(direction === 'back') selectedCardObj.position.addScaledVector(camDir, -MOVE_STEP);
-            else if(direction === 'up') selectedCardObj.position.y += MOVE_STEP;
-            else if(direction === 'down') selectedCardObj.position.y -= MOVE_STEP;
-            else if(direction === 'left') selectedCardObj.position.x -= MOVE_STEP;
-            else if(direction === 'right') selectedCardObj.position.x += MOVE_STEP;
+            // For Forward/Back, we use Camera Direction
+            // For Left/Right/Up/Down, we use World Axis
+            
+            if(direction === 'fwd' || direction === 'back') {
+                const camDir = new THREE.Vector3();
+                camera.getWorldDirection(camDir);
+                camDir.y = 0; // Keep horizontal
+                camDir.normalize();
+                
+                if(direction === 'fwd') selectedCardObj.position.addScaledVector(camDir, MOVE_STEP);
+                else selectedCardObj.position.addScaledVector(camDir, -MOVE_STEP);
+            } 
+            else {
+                // World Axis Movement
+                if(direction === 'up') selectedCardObj.position.y += MOVE_STEP;
+                else if(direction === 'down') selectedCardObj.position.y -= MOVE_STEP;
+                else if(direction === 'left') selectedCardObj.position.x -= MOVE_STEP;
+                else if(direction === 'right') selectedCardObj.position.x += MOVE_STEP;
+            }
             
             updateCoordDisplay();
         };
