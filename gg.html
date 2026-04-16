@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbvfdit - Re cx xal Glass Effect</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; cursor: none; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
         #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
@@ -12,6 +12,32 @@
         button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         button.main-btn:hover { background: #000; transform: translateY(-2px); }
         #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
+        
+        /* Custom cursor */
+        #cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, border-color 0.2s;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        
+        #cursor-dot {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1001;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
         
         /* Vignette overlay */
         #vignette {
@@ -218,7 +244,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>The card is now real frosted glass.</p>
+            <p>Click to start.<br>Move your mouse to look around</p>
         </div>
     </div>
 
@@ -230,6 +256,8 @@
     <div id="status">Ready...</div>
     
     <div id="vignette"></div>
+    <div id="cursor"></div>
+    <div id="cursor-dot"></div>
     
     <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
     
@@ -290,6 +318,10 @@
             <div class="slider-control">
                 <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
                 <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
+            </div>
+            <div class="slider-control">
+                <label>Parallax Strength: <span id="parallax-val">50%</span></label>
+                <input type="range" id="parallax-strength" min="0" max="100" value="50" step="5">
             </div>
             <div id="blur-status">Blur: INACTIVE</div>
         </div>
@@ -393,6 +425,46 @@
             alert('Config exported to console!');
         };
 
+        // --- MOUSE PARALLAX SYSTEM ---
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetMouseX = 0;
+        let targetMouseY = 0;
+        let parallaxStrength = 0.5;
+        
+        // Custom cursor
+        const cursor = document.getElementById('cursor');
+        const cursorDot = document.getElementById('cursor-dot');
+        
+        document.addEventListener('mousemove', (e) => {
+            targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            
+            // Move custom cursor
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+        });
+        
+        document.addEventListener('mouseleave', () => {
+            targetMouseX = 0;
+            targetMouseY = 0;
+            cursor.style.opacity = '0';
+            cursorDot.style.opacity = '0';
+        });
+        
+        document.addEventListener('mouseenter', () => {
+            cursor.style.opacity = '1';
+            cursorDot.style.opacity = '1';
+        });
+        
+        // Parallax strength slider
+        document.getElementById('parallax-strength').addEventListener('input', (e) => {
+            parallaxStrength = e.target.value / 100;
+            document.getElementById('parallax-val').textContent = e.target.value + '%';
+        });
+
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff); 
@@ -402,6 +474,11 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
+
+        // Store base camera rotation and position for parallax
+        let baseCameraPosition = new THREE.Vector3();
+        let baseCameraQuaternion = new THREE.Quaternion();
+        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
 
         // --- BLOOM EFFECT ---
         const renderScene = new RenderPass(scene, camera);
@@ -547,25 +624,24 @@
         }
 
         // --- STATIONS ---
-        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },  // No card
+            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
             { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
             { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
             { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
             { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
-        // CARD POSITIONS (Station 1/C has no card)
+        // CARD POSITIONS
         const cardPositions = {
-            2: { x: 0.10, y: 1.20, z: 4.00 },   // D
-            3: { x: 3.60, y: 1.25, z: 1.20 },   // E
-            4: { x: 2.20, y: 1.20, z: -3.20 },  // F
-            5: { x: -2.20, y: 1.25, z: -2.70 }  // G
+            2: { x: 0.10, y: 1.20, z: 4.00 },
+            3: { x: 3.60, y: 1.25, z: 1.20 },
+            4: { x: 2.20, y: 1.20, z: -3.20 },
+            5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
-        // --- CREATE CARDS (ONLY FOR STATIONS 2-5) ---
+        // --- CREATE CARDS ---
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -574,38 +650,30 @@
             canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            // Very subtle glass background
             context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
             context.fillRect(0, 0, 512, 512);
             
-            // Strong text shadow for depth
             context.shadowColor = 'rgba(0, 0, 0, 1.0)';
             context.shadowBlur = 20;
             context.shadowOffsetX = 4;
             context.shadowOffsetY = 4;
             
-            // Station name - SUPER BRIGHT WHITE
             context.font = 'bold 70px Arial'; 
             context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
             context.fillText(stationName, 256, 200);
-            
-            // Second pass for extra brightness
             context.fillText(stationName, 256, 200);
             
-            // Subtitle - SUPER BRIGHT WHITE
             context.font = 'bold 45px Arial'; 
             context.fillStyle = '#ffffff';
             context.fillText(`Station ${stationIndex}`, 256, 300);
             context.fillText(`Station ${stationIndex}`, 256, 300);
             
-            // Additional info - SUPER BRIGHT WHITE
             context.font = 'bold 32px Arial';
             context.fillStyle = '#ffffff';
             context.fillText('Viewpoint', 256, 370);
             context.fillText('Viewpoint', 256, 370);
             
-            // Reset shadow
             context.shadowColor = 'transparent';
             context.shadowBlur = 0;
             context.shadowOffsetX = 0;
@@ -641,7 +709,6 @@
             }
         }
 
-        // Create cards only for stations 2-5 (D, E, F, G)
         for (let i = 2; i < STATIONS.length; i++) {
             const card = createCard(STATIONS[i].name, i);
             cards[i] = card;
@@ -672,6 +739,8 @@
             scene.add(model);
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
+            baseCameraPosition.copy(camera.position);
+            baseCameraQuaternion.copy(camera.quaternion);
             positionCards();
         }, undefined, function (error) { console.error(error); });
 
@@ -730,6 +799,45 @@
         function easeInOutCubic(t) { 
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
+        
+        // Smooth mouse movement
+        function updateMouseParallax() {
+            mouseX += (targetMouseX - mouseX) * 0.05;
+            mouseY += (targetMouseY - mouseY) * 0.05;
+        }
+        
+        function applyParallax() {
+            if (isAnimating) return;
+            
+            // Calculate offset based on mouse position
+            const offsetX = mouseX * 0.5 * parallaxStrength;
+            const offsetY = mouseY * 0.3 * parallaxStrength;
+            
+            // Create a quaternion for the parallax rotation
+            const parallaxQuat = new THREE.Quaternion();
+            const up = new THREE.Vector3(0, 1, 0);
+            const right = new THREE.Vector3(1, 0, 0);
+            
+            // Rotate around world Y and local X
+            const yRot = new THREE.Quaternion().setFromAxisAngle(up, offsetX * 0.3);
+            const xRot = new THREE.Quaternion().setFromAxisAngle(right, offsetY * 0.2);
+            
+            parallaxQuat.multiplyQuaternions(yRot, xRot);
+            
+            // Apply to camera while maintaining look at center
+            const direction = new THREE.Vector3().subVectors(POINT_CENTER, baseCameraPosition).normalize();
+            const distance = baseCameraPosition.distanceTo(POINT_CENTER);
+            
+            // Apply rotation to direction
+            direction.applyQuaternion(parallaxQuat);
+            
+            // Set new camera position
+            camera.position.copy(POINT_CENTER.clone().add(direction.multiplyScalar(-distance)));
+            camera.lookAt(POINT_CENTER);
+            
+            // Update base quaternion
+            baseCameraQuaternion.copy(camera.quaternion);
+        }
 
         // --- ANIMATION LOOP ---
         function animate() {
@@ -737,6 +845,12 @@
             
             updateGlow();
             updateBlur();
+            updateMouseParallax();
+            
+            if (!isAnimating) {
+                baseCameraPosition.copy(camera.position);
+                applyParallax();
+            }
 
             for (let i = 2; i < cards.length; i++) {
                 if (cards[i]) {
@@ -754,7 +868,9 @@
                 if (animationProgress >= 1) { 
                     animationProgress = 1; 
                     isAnimating = false; 
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
+                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
+                    baseCameraPosition.copy(camera.position);
+                    baseCameraQuaternion.copy(camera.quaternion);
                 }
                 const t = easeInOutCubic(animationProgress);
                 const p0 = window.animControlPoints.start; 
@@ -773,7 +889,6 @@
         
         setTimeout(() => selectStation(2), 100);
         
-        // Set initial values
         document.getElementById('glow-min').value = 23;
         document.getElementById('glow-max').value = 39;
         MIN_STRENGTH = 0.23;
