@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinemaedzfez - Real Glass Effect</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
@@ -393,33 +393,31 @@
             alert('Config exported to console!');
         };
 
-        // --- EDGE-ONLY HORIZONTAL PARALLAX ---
-        let mouseX = 0;
-        let targetMouseX = 0;
+        // --- FIXED POSITION MOVEMENT - Tiny move and stop ---
+        let currentOffset = 0;
+        let targetOffset = 0;
         
-        // Very small maximum offset
-        const MAX_OFFSET_X = 0.008;
+        // Very small fixed positions
+        const OFFSET_LEFT = -0.006;
+        const OFFSET_RIGHT = 0.006;
+        const OFFSET_CENTER = 0;
         
         document.addEventListener('mousemove', (e) => {
-            // Only activate near edges (20% from borders)
-            const threshold = 0.2;
-            let normalizedX = (e.clientX / window.innerWidth) * 2 - 1;
+            const mouseX = e.clientX;
+            const screenWidth = window.innerWidth;
             
-            // Create dead zone in middle - only move when cursor is near edges
-            if (Math.abs(normalizedX) > (1 - threshold * 2)) {
-                // Map the edge region to full range
-                if (normalizedX > 0) {
-                    targetMouseX = (normalizedX - (1 - threshold * 2)) / (threshold * 2);
-                } else {
-                    targetMouseX = (normalizedX + (1 - threshold * 2)) / (threshold * 2);
-                }
+            // Three zones: left third, middle third, right third
+            if (mouseX < screenWidth * 0.33) {
+                targetOffset = OFFSET_LEFT;
+            } else if (mouseX > screenWidth * 0.66) {
+                targetOffset = OFFSET_RIGHT;
             } else {
-                targetMouseX = 0;
+                targetOffset = OFFSET_CENTER;
             }
         });
         
         document.addEventListener('mouseleave', () => {
-            targetMouseX = 0;
+            targetOffset = OFFSET_CENTER;
         });
 
         // --- SCENE SETUP ---
@@ -754,22 +752,19 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
         
-        // Edge-only, very limited movement
+        // Smooth transition between fixed positions
         function updateMouseParallax() {
-            mouseX += (targetMouseX - mouseX) * 0.08;
+            currentOffset += (targetOffset - currentOffset) * 0.05;
         }
         
         function applyParallax() {
             if (isAnimating) return;
             
-            const clampedX = Math.max(-1, Math.min(1, mouseX));
-            const offsetX = clampedX * MAX_OFFSET_X;
-            
             const direction = new THREE.Vector3().subVectors(POINT_CENTER, baseCameraPosition).normalize();
             const distance = baseCameraPosition.distanceTo(POINT_CENTER);
             
             const up = new THREE.Vector3(0, 1, 0);
-            const yRot = new THREE.Quaternion().setFromAxisAngle(up, offsetX);
+            const yRot = new THREE.Quaternion().setFromAxisAngle(up, currentOffset);
             
             const newDir = direction.clone().applyQuaternion(yRot);
             
