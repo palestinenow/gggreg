@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit ezd Glass Effect</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
@@ -239,32 +239,31 @@
         <div class="control-group">
             <h4>📍 SELECT STATION CARD</h4>
             <div class="station-selector">
-                <button class="station-btn" onclick="selectStation(1)">C: First</button>
                 <button class="station-btn" onclick="selectStation(2)">D: 2</button>
                 <button class="station-btn" onclick="selectStation(3)">E: 3</button>
                 <button class="station-btn" onclick="selectStation(4)">F: 4</button>
                 <button class="station-btn" onclick="selectStation(5)">G: 5</button>
             </div>
-            <div id="selected-station" class="coord-display">Selected: Station C</div>
+            <div id="selected-station" class="coord-display">Selected: Station D</div>
         </div>
         
         <div class="control-group">
             <h4>🎯 CARD POSITION</h4>
             <div class="pos-control">
                 <label>X:</label>
-                <input type="number" id="pos-x" step="0.01" value="-3.61">
+                <input type="number" id="pos-x" step="0.01" value="0.10">
                 <button onclick="moveCard('x', -0.1)">-</button>
                 <button onclick="moveCard('x', 0.1)">+</button>
             </div>
             <div class="pos-control">
                 <label>Y:</label>
-                <input type="number" id="pos-y" step="0.01" value="1.30">
+                <input type="number" id="pos-y" step="0.01" value="1.20">
                 <button onclick="moveCard('y', -0.1)">-</button>
                 <button onclick="moveCard('y', 0.1)">+</button>
             </div>
             <div class="pos-control">
                 <label>Z:</label>
-                <input type="number" id="pos-z" step="0.01" value="1.17">
+                <input type="number" id="pos-z" step="0.01" value="4.00">
                 <button onclick="moveCard('z', -0.1)">-</button>
                 <button onclick="moveCard('z', 0.1)">+</button>
             </div>
@@ -330,7 +329,7 @@
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         };
         
-        let selectedStation = 1;
+        let selectedStation = 2;
         window.selectStation = function(index) {
             selectedStation = index;
             const stationNames = ['', 'C: First', 'D: 2', 'E: 3', 'F: 4', 'G: 5'];
@@ -343,7 +342,7 @@
             }
             
             document.querySelectorAll('.station-btn').forEach((btn, i) => {
-                if (i === index - 1) btn.classList.add('active');
+                if (i === index - 2) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
         };
@@ -558,16 +557,15 @@
             { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
-        // EXACT CARD POSITIONS
+        // EXACT CARD POSITIONS (Station 1 removed)
         const cardPositions = {
-            1: { x: -3.61, y: 1.30, z: 1.17 },
             2: { x: 0.10, y: 1.20, z: 4.00 },
             3: { x: 3.60, y: 1.25, z: 1.20 },
             4: { x: 2.20, y: 1.20, z: -3.20 },
             5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
-        // --- CREATE CARDS (PURE WHITE TEXT) ---
+        // --- CREATE CARDS (PURE WHITE TEXT, STATION 1 SKIPPED) ---
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -576,31 +574,35 @@
             canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            // Very subtle glass background
-            context.fillStyle = 'rgba(255, 255, 255, 0.08)'; 
-            context.fillRect(0, 0, 512, 512);
+            // Completely transparent background - no fill for pure glass
+            context.clearRect(0, 0, 512, 512);
             
-            // Strong text shadow for depth
-            context.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            context.shadowBlur = 15;
-            context.shadowOffsetX = 3;
-            context.shadowOffsetY = 3;
+            // Very strong text shadow for maximum contrast
+            context.shadowColor = 'rgba(0, 0, 0, 1.0)';
+            context.shadowBlur = 20;
+            context.shadowOffsetX = 4;
+            context.shadowOffsetY = 4;
             
-            // Station name - PURE WHITE
-            context.font = 'bold 65px Arial'; 
+            // Station name - BRIGHT WHITE
+            context.font = 'bold 70px Arial'; 
             context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
             context.fillText(stationName, 256, 200);
             
-            // Subtitle - PURE WHITE
-            context.font = 'bold 40px Arial'; 
-            context.fillStyle = '#ffffff';
-            context.fillText(`Station ${stationIndex}`, 256, 290);
+            // Second pass for extra brightness
+            context.fillText(stationName, 256, 200);
             
-            // Additional info - PURE WHITE
-            context.font = 'bold 28px Arial';
+            // Subtitle - BRIGHT WHITE
+            context.font = 'bold 45px Arial'; 
             context.fillStyle = '#ffffff';
-            context.fillText('Viewpoint', 256, 360);
+            context.fillText(`Station ${stationIndex}`, 256, 300);
+            context.fillText(`Station ${stationIndex}`, 256, 300);
+            
+            // Additional info - BRIGHT WHITE
+            context.font = 'bold 32px Arial';
+            context.fillStyle = '#ffffff';
+            context.fillText('Viewpoint', 256, 370);
+            context.fillText('Viewpoint', 256, 370);
             
             // Reset shadow
             context.shadowColor = 'transparent';
@@ -614,13 +616,13 @@
                 map: pageTexture,
                 transparent: true,
                 opacity: 0.0,
-                roughness: 0.05,
+                roughness: 0.0,
                 metalness: 0.0,
                 side: THREE.DoubleSide,
                 depthWrite: false,
                 blending: THREE.NormalBlending,
                 emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 0.3
+                emissiveIntensity: 0.5
             });
             
             const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
@@ -630,7 +632,7 @@
         }
 
         function positionCards() {
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 2; i <= 5; i++) {
                 if (cards[i] && cardPositions[i]) {
                     cards[i].position.set(cardPositions[i].x, cardPositions[i].y, cardPositions[i].z);
                     cards[i].lookAt(POINT_CENTER);
@@ -638,7 +640,8 @@
             }
         }
 
-        for (let i = 1; i < STATIONS.length; i++) {
+        // Skip station 1 (C), start from station 2 (D)
+        for (let i = 2; i < STATIONS.length; i++) {
             const card = createCard(STATIONS[i].name, i);
             cards[i] = card;
             scene.add(card);
@@ -680,16 +683,16 @@
         window.nextStation = function() {
             if (isAnimating) return;
             if (currentStationIndex === 0) {
-                currentStationIndex = 1;
+                currentStationIndex = 2; // Skip station 1
             } else if (currentStationIndex < STATIONS.length - 1) {
                 currentStationIndex++;
             } else {
-                currentStationIndex = 1;
+                currentStationIndex = 2; // Loop back to D
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
-            if (currentStationIndex > 0) {
+            if (currentStationIndex > 1) {
                 selectStation(currentStationIndex);
             }
         };
@@ -698,15 +701,15 @@
             if (isAnimating) return;
             if (currentStationIndex === 0) {
                 currentStationIndex = STATIONS.length - 1;
-            } else if (currentStationIndex > 1) {
+            } else if (currentStationIndex > 2) {
                 currentStationIndex--;
             } else {
-                currentStationIndex = STATIONS.length - 1;
+                currentStationIndex = STATIONS.length - 1; // Loop to G
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
-            if (currentStationIndex > 0) {
+            if (currentStationIndex > 1) {
                 selectStation(currentStationIndex);
             }
         };
@@ -734,11 +737,11 @@
             updateGlow();
             updateBlur();
 
-            for (let i = 1; i < cards.length; i++) {
+            for (let i = 2; i < cards.length; i++) {
                 if (cards[i]) {
                     if (i === currentStationIndex) {
                         cards[i].lookAt(camera.position);
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.7, 0.1);
+                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.8, 0.1);
                     } else {
                         cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.0, 0.1);
                     }
@@ -767,7 +770,7 @@
         }
         animate();
         
-        setTimeout(() => selectStation(1), 100);
+        setTimeout(() => selectStation(2), 100);
         
         // Set initial values
         document.getElementById('glow-min').value = 23;
