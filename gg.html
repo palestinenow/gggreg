@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Glow Edition</title>
+    <title>Cinematic Orbit - Pulsing Glow</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: 'Courier New', Courier, monospace; }
         
@@ -108,7 +108,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1 style="color:#0f0">CLICK ANYWHERE TO START</h1>
-            <p>Camera will orbit the glowing tree.<br>Click "NEXT STATION" to move smoothly between viewpoints.<br>Always looking at the center.</p>
+            <p>Camera will orbit the pulsing glowing tree.<br>Click "NEXT STATION" to move smoothly between viewpoints.<br>Always looking at the center.</p>
         </div>
     </div>
 
@@ -155,8 +155,8 @@
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.2;
-        bloomPass.strength = 1.2;   // Glow intensity
-        bloomPass.radius = 0.5;     // Glow spread
+        bloomPass.strength = 0;   // Start at 0 — we'll animate this
+        bloomPass.radius = 0.5;
 
         const composer = new EffectComposer(renderer);
         composer.addPass(renderScene);
@@ -192,10 +192,10 @@
         spotLight.castShadow = true;
         scene.add(spotLight);
         scene.add(spotLight.target);
-        spotLight.target.position.set(-0.006, 1.041, -0.008); // Point at tree
+        spotLight.target.position.set(-0.006, 1.041, -0.008);
 
-        // Additional point light at center for glow
-        const centerLight = new THREE.PointLight(0xff00ff, 1, 10);
+        // Point light at center for glow — we'll animate its intensity
+        const centerLight = new THREE.PointLight(0xff00ff, 0, 10); // Start at 0 intensity
         centerLight.position.copy(new THREE.Vector3(-0.006, 1.041, -0.008));
         scene.add(centerLight);
 
@@ -209,15 +209,21 @@
             { name: "E: 3",      pos: new THREE.Vector3(5.276, 1.338, 1.737) },
             { name: "F: 4",      pos: new THREE.Vector3(3.257, 1.258, -4.664) },
             { name: "G: 5",      pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
-            // H:6 REMOVED
         ];
 
-        let currentStationIndex = 0; // Start at Intro
+        let currentStationIndex = 0;
         let isAnimating = false;
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 3.0; // seconds
+        const ANIMATION_DURATION = 3.0;
+
+        // --- PULSE GLOW VARIABLES ---
+        let pulseStartTime = Date.now();
+        const PULSE_DURATION = 7000; // 7 seconds up, 7 seconds down = 14s total cycle
+
+        // Store reference to tree mesh for emissive glow
+        let treeMesh = null;
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -227,16 +233,16 @@
                 if (child.isMesh) { 
                     child.castShadow = true; 
                     child.receiveShadow = true; 
-                    // Optional: Make tree emissive for stronger glow
+                    // Try to find tree/plant mesh
                     if (child.name.toLowerCase().includes('tree') || child.name.toLowerCase().includes('plant')) {
+                        treeMesh = child;
                         child.material.emissive = new THREE.Color(0xaa00aa);
-                        child.material.emissiveIntensity = 0.5;
+                        child.material.emissiveIntensity = 0; // Start at 0
                     }
                 }
             });
             scene.add(model);
             
-            // Start at Intro
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
             updateUI();
@@ -246,22 +252,18 @@
 
         // --- CLICK ANYWHERE TO START ---
         document.getElementById('blocker').addEventListener('click', function() {
-            this.style.display = 'none'; // Hide blocker forever
+            this.style.display = 'none';
             document.getElementById('status').innerText = "Started! Click 'NEXT STATION' to begin tour.";
         });
 
         // --- NEXT STATION FUNCTION ---
         window.nextStation = function() {
             if (isAnimating) return;
-
-            // If we're at Intro, next is C: First (index 1)
-            // After that, cycle 1→2→3→4→5→1→2... (skip Intro after first time)
             if (currentStationIndex === 0) {
                 currentStationIndex = 1;
             } else {
                 currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
             }
-
             startAnimation(STATIONS[currentStationIndex].pos);
             updateUI();
         };
@@ -280,27 +282,52 @@
             document.getElementById('next-station').innerText = STATIONS[nextIndex].name;
         }
 
-        // --- EASING FUNCTION: Ease In Out Cubic ---
         function easeInOutCubic(t) {
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
 
-        // --- ANIMATION LOOP ---
+        // --- ANIMATION LOOP WITH PULSING GLOW ---
         function animate() {
             requestAnimationFrame(animate);
             
+            // === PULSE GLOW LOGIC ===
+            const now = Date.now();
+            const elapsed = now - pulseStartTime;
+            const cycleTime = elapsed % (PULSE_DURATION * 2); // 14s total cycle
+
+            // Calculate glow value: 0 → 1 → 0 over 14s
+            let glowValue = 0;
+            if (cycleTime < PULSE_DURATION) {
+                // Rising: 0 to 1 over 7s
+                glowValue = cycleTime / PULSE_DURATION;
+            } else {
+                // Falling: 1 to 0 over next 7s
+                glowValue = 1 - ((cycleTime - PULSE_DURATION) / PULSE_DURATION);
+            }
+
+            // Apply to bloom
+            if (bloomEnabled) {
+                bloomPass.strength = glowValue * 1.5; // Max strength 1.5
+            }
+
+            // Apply to center light
+            centerLight.intensity = glowValue * 2; // Max intensity 2
+
+            // Apply to tree emissive (if found)
+            if (treeMesh && treeMesh.material) {
+                treeMesh.material.emissiveIntensity = glowValue * 1.0; // Max 1.0
+            }
+
+            // === CAMERA MOVEMENT ===
             if (isAnimating) {
-                animationProgress += 0.016 / ANIMATION_DURATION; // assuming 60fps
+                animationProgress += 0.016 / ANIMATION_DURATION;
                 if (animationProgress >= 1) {
                     animationProgress = 1;
                     isAnimating = false;
                     document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
                 }
-
                 const easedT = easeInOutCubic(animationProgress);
                 camera.position.lerpVectors(startPos, endPos, easedT);
-                
-                // ALWAYS LOOK AT CENTER
                 camera.lookAt(POINT_CENTER);
             }
 
@@ -310,7 +337,7 @@
             document.getElementById('p-y').innerText = p.y.toFixed(3);
             document.getElementById('p-z').innerText = p.z.toFixed(3);
 
-            // RENDER WITH BLOOM
+            // RENDER
             if (bloomEnabled) {
                 composer.render();
             } else {
