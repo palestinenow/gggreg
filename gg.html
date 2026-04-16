@@ -43,47 +43,83 @@
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(renderer.domElement);
 
         // --- LIGHTS ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
-        const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
-        const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); 
+        scene.add(ambientLight);
+        
+        const spotLight = new THREE.SpotLight(0xffeeff, 1); 
+        spotLight.position.set(0, 10, 0); 
+        spotLight.angle = Math.PI / 4; 
+        spotLight.penumbra = 0.5; 
+        spotLight.decay = 1; 
+        spotLight.distance = 50; 
+        spotLight.castShadow = true; 
+        scene.add(spotLight); 
+        spotLight.target.position.set(-0.006, 1.041, -0.008);
+        scene.add(spotLight.target);
+        
+        const centerLight = new THREE.PointLight(0xff00ff, 0.5, 10); 
+        centerLight.position.set(-0.006, 1.041, -0.008); 
+        scene.add(centerLight);
+        
+        // Directional light for better overall illumination
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 5);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
 
         // --- PURE WHITE SHINE EFFECT ---
-        // Store all materials for shine
+        // Store all materials
         const allMaterials = [];
         
-        // Create white shine lights
+        // Create white shine lights with proper intensity
         const shineLights = [];
-        for (let i = 0; i < 5; i++) {
+        const numShineLights = 6;
+        
+        for (let i = 0; i < numShineLights; i++) {
             const light = new THREE.PointLight(0xffffff, 0);
             light.position.set(
-                (Math.random() - 0.5) * 10,
-                Math.random() * 8 + 2,
-                (Math.random() - 0.5) * 10
+                (Math.random() - 0.5) * 8,
+                Math.random() * 6 + 2,
+                (Math.random() - 0.5) * 8
             );
+            light.castShadow = false;
+            light.decay = 1.5;
+            light.distance = 15;
             scene.add(light);
+            
             shineLights.push({
                 light: light,
                 phase: Math.random() * Math.PI * 2,
-                speed: 0.5 + Math.random() * 2,
-                baseIntensity: 0
+                speed: 1 + Math.random() * 3,
+                baseIntensity: 0,
+                targetPos: light.position.clone()
             });
         }
 
         // --- REAL GLASS CARD ---
-        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+        const canvas = document.createElement('canvas'); 
+        canvas.width = 512; 
+        canvas.height = 512;
         const context = canvas.getContext('2d');
         
         context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
         context.fillRect(0, 0, 512, 512);
         
-        context.strokeStyle = '#ffffff'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
+        context.strokeStyle = '#ffffff'; 
+        context.lineWidth = 20; 
+        context.strokeRect(20, 20, 472, 472);
         
-        context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
+        context.font = 'bold 50px Arial'; 
+        context.fillStyle = '#333'; 
+        context.textAlign = 'center';
         context.fillText("INFO", 256, 200);
-        context.font = '30px Arial'; context.fillStyle = '#555';
+        context.font = '30px Arial'; 
+        context.fillStyle = '#555';
         context.fillText("Viewpoint C", 256, 280);
         
         const pageTexture = new THREE.CanvasTexture(canvas);
@@ -138,24 +174,40 @@
                     child.castShadow = true; 
                     child.receiveShadow = true;
                     
+                    // Make materials more responsive to light
                     if (child.material) {
                         if (Array.isArray(child.material)) {
-                            child.material.forEach(mat => allMaterials.push(mat));
+                            child.material.forEach(mat => {
+                                mat.roughness = Math.max(0.2, mat.roughness || 0.5);
+                                mat.metalness = Math.min(0.3, mat.metalness || 0.1);
+                                allMaterials.push(mat);
+                            });
                         } else {
+                            child.material.roughness = Math.max(0.2, child.material.roughness || 0.5);
+                            child.material.metalness = Math.min(0.3, child.material.metalness || 0.1);
                             allMaterials.push(child.material);
                         }
                     }
                     
                     if (child.name.toLowerCase().includes('tree')) { 
-                        child.material.emissive = new THREE.Color(0xaa00aa);
-                        treeMaterials.push(child.material);
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(mat => {
+                                mat.emissive = new THREE.Color(0xaa00aa);
+                                treeMaterials.push(mat);
+                            });
+                        } else {
+                            child.material.emissive = new THREE.Color(0xaa00aa);
+                            treeMaterials.push(child.material);
+                        }
                     }
                 } 
             });
             scene.add(model);
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
-        }, undefined, function (error) { console.error(error); });
+        }, undefined, function (error) { 
+            console.error('Error loading model:', error); 
+        });
 
         // --- UI LOGIC ---
         document.getElementById('blocker').addEventListener('click', function() { 
@@ -191,8 +243,7 @@
         
         // Random shine state
         let nextShineTime = 0;
-        let currentShineIntensity = 0;
-        const shineDecaySpeed = 2.0;
+        let globalShineIntensity = 0;
 
         // --- ANIMATION LOOP ---
         function animate() {
@@ -211,36 +262,42 @@
 
             // --- PURE WHITE RANDOM SHINE ---
             if (elapsedTime > nextShineTime) {
-                // Random interval between shines (0.3 to 2 seconds)
-                nextShineTime = elapsedTime + 0.3 + Math.random() * 1.7;
+                // Random interval between shines (0.1 to 1 second for more frequent sparkles)
+                nextShineTime = elapsedTime + 0.1 + Math.random() * 0.9;
                 
-                // Random shine intensity
-                currentShineIntensity = 0.3 + Math.random() * 1.2;
+                // Stronger shine intensity
+                globalShineIntensity = 0.5 + Math.random() * 2.0;
                 
-                // Randomly position shine lights
+                // Randomly position and activate shine lights
                 shineLights.forEach(shineData => {
-                    shineData.light.position.set(
-                        (Math.random() - 0.5) * 12,
-                        Math.random() * 8 + 3,
-                        (Math.random() - 0.5) * 12
+                    // New random position
+                    shineData.targetPos.set(
+                        POINT_CENTER.x + (Math.random() - 0.5) * 8,
+                        POINT_CENTER.y + Math.random() * 6 + 1,
+                        POINT_CENTER.z + (Math.random() - 0.5) * 8
                     );
                     
                     // Random intensity for each light
-                    shineData.baseIntensity = 0.2 + Math.random() * 1.0;
+                    shineData.baseIntensity = Math.random() * 1.5;
+                    
+                    // Jump to new position
+                    shineData.light.position.copy(shineData.targetPos);
                 });
             }
             
             // Decay shine intensity
-            currentShineIntensity = Math.max(0, currentShineIntensity - delta * shineDecaySpeed);
+            globalShineIntensity = Math.max(0, globalShineIntensity - delta * 3.0);
             
-            // Apply pure white shine to lights
+            // Apply shine to lights with smooth movement
             shineLights.forEach(shineData => {
-                const sinMod = Math.sin(elapsedTime * shineData.speed + shineData.phase) * 0.2;
-                shineData.light.intensity = Math.max(0, currentShineIntensity * (shineData.baseIntensity + sinMod));
+                // Calculate intensity with sine wave
+                const sinMod = Math.sin(elapsedTime * shineData.speed + shineData.phase) * 0.3;
+                shineData.light.intensity = Math.max(0, globalShineIntensity * (0.5 + sinMod) * shineData.baseIntensity);
                 
-                // Subtle position movement
-                shineData.light.position.x += Math.sin(elapsedTime * 1.5 + shineData.phase) * 0.005;
-                shineData.light.position.z += Math.cos(elapsedTime * 1.8 + shineData.phase) * 0.005;
+                // Subtle orbiting movement around center
+                shineData.light.position.x = shineData.targetPos.x + Math.sin(elapsedTime * 2 + shineData.phase) * 0.5;
+                shineData.light.position.z = shineData.targetPos.z + Math.cos(elapsedTime * 1.5 + shineData.phase) * 0.5;
+                shineData.light.position.y = shineData.targetPos.y + Math.sin(elapsedTime * 1.8 + shineData.phase) * 0.3;
             });
 
             // GLASS LOGIC
