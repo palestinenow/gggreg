@@ -5,13 +5,22 @@
     <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
+        
+        /* Canvas is behind everything */
+        canvas {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 1 !important;
+        }
+        
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
         #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
         
-        #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
+        #status { position: absolute; bottom: 40px; left: 40px; color: #fff; font-size: 14px; z-index: 100; opacity: 0.7; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         
-        /* Vignette overlay */
+        /* Vignette overlay - above canvas */
         #vignette {
             position: fixed;
             top: 0;
@@ -19,12 +28,12 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 50;
+            z-index: 2;
             background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);
             transition: backdrop-filter 0.5s ease;
         }
         
-        /* Control Panel */
+        /* Control Panel - above everything */
         #control-panel {
             position: absolute;
             top: 20px;
@@ -210,58 +219,56 @@
             margin-top: 5px;
         }
 
-        /* HydroRippleButton Styles - FIXED Z-INDEX */
+        /* HydroRippleButton Styles - HIGH Z-INDEX */
         @keyframes ripple-bloom {
             0% { transform: scale(0.9); opacity: 0.8; border-width: 2px; }
-            100% { transform: scale(1.4); opacity: 0; border-width: 0px; }
+            100% { transform: scale(1.5); opacity: 0; border-width: 0px; }
         }
         
         .hydro-nav-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 300 !important;
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 1000 !important;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.8s ease;
         }
         
         .hydro-nav-container.visible {
-            opacity: 1;
-            pointer-events: auto;
+            opacity: 1 !important;
+            pointer-events: auto !important;
         }
         
         .hydro-nav {
             display: flex;
-            gap: 60px;
+            gap: 80px;
             align-items: center;
             justify-content: center;
         }
         
         .hydro-btn {
             position: relative;
-            padding: 24px 60px;
+            padding: 20px 50px;
             font-weight: bold;
-            font-size: 20px;
+            font-size: 18px;
             text-transform: uppercase;
-            letter-spacing: 0.4em;
+            letter-spacing: 0.3em;
             overflow: visible;
-            border-radius: 60px;
-            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 50px;
+            border: 2px solid rgba(255,255,255,0.3);
             transition: all 0.15s ease-out;
-            background: rgba(20, 30, 40, 0.5);
+            background: rgba(30, 40, 50, 0.7);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             color: white;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            filter: blur(8px);
-            opacity: 0.05;
-            transform: scale(0.98);
-            border-color: rgba(255,255,255,0.05);
+            opacity: 0.8;
+            transform: scale(1);
         }
         
         .hydro-btn .ripple-container {
@@ -272,21 +279,21 @@
             align-items: center;
             justify-content: center;
             pointer-events: none;
-            border-radius: 60px;
+            border-radius: 50px;
         }
         
         .hydro-btn .ripple {
             position: absolute;
             width: 100%;
             height: 100%;
-            border: 2px solid rgba(255,255,255,0.6);
-            border-radius: 60px;
+            border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 50px;
             animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
         }
         
         .hydro-btn .ripple-delayed {
             animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) 0.15s forwards;
-            border-color: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.4);
         }
         
         .hydro-btn .btn-content {
@@ -299,7 +306,7 @@
         
         .hydro-btn .arrow {
             transition: transform 0.3s ease;
-            font-size: 24px;
+            font-size: 20px;
         }
         
         .hydro-btn:hover .arrow-left {
@@ -311,15 +318,18 @@
         }
         
         .hydro-btn:hover {
-            border-color: rgba(255,255,255,0.4);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.6);
+            background: rgba(40, 50, 60, 0.8);
+            opacity: 1;
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
         }
         
         .hydro-btn .glass-highlight {
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-            border-radius: 60px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+            border-radius: 50px;
             opacity: 0;
             transition: opacity 0.5s;
             pointer-events: none;
@@ -329,7 +339,6 @@
             opacity: 1;
         }
         
-        /* Shine effect */
         .hydro-btn::before {
             content: '';
             position: absolute;
@@ -337,10 +346,10 @@
             left: -75%;
             width: 50%;
             height: 100%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.08) 46%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.08) 54%, transparent 60%);
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.1) 46%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.1) 54%, transparent 60%);
             transition: left 0.8s ease;
             pointer-events: none;
-            border-radius: 60px;
+            border-radius: 50px;
         }
         
         .hydro-btn:hover::before {
@@ -361,7 +370,7 @@
     
     <div id="vignette"></div>
     
-    <!-- HydroRippleButton Navigation (visible only at Station C) -->
+    <!-- HydroRippleButton Navigation - VISIBLE AT STATION C -->
     <div class="hydro-nav-container" id="hydroNav">
         <div class="hydro-nav">
             <button class="hydro-btn" id="hydroPrevBtn" onclick="window.hydroPrev()">
@@ -564,6 +573,7 @@
         
         function triggerRipple(btnId) {
             const btn = document.getElementById(btnId);
+            if (!btn) return;
             const container = btn.querySelector('.ripple-container');
             const oldRipples = container.querySelectorAll('.ripple, .ripple-delayed');
             oldRipples.forEach(r => r.remove());
@@ -579,41 +589,6 @@
                 ripple1.remove();
                 ripple2.remove();
             }, 1500);
-        }
-
-        // Proximity effect for hydro buttons
-        let hydroBtns = [];
-        function initProximityEffect() {
-            hydroBtns = [
-                { btn: document.getElementById('hydroPrevBtn'), baseStyle: { blur: 8, opacity: 0.05, scale: 0.98, border: 0.05 } },
-                { btn: document.getElementById('hydroNextBtn'), baseStyle: { blur: 8, opacity: 0.05, scale: 0.98, border: 0.05 } }
-            ];
-            
-            window.addEventListener('mousemove', (e) => {
-                if (currentStationIndex !== 1) return;
-                
-                hydroBtns.forEach(({ btn, baseStyle }) => {
-                    if (!btn) return;
-                    const rect = btn.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    const dist = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
-                    
-                    const maxDist = 600;
-                    const normalizedDist = Math.min(dist / maxDist, 1);
-                    const proximity = 1 - normalizedDist;
-                    
-                    const currentOpacity = 0.1 + (0.9 * proximity);
-                    const currentBlur = 8 * (1 - proximity);
-                    const currentScale = 0.98 + (0.02 * proximity);
-                    const currentBorder = 0.1 + (0.4 * proximity);
-                    
-                    btn.style.filter = `blur(${currentBlur}px)`;
-                    btn.style.opacity = currentOpacity;
-                    btn.style.transform = `scale(${currentScale})`;
-                    btn.style.borderColor = `rgba(255,255,255,${currentBorder})`;
-                });
-            });
         }
 
         // Auto bloom for hydro buttons
@@ -633,6 +608,12 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
+        
+        // Ensure canvas is behind everything
+        renderer.domElement.style.position = 'fixed';
+        renderer.domElement.style.top = '0';
+        renderer.domElement.style.left = '0';
+        renderer.domElement.style.zIndex = '1';
 
         // --- BLOOM EFFECT ---
         const renderScene = new RenderPass(scene, camera);
@@ -900,7 +881,6 @@
         document.getElementById('blocker').addEventListener('click', function() { 
             this.style.display = 'none'; 
             document.getElementById('status').innerText = "Tour Started"; 
-            initProximityEffect();
         });
 
         function updateHydroNavVisibility() {
