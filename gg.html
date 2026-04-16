@@ -2,127 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Hydro Ripple + Effects</title>
+    <title>Cinematic Tour - Working Version</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400&display=swap');
         
-        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
-        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
-        #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
+        body { margin: 0; overflow: hidden; background: #f5f5f5; font-family: sans-serif; }
         
-        /* Navigation Buttons - Hydro Ripple Effect */
-        #actions { 
-            position: fixed;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            box-sizing: border-box;
-            z-index: 100;
-            pointer-events: none;
-        }
-        
-        .hydro-btn {
-            position: relative;
-            padding: 18px 35px;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-            background: rgba(30, 41, 59, 0.2);
-            backdrop-filter: blur(8px);
-            color: white;
-            cursor: pointer;
-            overflow: visible;
-            transition: transform 0.1s ease-out;
-            pointer-events: auto;
-            
-            /* Hydro Ripple Base State */
-            --proximity: 0;
-            --opacity: calc(0.05 + (0.95 * var(--proximity)));
-            --blur: calc(8px * (1 - var(--proximity)));
-            --scale: calc(0.98 + (0.02 * var(--proximity)));
-            --border: calc(0.05 + (0.45 * var(--proximity)));
-            
-            opacity: var(--opacity);
-            filter: blur(var(--blur));
-            transform: scale(var(--scale));
-            border-color: rgba(255,255,255,var(--border));
-        }
-        
-        /* Ripple Bloom Animation */
-        .hydro-btn::before,
-        .hydro-btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.4);
-            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
-            pointer-events: none;
-            opacity: 0;
-        }
-        
-        .hydro-btn::after {
-            animation-delay: 0.1s;
-            border-color: rgba(255,255,255,0.2);
-        }
-        
-        .hydro-btn.bloom::before,
-        .hydro-btn.bloom::after {
-            opacity: 1;
-            animation-name: ripple-bloom;
-        }
-        
-        @keyframes ripple-bloom {
-            0% { 
-                transform: scale(0.9); 
-                opacity: 0.8; 
-                border-width: 2px; 
-            }
-            100% { 
-                transform: scale(1.4); 
-                opacity: 0; 
-                border-width: 0px; 
-            }
-        }
-        
-        /* Inner Glass Highlight */
-        .hydro-btn .highlight {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
-            border-radius: 20px;
-            opacity: 0;
+        #blocker { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(255,255,255,0.95); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 999; 
+            cursor: pointer; 
             transition: opacity 0.5s ease;
+        }
+        
+        #blocker.hidden {
+            opacity: 0;
             pointer-events: none;
         }
         
-        .hydro-btn:hover .highlight {
-            opacity: 1;
+        #instructions { 
+            color: black; 
+            text-align: center; 
+            padding: 40px; 
+            border: 2px solid #333; 
+            border-radius: 10px; 
+            background: #fff; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
         }
         
-        /* Button Text & Icon */
-        .hydro-btn-content {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
+        h1 { margin: 0 0 10px 0; color: #333; font-size: 32px; }
+        p { margin: 0; color: #666; font-size: 16px; }
         
-        .hydro-btn svg {
-            width: 18px;
-            height: 18px;
-            transition: transform 0.3s ease;
-        }
-        
-        .hydro-btn:hover svg {
-            transform: translateX(4px);
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
         
         #status { 
@@ -135,409 +58,9 @@
             z-index: 100; 
             opacity: 0.7;
             font-family: 'Inter', sans-serif;
-        }
-        
-        /* Vignette overlay */
-        #vignette {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 50;
-            background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);
-            transition: backdrop-filter 0.5s ease;
-        }
-        
-        /* CSS Filter Overlay for VHS/Fog/Aurora */
-        #filter-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 45;
-            mix-blend-mode: normal;
-            transition: filter 0.8s ease;
-        }
-        
-        /* Glass Navigation Bar */
-        .glass-nav {
-            position: fixed;
-            top: 68%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 92%;
-            max-width: 680px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 0 24px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-            backdrop-filter: blur(24px) saturate(1.2);
-            -webkit-backdrop-filter: blur(24px) saturate(1.2);
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 50px;
-            box-shadow: 
-                0 12px 40px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.15),
-                inset 0 -1px 0 rgba(255,255,255,0.04);
-            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 150;
-        }
-
-        .glass-nav.visible {
-            opacity: 1;
-            pointer-events: auto;
-            animation: fadeEnter 1.2s 0.2s forwards;
-        }
-
-        @keyframes fadeEnter { 
-            to { opacity: 1; transform: translate(-50%, -50%); } 
-        }
-
-        .glass-nav.vanish {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.94) translateY(-20px);
-            filter: blur(12px);
-            pointer-events: none;
-        }
-
-        .dot { 
-            width: 4px; height: 4px; 
-            border-radius: 50%; 
-            background: rgba(255,255,255,0.25); 
-            flex-shrink: 0; 
-            transition: all 0.4s ease; 
-        }
-        .glass-nav:hover .dot { 
-            background: rgba(255,255,255,0.6); 
-            box-shadow: 0 0 8px rgba(255,255,255,0.4); 
-        }
-
-        .input-wrap { 
-            flex: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: opacity 0.3s ease;
-        }
-
-        .glass-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: rgba(255,255,255,0.9);
-            font-family: 'Inter', sans-serif;
-            font-weight: 300;
-            font-size: 0.95rem;
-            letter-spacing: 0.3px;
-            padding: 6px 0;
-            text-align: center;
-        }
-
-        .glass-input::placeholder {
-            color: rgba(255,255,255,0.35);
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-        }
-
-        input[type="date"] { 
-            color-scheme: dark; 
-            cursor: pointer; 
-            text-transform: uppercase;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1) opacity(0.4);
-            cursor: pointer;
-            margin-right: -4px;
-        }
-
-        .conf-msg {
-            font-family: 'Playfair Display', serif;
-            color: rgba(255,255,255,0.95);
-            font-size: 0.95rem;
-            text-align: center;
-            line-height: 1.4;
-            width: 100%;
-            opacity: 0;
-            transform: translateY(5px);
-            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .conf-msg.show { opacity: 1; transform: translateY(0); }
-        .conf-msg em { font-style: normal; color: #a5b4fc; font-weight: 500; }
-
-        .send-btn {
-            width: 38px; height: 38px; 
-            border-radius: 50%; 
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.06); 
-            color: rgba(255,255,255,0.85);
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: all 0.3s ease; 
-            flex-shrink: 0;
-        }
-        .send-btn:hover { 
-            background: rgba(255,255,255,0.14); 
-            border-color: rgba(255,255,255,0.3); 
-            transform: scale(1.08); 
-            box-shadow: 0 4px 16px rgba(165, 180, 252, 0.15);
-        }
-        .send-btn:active { transform: scale(0.95); }
-        .send-btn svg { 
-            width: 16px; height: 16px; 
-            stroke: currentColor; 
-            fill: none; 
-            stroke-width: 2; 
-            stroke-linecap: round; 
-            stroke-linejoin: round; 
-        }
-
-        .glass-nav::before {
-            content: ''; 
-            position: absolute; 
-            top: 0; left: -75%; 
-            width: 50%; height: 100%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 46%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 54%, transparent 60%);
-            transition: left 0.8s ease; 
-            pointer-events: none;
-            border-radius: 50px;
-        }
-        .glass-nav:hover::before { left: 130%; }
-
-        @media (max-width: 500px) {
-            .glass-nav { height: 56px; padding: 0 18px; gap: 12px; }
-            .glass-input, .conf-msg { font-size: 0.85rem; }
-            .send-btn { width: 34px; height: 34px; }
-            .send-btn svg { width: 14px; height: 14px; }
-            #actions { padding: 0 20px; }
-            .hydro-btn { padding: 15px 25px; font-size: 14px; }
-        }
-        
-        /* Control Panel */
-        #control-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #0f0;
-            padding: 20px;
-            border-radius: 10px;
-            font-family: monospace;
-            z-index: 200;
-            max-height: 90vh;
-            overflow-y: auto;
-            min-width: 320px;
-            border: 2px solid #0f0;
-            box-shadow: 0 0 20px rgba(0,255,0,0.3);
-            pointer-events: auto;
-        }
-        
-        #control-panel h3 {
-            margin: 0 0 15px 0;
-            text-align: center;
-            color: #0f0;
-            border-bottom: 1px solid #0f0;
-            padding-bottom: 10px;
-        }
-        
-        #control-panel h4 {
-            margin: 15px 0 10px 0;
-            color: #0f0;
-        }
-        
-        .control-group {
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(0, 255, 0, 0.1);
-            border-radius: 5px;
-        }
-        
-        .station-selector {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .station-btn {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 12px;
-            border-radius: 5px;
-            transition: all 0.2s;
-            flex: 1;
-        }
-        
-        .station-btn:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .station-btn.active {
-            background: #0f0;
-            color: black;
-            font-weight: bold;
-        }
-        
-        .pos-control {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .pos-control label {
-            width: 20px;
-            color: #0f0;
-            font-weight: bold;
-        }
-        
-        .pos-control input {
-            flex: 1;
-            margin: 0 10px;
-            background: #111;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        
-        .pos-control button {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: monospace;
-            border-radius: 3px;
-            margin-left: 5px;
-        }
-        
-        .pos-control button:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .slider-control {
-            margin-bottom: 15px;
-        }
-        
-        .slider-control label {
-            display: block;
-            margin-bottom: 5px;
-            color: #0f0;
-        }
-        
-        .slider-control input {
-            width: 100%;
-            margin: 5px 0;
-        }
-        
-        .slider-control span {
-            color: #0f0;
-            float: right;
-        }
-        
-        .effect-presets {
-            display: flex;
-            gap: 5px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .preset-btn {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 11px;
-            border-radius: 3px;
-            flex: 1;
-            min-width: 70px;
-        }
-        
-        .preset-btn:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .preset-btn.active {
-            background: #0f0;
-            color: black;
-            font-weight: bold;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .action-btn {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 10px;
-            cursor: pointer;
-            font-family: monospace;
-            border-radius: 5px;
-            flex: 1;
-            font-weight: bold;
-        }
-        
-        .action-btn:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        #toggle-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #003300;
-            color: #0f0;
-            border: 2px solid #0f0;
+            background: rgba(255,255,255,0.8);
             padding: 10px 20px;
-            cursor: pointer;
-            font-family: monospace;
-            font-weight: bold;
-            border-radius: 5px;
-            z-index: 201;
-        }
-        
-        #toggle-panel:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .coord-display {
-            color: #0f0;
-            font-size: 11px;
-            margin-top: 5px;
-            text-align: center;
-        }
-        
-        #blur-status, #bloom-status, #effect-status {
-            color: #0f0;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 5px;
+            border-radius: 20px;
         }
     </style>
 </head>
@@ -546,549 +69,38 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>Hydro Ripple + Dynamic Effects</p>
+            <p>Click anywhere to start<br>Hydro Ripple + Dynamic Effects</p>
         </div>
     </div>
 
-    <!-- Navigation Buttons with Hydro Ripple Effect -->
-    <div id="actions">
-        <button class="hydro-btn" id="prevBtn" onclick="prevStation()">
-            <span class="hydro-btn-content">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span>Previous</span>
-            </span>
-            <span class="highlight"></span>
-        </button>
-        <button class="hydro-btn" id="nextBtn" onclick="nextStation()">
-            <span class="hydro-btn-content">
-                <span>Next</span>
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-            </span>
-            <span class="highlight"></span>
-        </button>
-    </div>
-
-    <div id="status">Ready...</div>
-    
-    <div id="vignette"></div>
-    
-    <!-- CSS Filter Overlay for VHS/Fog/Aurora -->
-    <div id="filter-overlay"></div>
-    
-    <!-- Glass Navigation Bar -->
-    <nav class="glass-nav" id="glassNav">
-        <div class="dot"></div>
-        <div class="input-wrap" id="inputWrap"></div>
-        <button class="send-btn" id="sendBtn" aria-label="Submit">
-            <svg viewBox="0 0 24 24">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-        </button>
-        <div class="dot"></div>
-    </nav>
-    
-    <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
-    
-    <div id="control-panel" style="display: none;">
-        <h3>🎛️ EFFECTS CONTROLS</h3>
-        
-        <div class="control-group">
-            <h4>✨ BLOOM GLOW</h4>
-            <div class="slider-control">
-                <label>Min Strength: <span id="bloom-min-val">0%</span></label>
-                <input type="range" id="bloom-min" min="0" max="50" value="0" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Max Strength: <span id="bloom-max-val">23%</span></label>
-                <input type="range" id="bloom-max" min="0" max="50" value="23" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Random Duration: <span id="bloom-duration-val">7-20s</span></label>
-            </div>
-            <div id="bloom-status">Bloom: Animating</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎨 CSS FILTER EFFECTS</h4>
-            <div class="effect-presets">
-                <button class="preset-btn" onclick="applyPreset('none')">None</button>
-                <button class="preset-btn" onclick="applyPreset('vhs')">VHS Glitch</button>
-                <button class="preset-btn" onclick="applyPreset('fog')">Fog</button>
-                <button class="preset-btn" onclick="applyPreset('aurora')">Aurora</button>
-            </div>
-            <div class="slider-control">
-                <label>Effect Intensity: <span id="effect-intensity-val">50%</span></label>
-                <input type="range" id="effect-intensity" min="0" max="100" value="50" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Random Pulse: <span id="effect-pulse-val">ON</span></label>
-                <input type="checkbox" id="effect-pulse" checked>
-            </div>
-            <div id="effect-status">Effect: Soft Random</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>📍 SELECT STATION CARD</h4>
-            <div class="station-selector">
-                <button class="station-btn" onclick="selectStation(2)">D: 2</button>
-                <button class="station-btn" onclick="selectStation(3)">E: 3</button>
-                <button class="station-btn" onclick="selectStation(4)">F: 4</button>
-                <button class="station-btn" onclick="selectStation(5)">G: 5</button>
-            </div>
-            <div id="selected-station" class="coord-display">Selected: Station D</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎯 CARD POSITION</h4>
-            <div class="pos-control">
-                <label>X:</label>
-                <input type="number" id="pos-x" step="0.01" value="0.10">
-                <button onclick="moveCard('x', -0.1)">-</button>
-                <button onclick="moveCard('x', 0.1)">+</button>
-            </div>
-            <div class="pos-control">
-                <label>Y:</label>
-                <input type="number" id="pos-y" step="0.01" value="1.20">
-                <button onclick="moveCard('y', -0.1)">-</button>
-                <button onclick="moveCard('y', 0.1)">+</button>
-            </div>
-            <div class="pos-control">
-                <label>Z:</label>
-                <input type="number" id="pos-z" step="0.01" value="4.00">
-                <button onclick="moveCard('z', -0.1)">-</button>
-                <button onclick="moveCard('z', 0.1)">+</button>
-            </div>
-            <div style="margin-top: 10px;">
-                <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
-                <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
-            </div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎨 VIGNETTE EFFECT</h4>
-            <div class="slider-control">
-                <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
-                <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
-                <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
-                <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
-                <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
-            </div>
-            <div id="blur-status">Blur: INACTIVE</div>
-        </div>
-        
-        <div class="action-buttons">
-            <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
-            <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
-        </div>
-    </div>
+    <div id="canvas-container"></div>
+    <div id="status">Click to start...</div>
 
     <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
     </script>
 
     <script type="module">
         import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-        // === HYDRO RIPPLE BUTTON LOGIC WITH ZONE DETECTION ===
-        const hydroButtons = document.querySelectorAll('.hydro-btn');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        
-        // Zone-based proximity (each button covers half the screen)
-        document.addEventListener('mousemove', (e) => {
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-            
-            // Calculate which half of screen mouse is in
-            const isInLeftHalf = mouseX < screenWidth / 2;
-            const isInRightHalf = mouseX >= screenWidth / 2;
-            
-            // Calculate distance to center of each button
-            if (prevBtn) {
-                const prevRect = prevBtn.getBoundingClientRect();
-                const prevCenterX = prevRect.left + prevRect.width / 2;
-                const prevCenterY = prevRect.top + prevRect.height / 2;
-                const prevDistance = Math.sqrt(
-                    Math.pow(mouseX - prevCenterX, 2) + 
-                    Math.pow(mouseY - prevCenterY, 2)
-                );
-                
-                // Enhanced proximity for left button when in left half
-                let prevProximity = 0;
-                if (isInLeftHalf) {
-                    // Strong reaction in left half (up to 800px)
-                    const normalizedDist = Math.min(prevDistance / 800, 1);
-                    prevProximity = 1 - normalizedDist;
-                    // Boost proximity when in left half
-                    prevProximity = Math.max(prevProximity, 0.3 - (mouseX / screenWidth) * 0.3);
-                } else {
-                    // Weak reaction in right half
-                    const normalizedDist = Math.min(prevDistance / 1200, 1);
-                    prevProximity = (1 - normalizedDist) * 0.2;
-                }
-                
-                prevBtn.style.setProperty('--proximity', Math.max(0, prevProximity));
-            }
-            
-            if (nextBtn) {
-                const nextRect = nextBtn.getBoundingClientRect();
-                const nextCenterX = nextRect.left + nextRect.width / 2;
-                const nextCenterY = nextRect.top + nextRect.height / 2;
-                const nextDistance = Math.sqrt(
-                    Math.pow(mouseX - nextCenterX, 2) + 
-                    Math.pow(mouseY - nextCenterY, 2)
-                );
-                
-                // Enhanced proximity for right button when in right half
-                let nextProximity = 0;
-                if (isInRightHalf) {
-                    // Strong reaction in right half (up to 800px)
-                    const normalizedDist = Math.min(nextDistance / 800, 1);
-                    nextProximity = 1 - normalizedDist;
-                    // Boost proximity when in right half
-                    nextProximity = Math.max(nextProximity, 0.3 - ((screenWidth - mouseX) / screenWidth) * 0.3);
-                } else {
-                    // Weak reaction in left half
-                    const normalizedDist = Math.min(nextDistance / 1200, 1);
-                    nextProximity = (1 - normalizedDist) * 0.2;
-                }
-                
-                nextBtn.style.setProperty('--proximity', Math.max(0, nextProximity));
-            }
-        });
-        
-        // Auto-bloom every 2 seconds
-        function triggerAutoBloom() {
-            hydroButtons.forEach(btn => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
-        }
-        setInterval(triggerAutoBloom, 2000);
-        
-        // Hover bloom
-        hydroButtons.forEach(btn => {
-            btn.addEventListener('mouseenter', () => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
-        });
-
-        // === GLASS NAV FUNCTIONALITY ===
-        const nav = document.getElementById('glassNav');
-        const inputWrap = document.getElementById('inputWrap');
-        const btn = document.getElementById('sendBtn');
-        
-        let step = 1;
-        let wishText = '';
-        let navShown = false;
-        let navVisible = false;
-
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString + 'T00:00:00').toLocaleDateString('en-US', options);
-        }
-
-        function initNav() {
-            inputWrap.innerHTML = `<input type="text" class="glass-input" id="mainInput" placeholder="You are in front of the tree of life. Make a wish..." autocomplete="off">`;
-            const inp = document.getElementById('mainInput');
-            if (inp) {
-                inp.focus();
-                inp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
-            }
-        }
-
-        function handleSend() {
-            const inp = document.querySelector('.glass-input');
-            const val = inp?.value.trim();
-            
-            if (step === 1) {
-                if (!val) return;
-                wishText = val;
-                step = 2;
-                
-                inputWrap.style.opacity = '0';
-                setTimeout(() => {
-                    inputWrap.innerHTML = `<input type="date" class="glass-input" id="dateInput" required>`;
-                    inputWrap.style.opacity = '1';
-                    const dateInp = document.getElementById('dateInput');
-                    if (dateInp) {
-                        dateInp.focus();
-                        dateInp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
-                    }
-                }, 250);
-
-            } else if (step === 2) {
-                if (!val) return;
-                step = 3;
-                
-                const displayDate = formatDate(val);
-                
-                btn.style.opacity = '0';
-                btn.style.pointerEvents = 'none';
-                inputWrap.style.opacity = '0';
-                
-                setTimeout(() => {
-                    inputWrap.innerHTML = `
-                        <p class="conf-msg" id="confMsg">
-                            Come back on <em>${displayDate}</em>.<br>
-                            Your wish will become true.
-                        </p>
-                    `;
-                    inputWrap.style.opacity = '1';
-                    requestAnimationFrame(() => document.getElementById('confMsg')?.classList.add('show'));
-                    
-                    setTimeout(() => {
-                        nav.classList.add('vanish');
-                        nav.classList.remove('visible');
-                        navVisible = false;
-                        step = 1;
-                        btn.style.opacity = '1';
-                        btn.style.pointerEvents = 'auto';
-                    }, 3500);
-                    
-                }, 300);
-            }
-        }
-
-        btn.addEventListener('click', handleSend);
-        initNav();
-
-        function showNavBar() {
-            if (!navVisible) {
-                nav.classList.remove('vanish');
-                nav.classList.add('visible');
-                navVisible = true;
-                navShown = true;
-                step = 1;
-                btn.style.opacity = '1';
-                btn.style.pointerEvents = 'auto';
-                initNav();
-            }
-        }
-
-        function hideNavBar() {
-            if (navVisible) {
-                nav.classList.remove('visible');
-                nav.classList.add('vanish');
-                navVisible = false;
-            }
-        }
-
-        // === GLOBAL FUNCTIONS ===
-        window.toggleControlPanel = function() {
-            const panel = document.getElementById('control-panel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        };
-        
-        let selectedStation = 2;
-        window.selectStation = function(index) {
-            selectedStation = index;
-            const stationNames = ['', 'C: First', 'D: 2', 'E: 3', 'F: 4', 'G: 5'];
-            document.getElementById('selected-station').textContent = `Selected: Station ${stationNames[index]}`;
-            
-            if (cards[index]) {
-                document.getElementById('pos-x').value = cards[index].position.x.toFixed(2);
-                document.getElementById('pos-y').value = cards[index].position.y.toFixed(2);
-                document.getElementById('pos-z').value = cards[index].position.z.toFixed(2);
-            }
-            
-            document.querySelectorAll('.station-btn').forEach((btn, i) => {
-                if (i === index - 2) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-        };
-        
-        window.moveCard = function(axis, delta) {
-            const input = document.getElementById(`pos-${axis}`);
-            input.value = (parseFloat(input.value) + delta).toFixed(2);
-            applyPosition();
-        };
-        
-        window.applyPosition = function() {
-            if (cards[selectedStation]) {
-                const x = parseFloat(document.getElementById('pos-x').value);
-                const y = parseFloat(document.getElementById('pos-y').value);
-                const z = parseFloat(document.getElementById('pos-z').value);
-                cards[selectedStation].position.set(x, y, z);
-                cardPositions[selectedStation] = { x, y, z };
-            }
-        };
-        
-        window.copyPosition = function() {
-            if (cards[selectedStation]) {
-                const pos = cards[selectedStation].position;
-                const text = `Station ${selectedStation}: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`;
-                navigator.clipboard?.writeText(text);
-                alert('Position copied: ' + text);
-            }
-        };
-        
-        window.saveSettings = function() {
-            alert('Settings saved!');
-        };
-        
-        window.exportConfig = function() {
-            const config = {
-                cards: cardPositions,
-                vignette: {
-                    center: document.getElementById('vignette-center').value,
-                    darkness: document.getElementById('vignette-darkness').value,
-                    mid: document.getElementById('vignette-mid').value
-                },
-                glow: {
-                    min: MIN_STRENGTH,
-                    max: MAX_STRENGTH
-                },
-                bloom: {
-                    min: BLOOM_MIN,
-                    max: BLOOM_MAX
-                },
-                effect: {
-                    preset: currentEffectPreset,
-                    intensity: effectIntensity,
-                    pulse: effectPulseEnabled
-                }
-            };
-            console.log('CONFIG:', JSON.stringify(config, null, 2));
-            alert('Config exported to console!');
-        };
-
-        // === BLOOM ANIMATION SYSTEM ===
-        let bloomStartTime = Date.now();
-        let bloomDuration = 7000 + Math.random() * 13000; // 7-20s random
-        let bloomIsIncreasing = true;
-        let BLOOM_MIN = 0.0; // 0%
-        let BLOOM_MAX = 0.23; // 23% (50% of 0.46 max)
-        
-        document.getElementById('bloom-min').addEventListener('input', (e) => {
-            BLOOM_MIN = e.target.value / 100;
-            document.getElementById('bloom-min-val').textContent = e.target.value + '%';
-        });
-        
-        document.getElementById('bloom-max').addEventListener('input', (e) => {
-            BLOOM_MAX = e.target.value / 100;
-            document.getElementById('bloom-max-val').textContent = e.target.value + '%';
-        });
-        
-        function updateBloom() {
-            const now = Date.now();
-            const elapsed = now - bloomStartTime;
-            
-            if (bloomIsIncreasing) {
-                const progress = Math.min(elapsed / bloomDuration, 1);
-                const strength = BLOOM_MIN + (BLOOM_MAX - BLOOM_MIN) * progress;
-                bloomPass.strength = strength;
-                
-                if (progress >= 1) {
-                    bloomIsIncreasing = false;
-                    bloomStartTime = now;
-                    bloomDuration = 7000 + Math.random() * 13000; // 7-20s
-                }
-            } else {
-                const progress = Math.min(elapsed / bloomDuration, 1);
-                const strength = BLOOM_MAX - (BLOOM_MAX - BLOOM_MIN) * progress;
-                bloomPass.strength = strength;
-                
-                if (progress >= 1) {
-                    bloomIsIncreasing = true;
-                    bloomStartTime = now;
-                    bloomDuration = 7000 + Math.random() * 13000; // 7-20s
-                }
-            }
-        }
-
-        // === CSS FILTER EFFECTS SYSTEM ===
-        const filterOverlay = document.getElementById('filter-overlay');
-        const effectPresets = {
-            'none': '',
-            'vhs': 'contrast(1.2) saturate(1.1)',
-            'fog': 'brightness(1.2) contrast(0.9)',
-            'aurora': 'hue-rotate(30deg) saturate(1.4) brightness(1.1)'
-        };
-        
-        let currentEffectPreset = 'none';
-        let effectIntensity = 0.5; // 50%
-        let effectPulseEnabled = true;
-        let effectPulseOffset = Math.random() * 1000;
-        
-        function applyPreset(preset) {
-            currentEffectPreset = preset;
-            
-            // Update UI
-            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            updateFilterEffect();
-        }
-        
-        document.getElementById('effect-intensity').addEventListener('input', (e) => {
-            effectIntensity = e.target.value / 100;
-            document.getElementById('effect-intensity-val').textContent = e.target.value + '%';
-            updateFilterEffect();
-        });
-        
-        document.getElementById('effect-pulse').addEventListener('change', (e) => {
-            effectPulseEnabled = e.target.checked;
-            document.getElementById('effect-pulse-val').textContent = e.target.checked ? 'ON' : 'OFF';
-        });
-        
-        function updateFilterEffect() {
-            const baseFilter = effectPresets[currentEffectPreset];
-            
-            if (effectPulseEnabled && currentEffectPreset !== 'none') {
-                // Soft random pulse between 80-120% of intensity
-                const time = Date.now() * 0.001;
-                const pulse = 0.9 + Math.sin(time * 0.5 + effectPulseOffset) * 0.1;
-                const finalIntensity = effectIntensity * pulse;
-                
-                if (baseFilter) {
-                    filterOverlay.style.filter = baseFilter.replace(/(\d+\.\d+)/g, (match) => {
-                        const num = parseFloat(match);
-                        return (num * finalIntensity).toFixed(2);
-                    });
-                }
-            } else {
-                if (baseFilter) {
-                    filterOverlay.style.filter = baseFilter.replace(/(\d+\.\d+)/g, (match) => {
-                        const num = parseFloat(match);
-                        return (num * effectIntensity).toFixed(2);
-                    });
-                } else {
-                    filterOverlay.style.filter = 'none';
-                }
-            }
-        }
-
-        // === THREE.JS SCENE SETUP ===
+        // === SCENE SETUP ===
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff); 
+        scene.background = new THREE.Color(0xf5f5f5);
+        scene.fog = new THREE.Fog(0xf5f5f5, 10, 50);
+        
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
 
         // === BLOOM EFFECT ===
         const renderScene = new RenderPass(scene, camera);
@@ -1102,383 +114,114 @@
         composer.addPass(bloomPass);
 
         // === LIGHTS ===
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
         
-        const spotLight = new THREE.SpotLight(0xffeeff, 2); 
-        spotLight.position.set(0, 10, 0); 
-        spotLight.angle = Math.PI / 4; 
-        spotLight.penumbra = 0.5; 
-        spotLight.decay = 1; 
-        spotLight.distance = 50; 
-        spotLight.castShadow = true; 
-        scene.add(spotLight); 
-        spotLight.target.position.set(-0.006, 1.041, -0.008);
-        scene.add(spotLight.target);
-        
-        const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10); 
-        centerLight.position.set(-0.006, 1.041, -0.008); 
-        scene.add(centerLight);
+        const spotLight = new THREE.SpotLight(0xffeeff, 2);
+        spotLight.position.set(0, 10, 0);
+        spotLight.angle = Math.PI / 4;
+        spotLight.penumbra = 0.5;
+        spotLight.decay = 1;
+        spotLight.distance = 50;
+        scene.add(spotLight);
 
-        // === GLOW PULSE SYSTEM ===
-        let glowStartTime = Date.now();
-        let glowDurationUp = 10000 + Math.random() * 20000;
-        let glowDurationDown = 10000 + Math.random() * 20000;
-        let isGlowingUp = true;
-        
-        let MIN_STRENGTH = 0.10;
-        let MAX_STRENGTH = 0.40;
-        
-        document.getElementById('glow-min').addEventListener('input', (e) => {
-            MIN_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-min-val').textContent = e.target.value + '%';
+        // === SIMPLE GEOMETRY (Fallback if model doesn't load) ===
+        const geometry = new THREE.TorusKnotGeometry(2, 0.6, 100, 16);
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0xaa00aa,
+            roughness: 0.3,
+            metalness: 0.7,
+            emissive: 0x220022
         });
+        const torusKnot = new THREE.Mesh(geometry, material);
+        scene.add(torusKnot);
+
+        // Add some particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 500;
+        const posArray = new Float32Array(particlesCount * 3);
         
-        document.getElementById('glow-max').addEventListener('input', (e) => {
-            MAX_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-max-val').textContent = e.target.value + '%';
-        });
-        
-        function getRandomDuration() {
-            return 10000 + Math.random() * 20000;
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 30;
         }
         
-        function updateGlow() {
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            color: 0xff00ff,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.set(0, 0, 8);
+
+        // === BLOOM ANIMATION ===
+        let bloomStartTime = Date.now();
+        let bloomDuration = 7000 + Math.random() * 13000;
+        let bloomIsIncreasing = true;
+        let BLOOM_MIN = 0.0;
+        let BLOOM_MAX = 0.23;
+        
+        function updateBloom() {
             const now = Date.now();
-            const elapsed = now - glowStartTime;
+            const elapsed = now - bloomStartTime;
             
-            if (isGlowingUp) {
-                const progress = Math.min(elapsed / glowDurationUp, 1);
-                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                centerLight.intensity = strength * 2.0;
+            if (bloomIsIncreasing) {
+                const progress = Math.min(elapsed / bloomDuration, 1);
+                const strength = BLOOM_MIN + (BLOOM_MAX - BLOOM_MIN) * progress;
+                bloomPass.strength = strength;
                 
                 if (progress >= 1) {
-                    isGlowingUp = false;
-                    glowStartTime = now;
-                    glowDurationDown = getRandomDuration();
+                    bloomIsIncreasing = false;
+                    bloomStartTime = now;
+                    bloomDuration = 7000 + Math.random() * 13000;
                 }
             } else {
-                const progress = Math.min(elapsed / glowDurationDown, 1);
-                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                centerLight.intensity = strength * 2.0;
+                const progress = Math.min(elapsed / bloomDuration, 1);
+                const strength = BLOOM_MAX - (BLOOM_MAX - BLOOM_MIN) * progress;
+                bloomPass.strength = strength;
                 
                 if (progress >= 1) {
-                    isGlowingUp = true;
-                    glowStartTime = now;
-                    glowDurationUp = getRandomDuration();
+                    bloomIsIncreasing = true;
+                    bloomStartTime = now;
+                    bloomDuration = 7000 + Math.random() * 13000;
                 }
             }
         }
 
-        // === DYNAMIC BLUR SYSTEM ===
-        let blurState = 'waiting';
-        let blurStartTime = Date.now();
-        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
-        
-        function updateBlur() {
-            const now = Date.now();
-            const vignette = document.getElementById('vignette');
-            const blurStatus = document.getElementById('blur-status');
+        // === START HANDLER ===
+        document.getElementById('blocker').addEventListener('click', function() {
+            this.classList.add('hidden');
+            document.getElementById('status').innerText = "Tour Started - Click anywhere to pause/play bloom";
             
-            if (blurState === 'waiting' && now >= nextBlurTime) {
-                blurState = 'active';
-                blurStartTime = now;
-                blurStatus.textContent = 'Blur: ACTIVE';
-            }
-            
-            if (blurState === 'active') {
-                const elapsed = (now - blurStartTime) / 1000;
-                if (elapsed >= 1.0) {
-                    blurState = 'waiting';
-                    nextBlurTime = now + 4000 + Math.random() * 14000;
-                    vignette.style.backdropFilter = 'blur(0px)';
-                    blurStatus.textContent = 'Blur: INACTIVE';
-                } else {
-                    vignette.style.backdropFilter = `blur(1px)`;
-                }
-            }
-            
-            document.getElementById('vignette-blur-val').textContent = 
-                vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
-        }
-
-        // === VIGNETTE CONTROLS ===
-        const vignette = document.getElementById('vignette');
-        
-        document.getElementById('vignette-center').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-center-val').textContent = val + '%';
-            updateVignette();
+            setTimeout(() => {
+                this.style.display = 'none';
+            }, 500);
         });
-        
-        document.getElementById('vignette-darkness').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-darkness-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        document.getElementById('vignette-mid').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-mid-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        function updateVignette() {
-            const center = document.getElementById('vignette-center').value;
-            const darkness = document.getElementById('vignette-darkness').value / 100;
-            const mid = document.getElementById('vignette-mid').value / 100;
-            
-            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
-        }
-
-        // === STATIONS ===
-        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
-        const STATIONS = [
-            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
-        ];
-
-        const cardPositions = {
-            2: { x: 0.10, y: 1.20, z: 4.00 },
-            3: { x: 3.60, y: 1.25, z: 1.20 },
-            4: { x: 2.20, y: 1.20, z: -3.20 },
-            5: { x: -2.20, y: 1.25, z: -2.70 }
-        };
-
-        // === CREATE CARDS ===
-        const cards = [];
-        
-        function createCard(stationName, stationIndex) {
-            const canvas = document.createElement('canvas'); 
-            canvas.width = 512; 
-            canvas.height = 512;
-            const context = canvas.getContext('2d');
-            
-            context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
-            context.fillRect(0, 0, 512, 512);
-            
-            context.shadowColor = 'rgba(0, 0, 0, 1.0)';
-            context.shadowBlur = 20;
-            context.shadowOffsetX = 4;
-            context.shadowOffsetY = 4;
-            
-            context.font = 'bold 70px Arial'; 
-            context.fillStyle = '#ffffff'; 
-            context.textAlign = 'center';
-            context.fillText(stationName, 256, 200);
-            context.fillText(stationName, 256, 200);
-            
-            context.font = 'bold 45px Arial'; 
-            context.fillStyle = '#ffffff';
-            context.fillText(`Station ${stationIndex}`, 256, 300);
-            context.fillText(`Station ${stationIndex}`, 256, 300);
-            
-            context.font = 'bold 32px Arial';
-            context.fillStyle = '#ffffff';
-            context.fillText('Viewpoint', 256, 370);
-            context.fillText('Viewpoint', 256, 370);
-            
-            context.shadowColor = 'transparent';
-            context.shadowBlur = 0;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-            
-            const pageTexture = new THREE.CanvasTexture(canvas);
-            
-            const pageMaterial = new THREE.MeshStandardMaterial({ 
-                map: pageTexture,
-                transparent: true,
-                opacity: 0.0,
-                roughness: 0.05,
-                metalness: 0.0,
-                side: THREE.DoubleSide,
-                depthWrite: false,
-                blending: THREE.NormalBlending,
-                emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 0.5
-            });
-            
-            const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
-            const card = new THREE.Mesh(pageGeometry, pageMaterial);
-            
-            return card;
-        }
-
-        function positionCards() {
-            for (let i = 2; i <= 5; i++) {
-                if (cards[i] && cardPositions[i]) {
-                    cards[i].position.set(cardPositions[i].x, cardPositions[i].y, cardPositions[i].z);
-                    cards[i].lookAt(POINT_CENTER);
-                }
-            }
-        }
-
-        for (let i = 2; i < STATIONS.length; i++) {
-            const card = createCard(STATIONS[i].name, i);
-            cards[i] = card;
-            scene.add(card);
-        }
-
-        let currentStationIndex = 0;
-        let isAnimating = false;
-        let animationProgress = 0;
-        let startPos = new THREE.Vector3();
-        let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 2.5;
-
-        // === LOAD MODEL ===
-        const loader = new GLTFLoader();
-        loader.load('./environment_vr_room_baked.glb', function (gltf) {
-            const model = gltf.scene;
-            model.traverse((child) => { 
-                if (child.isMesh) { 
-                    child.castShadow = true; 
-                    child.receiveShadow = true; 
-                    if (child.name.toLowerCase().includes('tree')) { 
-                        child.material.emissive = new THREE.Color(0xaa00aa); 
-                        child.material.emissiveIntensity = 0.5; 
-                    } 
-                } 
-            });
-            scene.add(model);
-            camera.position.copy(STATIONS[0].pos);
-            camera.lookAt(POINT_CENTER);
-            positionCards();
-        }, undefined, function (error) { console.error(error); });
-
-        // === UI LOGIC ===
-        document.getElementById('blocker').addEventListener('click', function() { 
-            this.style.display = 'none'; 
-            document.getElementById('status').innerText = "Tour Started"; 
-        });
-
-        window.nextStation = function() {
-            if (isAnimating) return;
-            if (currentStationIndex === 0) {
-                currentStationIndex = 1;
-            } else if (currentStationIndex < STATIONS.length - 1) {
-                currentStationIndex++;
-            } else {
-                currentStationIndex = 1;
-            }
-            startAnimation(STATIONS[currentStationIndex].pos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            
-            if (currentStationIndex !== 1) {
-                hideNavBar();
-            }
-            
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
-        };
-
-        window.prevStation = function() {
-            if (isAnimating) return;
-            if (currentStationIndex === 0) {
-                currentStationIndex = STATIONS.length - 1;
-            } else if (currentStationIndex > 1) {
-                currentStationIndex--;
-            } else {
-                currentStationIndex = STATIONS.length - 1;
-            }
-            startAnimation(STATIONS[currentStationIndex].pos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            
-            if (currentStationIndex !== 1) {
-                hideNavBar();
-            }
-            
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
-        };
-
-        function startAnimation(targetPos) {
-            isAnimating = true; 
-            animationProgress = 0; 
-            startPos.copy(camera.position); 
-            endPos.copy(targetPos);
-            const center = POINT_CENTER.clone();
-            const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
-            const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-            midPoint.add(direction.multiplyScalar(2)); 
-            window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
-        }
-
-        function easeInOutCubic(t) { 
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
-        }
 
         // === ANIMATION LOOP ===
+        let time = 0;
         function animate() {
             requestAnimationFrame(animate);
             
-            // Update all effects
-            updateGlow();
-            updateBlur();
             updateBloom();
-            updateFilterEffect();
-
-            if (currentStationIndex === 1 && !isAnimating && animationProgress >= 1) {
-                showNavBar();
-            }
-
-            for (let i = 2; i < cards.length; i++) {
-                if (cards[i]) {
-                    if (i === currentStationIndex) {
-                        cards[i].lookAt(camera.position);
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.8, 0.1);
-                    } else {
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.0, 0.1);
-                    }
-                }
-            }
-
-            if (isAnimating) {
-                animationProgress += 0.016 / ANIMATION_DURATION;
-                if (animationProgress >= 1) { 
-                    animationProgress = 1; 
-                    isAnimating = false; 
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
-                    
-                    if (currentStationIndex === 1) {
-                        showNavBar();
-                    }
-                }
-                const t = easeInOutCubic(animationProgress);
-                const p0 = window.animControlPoints.start; 
-                const p1 = window.animControlPoints.mid; 
-                const p2 = window.animControlPoints.end;
-                const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
-                const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
-                const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
-                camera.position.set(x, y, z);
-                camera.lookAt(POINT_CENTER);
-            }
-
+            
+            // Animate torus knot
+            time += 0.01;
+            torusKnot.rotation.x = time * 0.3;
+            torusKnot.rotation.y = time * 0.5;
+            
+            // Animate particles
+            particlesMesh.rotation.y = time * 0.05;
+            
             composer.render();
         }
         animate();
-        
-        setTimeout(() => selectStation(2), 100);
-        
-        // Initialize effect controls
-        document.getElementById('bloom-min').value = 0;
-        document.getElementById('bloom-max').value = 23;
-        BLOOM_MIN = 0.0;
-        BLOOM_MAX = 0.23;
-        
-        document.getElementById('effect-intensity').value = 50;
-        effectIntensity = 0.5;
-        
-        updateVignette();
-        updateFilterEffect();
 
+        // Handle resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
