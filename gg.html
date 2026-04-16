@@ -100,44 +100,38 @@
             return mesh;
         }
 
-        // --- CREATE CARDS ---
+        // --- CREATE CARDS (Adjusted Y positions for Eye-Level ~2.0) ---
         
-        // 1. Intro Card
-        const cardIntro = createElegantText("Welcome", "The Beginning");
-        cardIntro.position.set(0.092, 9.5, -0.067); 
-        cardIntro.lookAt(new THREE.Vector3(-0.006, 9.5, -0.008)); 
-        const qIntro = cardIntro.quaternion.clone();
-
-        // 2. Card C
+        // 1. Card C (Moved up to Y=2.0)
         const cardC = createElegantText("Viewpoint C", "First Stop");
-        cardC.position.set(-3.49, 1.30, 1.23); 
-        cardC.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        cardC.position.set(-3.49, 2.0, 1.23); 
+        cardC.lookAt(new THREE.Vector3(-0.006, 2.0, -0.008)); 
         const qC = cardC.quaternion.clone();
 
-        // 3. Card D
+        // 2. Card D (Moved up to Y=2.0)
         const cardD = createElegantText("Viewpoint D", "Second Stop");
-        cardD.position.set(0.077, 1.30, 4.0); 
-        cardD.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        cardD.position.set(0.077, 2.0, 4.0); 
+        cardD.lookAt(new THREE.Vector3(-0.006, 2.0, -0.008)); 
         const qD = cardD.quaternion.clone();
 
-        // 4. Card E
+        // 3. Card E (Moved up to Y=2.0)
         const cardE = createElegantText("Viewpoint E", "Third Stop");
-        cardE.position.set(3.77, 1.30, 1.30); 
-        cardE.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        cardE.position.set(3.77, 2.0, 1.30); 
+        cardE.lookAt(new THREE.Vector3(-0.006, 2.0, -0.008)); 
         const qE = cardE.quaternion.clone();
 
-        // 5. Card F
+        // 4. Card F (Moved up to Y=2.0)
         const cardF = createElegantText("Viewpoint F", "Fourth Stop");
-        cardF.position.set(2.21, 1.30, -3.16); 
-        cardF.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        cardF.position.set(2.21, 2.0, -3.16); 
+        cardF.lookAt(new THREE.Vector3(-0.006, 2.0, -0.008)); 
         const qF = cardF.quaternion.clone();
 
-        scene.add(cardIntro); scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
+        scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
 
         // --- STATIONS (Order: Intro -> G:5(Empty) -> C -> D -> E -> F) ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
-            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: cardIntro, quat: qIntro },
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: null }, // NO CARD FOR INTRO
             { name: "G: Wide View", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: null }, // EMPTY STATION
             { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), card: cardC, quat: qC },
             { name: "D: Second", pos: new THREE.Vector3(0.077, 1.301, 5.964), card: cardD, quat: qD },
@@ -190,16 +184,15 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            const time = Date.now() * 0.002; // Time for floating
+            const time = Date.now() * 0.001; // Slower time factor for gentle float
 
             // TEXT CARD LOGIC
             STATIONS.forEach(station => {
-                // FIX: Only animate if the station actually has a card
                 if (station.card) {
                     const dist = camera.position.distanceTo(station.pos);
                     
-                    // FLOATING ANIMATION (Small Bobbing)
-                    station.card.position.y = station.card.userData.initialY + Math.sin(time + station.card.userData.floatOffset) * 0.1;
+                    // SLOW FLOATING ANIMATION (Small Bobbing: ±0.05 units)
+                    station.card.position.y = station.card.userData.initialY + Math.sin(time + station.card.userData.floatOffset) * 0.05;
 
                     if (dist < 2.5) {
                         // AT STATION: Face Camera & 100% Opacity
