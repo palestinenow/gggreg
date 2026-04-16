@@ -8,9 +8,7 @@
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
         #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
-        #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; display: flex; gap: 15px; }
-        button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        button.main-btn:hover { background: #000; transform: translateY(-2px); }
+        
         #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
         
         /* Vignette overlay */
@@ -211,6 +209,139 @@
             text-align: center;
             margin-top: 5px;
         }
+
+        /* HydroRippleButton Styles */
+        @keyframes ripple-bloom {
+            0% { transform: scale(0.9); opacity: 0.8; border-width: 2px; }
+            100% { transform: scale(1.4); opacity: 0; border-width: 0px; }
+        }
+        
+        .hydro-nav-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 150;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        
+        .hydro-nav-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .hydro-nav {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hydro-btn {
+            position: relative;
+            padding: 20px 50px;
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            overflow: visible;
+            border-radius: 60px;
+            border: 1.5px solid rgba(255,255,255,0.1);
+            transition: all 0.15s ease-out;
+            background: rgba(15, 25, 35, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: white;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .hydro-btn .ripple-container {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            border-radius: 60px;
+        }
+        
+        .hydro-btn .ripple {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 1.5px solid rgba(255,255,255,0.5);
+            border-radius: 60px;
+            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
+        }
+        
+        .hydro-btn .ripple-delayed {
+            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) 0.15s forwards;
+            border-color: rgba(255,255,255,0.25);
+        }
+        
+        .hydro-btn .btn-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .hydro-btn .arrow {
+            transition: transform 0.3s ease;
+            font-size: 20px;
+        }
+        
+        .hydro-btn:hover .arrow-left {
+            transform: translateX(-5px);
+        }
+        
+        .hydro-btn:hover .arrow-right {
+            transform: translateX(5px);
+        }
+        
+        .hydro-btn:hover {
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        
+        .hydro-btn .glass-highlight {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%);
+            border-radius: 60px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        
+        .hydro-btn:hover .glass-highlight {
+            opacity: 1;
+        }
+        
+        /* Shine effect */
+        .hydro-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -75%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 46%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 54%, transparent 60%);
+            transition: left 0.8s ease;
+            pointer-events: none;
+            border-radius: 60px;
+        }
+        
+        .hydro-btn:hover::before {
+            left: 130%;
+        }
     </style>
 </head>
 <body>
@@ -222,14 +353,37 @@
         </div>
     </div>
 
-    <div id="actions">
-        <button class="main-btn" onclick="prevStation()">⬅️ PREVIOUS</button>
-        <button class="main-btn" onclick="nextStation()">NEXT ➡️</button>
-    </div>
-
     <div id="status">Ready...</div>
     
     <div id="vignette"></div>
+    
+    <!-- HydroRippleButton Navigation (visible only at Station C) -->
+    <div class="hydro-nav-container" id="hydroNav">
+        <div class="hydro-nav">
+            <button class="hydro-btn" id="hydroPrevBtn" onclick="window.hydroPrev()">
+                <span class="ripple-container">
+                    <span class="ripple"></span>
+                    <span class="ripple-delayed"></span>
+                </span>
+                <span class="glass-highlight"></span>
+                <span class="btn-content">
+                    <span class="arrow arrow-left">←</span>
+                    PREVIOUS
+                </span>
+            </button>
+            <button class="hydro-btn" id="hydroNextBtn" onclick="window.hydroNext()">
+                <span class="ripple-container">
+                    <span class="ripple"></span>
+                    <span class="ripple-delayed"></span>
+                </span>
+                <span class="glass-highlight"></span>
+                <span class="btn-content">
+                    NEXT
+                    <span class="arrow arrow-right">→</span>
+                </span>
+            </button>
+        </div>
+    </div>
     
     <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
     
@@ -393,32 +547,78 @@
             alert('Config exported to console!');
         };
 
-        // --- FIXED POSITION MOVEMENT - Tiny move and stop ---
-        let currentOffset = 0;
-        let targetOffset = 0;
+        // Hydro navigation functions
+        window.hydroPrev = function() {
+            triggerRipple('hydroPrevBtn');
+            setTimeout(() => prevStation(), 100);
+        };
         
-        // Very small fixed positions
-        const OFFSET_LEFT = -0.006;
-        const OFFSET_RIGHT = 0.006;
-        const OFFSET_CENTER = 0;
+        window.hydroNext = function() {
+            triggerRipple('hydroNextBtn');
+            setTimeout(() => nextStation(), 100);
+        };
         
-        document.addEventListener('mousemove', (e) => {
-            const mouseX = e.clientX;
-            const screenWidth = window.innerWidth;
+        function triggerRipple(btnId) {
+            const btn = document.getElementById(btnId);
+            const container = btn.querySelector('.ripple-container');
+            const oldRipples = container.querySelectorAll('.ripple, .ripple-delayed');
+            oldRipples.forEach(r => r.remove());
             
-            // Three zones: left third, middle third, right third
-            if (mouseX < screenWidth * 0.33) {
-                targetOffset = OFFSET_LEFT;
-            } else if (mouseX > screenWidth * 0.66) {
-                targetOffset = OFFSET_RIGHT;
-            } else {
-                targetOffset = OFFSET_CENTER;
+            const ripple1 = document.createElement('span');
+            ripple1.className = 'ripple';
+            const ripple2 = document.createElement('span');
+            ripple2.className = 'ripple-delayed';
+            container.appendChild(ripple1);
+            container.appendChild(ripple2);
+            
+            setTimeout(() => {
+                ripple1.remove();
+                ripple2.remove();
+            }, 1500);
+        }
+
+        // Proximity effect for hydro buttons
+        let hydroBtns = [];
+        function initProximityEffect() {
+            hydroBtns = [
+                { btn: document.getElementById('hydroPrevBtn'), baseStyle: { blur: 8, opacity: 0.05, scale: 0.98, border: 0.05 } },
+                { btn: document.getElementById('hydroNextBtn'), baseStyle: { blur: 8, opacity: 0.05, scale: 0.98, border: 0.05 } }
+            ];
+            
+            window.addEventListener('mousemove', (e) => {
+                if (currentStationIndex !== 1) return;
+                
+                hydroBtns.forEach(({ btn, baseStyle }) => {
+                    if (!btn) return;
+                    const rect = btn.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const dist = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
+                    
+                    const maxDist = 600;
+                    const normalizedDist = Math.min(dist / maxDist, 1);
+                    const proximity = 1 - normalizedDist;
+                    
+                    const currentOpacity = 0.05 + (0.95 * proximity);
+                    const currentBlur = 8 * (1 - proximity);
+                    const currentScale = 0.98 + (0.02 * proximity);
+                    const currentBorder = 0.05 + (0.45 * proximity);
+                    
+                    btn.style.filter = `blur(${currentBlur}px)`;
+                    btn.style.opacity = currentOpacity;
+                    btn.style.transform = `scale(${currentScale})`;
+                    btn.style.borderColor = `rgba(255,255,255,${currentBorder})`;
+                });
+            });
+        }
+
+        // Auto bloom for hydro buttons
+        setInterval(() => {
+            if (currentStationIndex === 1) {
+                triggerRipple('hydroPrevBtn');
+                triggerRipple('hydroNextBtn');
             }
-        });
-        
-        document.addEventListener('mouseleave', () => {
-            targetOffset = OFFSET_CENTER;
-        });
+        }, 2000);
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
@@ -429,9 +629,6 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
-
-        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
-        let baseCameraPosition = new THREE.Vector3();
 
         // --- BLOOM EFFECT ---
         const renderScene = new RenderPass(scene, camera);
@@ -577,6 +774,7 @@
         }
 
         // --- STATIONS ---
+        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
             { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
@@ -586,7 +784,6 @@
             { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
-        // CARD POSITIONS
         const cardPositions = {
             2: { x: 0.10, y: 1.20, z: 4.00 },
             3: { x: 3.60, y: 1.25, z: 1.20 },
@@ -692,7 +889,6 @@
             scene.add(model);
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
-            baseCameraPosition.copy(camera.position);
             positionCards();
         }, undefined, function (error) { console.error(error); });
 
@@ -700,7 +896,17 @@
         document.getElementById('blocker').addEventListener('click', function() { 
             this.style.display = 'none'; 
             document.getElementById('status').innerText = "Tour Started"; 
+            initProximityEffect();
         });
+
+        function updateHydroNavVisibility() {
+            const hydroNav = document.getElementById('hydroNav');
+            if (currentStationIndex === 1) {
+                hydroNav.classList.add('visible');
+            } else {
+                hydroNav.classList.remove('visible');
+            }
+        }
 
         window.nextStation = function() {
             if (isAnimating) return;
@@ -713,6 +919,7 @@
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
+            updateHydroNavVisibility();
             
             if (currentStationIndex >= 2) {
                 selectStation(currentStationIndex);
@@ -730,6 +937,7 @@
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
+            updateHydroNavVisibility();
             
             if (currentStationIndex >= 2) {
                 selectStation(currentStationIndex);
@@ -751,26 +959,6 @@
         function easeInOutCubic(t) { 
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
-        
-        // Smooth transition between fixed positions
-        function updateMouseParallax() {
-            currentOffset += (targetOffset - currentOffset) * 0.05;
-        }
-        
-        function applyParallax() {
-            if (isAnimating) return;
-            
-            const direction = new THREE.Vector3().subVectors(POINT_CENTER, baseCameraPosition).normalize();
-            const distance = baseCameraPosition.distanceTo(POINT_CENTER);
-            
-            const up = new THREE.Vector3(0, 1, 0);
-            const yRot = new THREE.Quaternion().setFromAxisAngle(up, currentOffset);
-            
-            const newDir = direction.clone().applyQuaternion(yRot);
-            
-            camera.position.copy(POINT_CENTER.clone().add(newDir.multiplyScalar(-distance)));
-            camera.lookAt(POINT_CENTER);
-        }
 
         // --- ANIMATION LOOP ---
         function animate() {
@@ -778,12 +966,6 @@
             
             updateGlow();
             updateBlur();
-            updateMouseParallax();
-            
-            if (!isAnimating) {
-                baseCameraPosition.copy(camera.position);
-                applyParallax();
-            }
 
             for (let i = 2; i < cards.length; i++) {
                 if (cards[i]) {
@@ -801,8 +983,7 @@
                 if (animationProgress >= 1) { 
                     animationProgress = 1; 
                     isAnimating = false; 
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
-                    baseCameraPosition.copy(camera.position);
+                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
                 }
                 const t = easeInOutCubic(animationProgress);
                 const p0 = window.animControlPoints.start; 
