@@ -54,7 +54,7 @@
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
-        bloomPass.strength = 0.0;
+        bloomPass.strength = 0.2; // Start at 20%
         bloomPass.radius = 0.8;
         
         const composer = new EffectComposer(renderer);
@@ -76,15 +76,18 @@
         spotLight.target.position.set(-0.006, 1.041, -0.008);
         scene.add(spotLight.target);
         
-        const centerLight = new THREE.PointLight(0xff00ff, 0, 10); 
+        const centerLight = new THREE.PointLight(0xff00ff, 0.4, 10); 
         centerLight.position.set(-0.006, 1.041, -0.008); 
         scene.add(centerLight);
 
-        // --- GLOW PULSE SYSTEM (RANDOM TIMING) ---
+        // --- GLOW PULSE SYSTEM (RANDOM TIMING) - NOW 10% to 40% ---
         let glowStartTime = Date.now();
         let glowDurationUp = 7000 + Math.random() * 15000;
         let glowDurationDown = 7000 + Math.random() * 15000;
         let isGlowingUp = true;
+        
+        const MIN_STRENGTH = 0.1;  // 10%
+        const MAX_STRENGTH = 0.4;  // 40%
         
         function getRandomDuration() {
             return 7000 + Math.random() * 15000;
@@ -96,8 +99,10 @@
             
             if (isGlowingUp) {
                 const progress = Math.min(elapsed / glowDurationUp, 1);
-                bloomPass.strength = progress * 2.0;
-                centerLight.intensity = progress * 2.0;
+                // Map progress from 0→1 to MIN_STRENGTH→MAX_STRENGTH
+                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
+                bloomPass.strength = strength;
+                centerLight.intensity = strength * 2.0; // Light intensity proportional
                 
                 if (progress >= 1) {
                     isGlowingUp = false;
@@ -106,8 +111,10 @@
                 }
             } else {
                 const progress = Math.min(elapsed / glowDurationDown, 1);
-                bloomPass.strength = (1 - progress) * 2.0;
-                centerLight.intensity = (1 - progress) * 2.0;
+                // Map progress from 0→1 to MAX_STRENGTH→MIN_STRENGTH
+                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
+                bloomPass.strength = strength;
+                centerLight.intensity = strength * 2.0;
                 
                 if (progress >= 1) {
                     isGlowingUp = true;
