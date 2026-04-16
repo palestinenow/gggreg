@@ -2,80 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic VR Room - High End</title>
-    <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Old Standard TT', serif; }
-        #blocker {
-            position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.98);
-            display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer;
-        }
-        #instructions {
-            color: black; text-align: center; padding: 40px; border: 1px solid #ccc;
-            background: #fff; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-        }
-        h1 { margin: 0 0 10px 0; font-weight: 700; letter-spacing: 2px; }
-        p { margin: 0; color: #666; font-style: italic; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
+        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
+        #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
-        button.main-btn {
-            background: #111; color: #fff; border: none; padding: 15px 35px;
-            font-family: 'Old Standard TT', serif; font-weight: bold; cursor: pointer; 
-            font-size: 16px; letter-spacing: 1px; transition: all 0.3s ease;
-        }
-        button.main-btn:hover { background: #444; transform: translateY(-2px); }
-        #status { position: absolute; bottom: 40px; left: 40px; color: #111; font-size: 14px; z-index: 100; font-style: italic; }
-        #controls {
-            position: absolute; top: 20px; right: 20px; width: 280px;
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
-            padding: 20px; border: 1px solid #eee; z-index: 100; display: none;
-        }
-        .control-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #333; }
-        select, input[type=range] { width: 100%; margin-bottom: 5px; }
-        .val-display { font-size: 11px; color: #666; float: right; }
-        .btn-row { display: flex; gap: 5px; }
-        .small-btn { flex: 1; padding: 5px; background: #eee; border: none; cursor: pointer; font-size: 12px; }
-        .small-btn:hover { background: #ddd; }
+        button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        button.main-btn:hover { background: #000; transform: translateY(-2px); }
+        #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
     </style>
 </head>
 <body>
+
     <div id="blocker">
         <div id="instructions">
-            <h1>THE VR ROOM</h1>
-            <p>Click to begin the cinematic journey.</p>
+            <h1>CINEMATIC TOUR</h1>
+            <p>Click to start.<br>The card is now real frosted glass.</p>
         </div>
     </div>
+
     <div id="actions">
         <button class="main-btn" onclick="nextStation()">NEXT STATION ➡️</button>
     </div>
+
     <div id="status">Ready...</div>
-    <div id="controls">
-        <div class="control-group">
-            <label>SELECT CARD <span id="cardName" class="val-display">C</span></label>
-            <select id="cardSelector">
-                <option value="C">Card C (Left)</option>
-                <option value="D">Card D (South)</option>
-                <option value="E">Card E (Right)</option>
-                <option value="F">Card F (Front-Right)</option>
-                <option value="G">Card G (Overview)</option>
-            </select>
-        </div>
-        <div class="control-group">
-            <label>VERTICAL POSITION (Y) <span id="yVal" class="val-display">1.30</span></label>
-            <div class="btn-row">
-                <button class="small-btn" onclick="adjustY(0.1)">▲ Up</button>
-                <button class="small-btn" onclick="adjustY(-0.1)">▼ Down</button>
-            </div>
-        </div>
-        <div class="control-group">
-            <label>TEXT SIZE <span id="sizeVal" class="val-display">1.0</span></label>
-            <input type="range" min="0.5" max="2.0" step="0.1" value="1.0" id="sizeSlider" oninput="updateSize(this.value)">
-        </div>
-        <div style="font-size: 10px; color: #999; margin-top: 10px;">
-            Live Coords: <span id="liveCoords">X:0 Y:0 Z:0</span>
-        </div>
-    </div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
@@ -85,218 +37,145 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+        // --- SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff); 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); scene.add(ambientLight);
-        const spotLight = new THREE.SpotLight(0xffeeff, 2); 
-        spotLight.position.set(0, 10, 0); 
-        spotLight.angle = Math.PI / 3; 
-        spotLight.penumbra = 0.5; 
-        spotLight.castShadow = true; 
-        scene.add(spotLight);
+        // --- LIGHTS ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
+        const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
+        const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // ✨ CENTER SHINE EFFECT
-        function createCenterShine() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-            gradient.addColorStop(0.4, 'rgba(255, 200, 255, 0.3)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 256, 256);
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending });
-            const sprite = new THREE.Sprite(material);
-            sprite.scale.set(8, 8, 1);
-            sprite.position.set(0, 1, 0);
-            sprite.userData = { targetOpacity: 0.1, nextChangeTime: 0, changeInterval: 0 };
-            scene.add(sprite);
-            return sprite;
-        }
-        const centerShine = createCenterShine();
+        // --- REAL GLASS CARD ---
+        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+        const context = canvas.getContext('2d');
+        
+        // Draw a semi-transparent white background for the "Frosted" look
+        context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
+        context.fillRect(0, 0, 512, 512);
+        
+        // Border
+        context.strokeStyle = '#ffffff'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
+        
+        // Text
+        context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
+        context.fillText("INFO", 256, 200);
+        context.font = '30px Arial'; context.fillStyle = '#555';
+        context.fillText("Viewpoint C", 256, 280);
+        
+        const pageTexture = new THREE.CanvasTexture(canvas);
+        
+        // USE STANDARD MATERIAL WITH HIGH TRANSPARENCY FOR GLASS
+        const pageMaterial = new THREE.MeshStandardMaterial({ 
+            map: pageTexture,
+            transparent: true,
+            opacity: 0.8, // Start high
+            roughness: 0.1, // Smooth like glass
+            metalness: 0.1,
+            side: THREE.DoubleSide,
+            depthWrite: false, // CRITICAL: Allows seeing through overlapping parts
+            blending: THREE.NormalBlending
+        });
+        
+        const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
+        const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
+        
+        // FIXED POSITION
+        floatingPage.position.set(-3.61, 1.30, 1.17);
+        
+        // Initial Rotation
+        floatingPage.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        const INITIAL_QUATERNION = floatingPage.quaternion.clone();
+        
+        scene.add(floatingPage);
 
-        const fontFace = new FontFace('Old Standard TT', 'url(https://fonts.gstatic.com/s/oldstandardtt/v15/MwQmbgXt-WfZ8GzhbP-1GZsUbjY.woff2)');
-        fontFace.load().then(function(loadedFace) {
-            document.fonts.add(loadedFace);
-            Object.values(cards).forEach(c => updateCardTexture(c));
-        }).catch(() => console.warn('Font fallback'));
-
-        const cards = {};
-        const cardData = {
-            C: { pos: new THREE.Vector3(-3.49, 1.30, 1.23), title: "Viewpoint C", sub: "Detail One" },
-            D: { pos: new THREE.Vector3(0.08, 1.10, 4.00), title: "Viewpoint D", sub: "Detail Two" },
-            E: { pos: new THREE.Vector3(3.77, 1.10, 1.30), title: "Viewpoint E", sub: "Detail Three" },
-            F: { pos: new THREE.Vector3(2.21, 0.90, -3.16), title: "Viewpoint F", sub: "Detail Four" },
-            G: { pos: new THREE.Vector3(-3.403, 2.50, -4.008), title: "Overview", sub: "Wide Perspective" }
-        };
-
-        function createCardMesh(key) {
-            const data = cardData[key];
-            const canvas = document.createElement('canvas');
-            canvas.width = 512; canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            drawCardContent(ctx, data.title, data.sub, 1.0);
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.MeshStandardMaterial({ 
-                map: texture, transparent: true, opacity: 0.05, roughness: 0.9, metalness: 0.1, side: THREE.DoubleSide, depthWrite: false 
-            });
-            const geometry = new THREE.PlaneGeometry(1.5, 1.5);
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.position.copy(data.pos);
-            mesh.lookAt(new THREE.Vector3(0, 1, 0));
-            mesh.userData = {
-                key, baseScale: 1.0, randomOffset: Math.random() * 100,
-                originalQuat: mesh.quaternion.clone(), canvas, ctx,
-                title: data.title, sub: data.sub
-            };
-            scene.add(mesh);
-            return mesh;
-        }
-
-        function drawCardContent(ctx, title, sub, scale) {
-            ctx.clearRect(0, 0, 512, 512);
-            // ✅ NO BORDER - Pure white background only
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'; 
-            ctx.fillRect(0, 0, 512, 512);
-            ctx.textAlign = 'center'; ctx.fillStyle = '#000000';
-            ctx.font = `bold ${60 * scale}px "Old Standard TT", serif`;
-            ctx.fillText(title, 256, 220);
-            ctx.font = `${40 * scale}px "Old Standard TT", serif`;
-            ctx.fillStyle = '#444444';
-            ctx.fillText(sub, 256, 290);
-        }
-
-        function updateCardTexture(mesh) {
-            if(!mesh.userData.ctx) return;
-            drawCardContent(mesh.userData.ctx, mesh.userData.title, mesh.userData.sub, mesh.userData.baseScale);
-            mesh.material.map.needsUpdate = true;
-        }
-
-        ['C', 'D', 'E', 'F', 'G'].forEach(key => { cards[key] = createCardMesh(key); });
-
-        const POINT_CENTER = new THREE.Vector3(0, 1, 0);
+        // --- STATIONS ---
+        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
-            { name: "Intro", pos: new THREE.Vector3(0.092, 9.50, -0.067), cardKey: null },
-            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 2.50, -4.008), cardKey: 'G' }, // ✅ FIXED POSITION
-            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), cardKey: 'C' },
-            { name: "D: Second", pos: new THREE.Vector3(0.077, 1.301, 5.964), cardKey: 'D' },
-            { name: "E: Third", pos: new THREE.Vector3(5.276, 1.338, 1.737), cardKey: 'E' },
-            { name: "F: Fourth", pos: new THREE.Vector3(3.257, 1.258, -4.664), cardKey: 'F' }
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
+            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
-        let currentStationIndex = 0, isAnimating = false, animationProgress = 0;
-        let startPos = new THREE.Vector3(), endPos = new THREE.Vector3(), midPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 2.5, clock = new THREE.Clock();
+        let currentStationIndex = 0;
+        let isAnimating = false;
+        let animationProgress = 0;
+        let startPos = new THREE.Vector3();
+        let endPos = new THREE.Vector3();
+        const ANIMATION_DURATION = 2.5;
 
+        // --- LOAD MODEL ---
         const loader = new GLTFLoader();
-        loader.load('./environment_vr_room_baked.glb', function(gltf) {
+        loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
-            model.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
+            model.traverse((child) => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; if (child.name.toLowerCase().includes('tree')) { child.material.emissive = new THREE.Color(0xaa00aa); child.material.emissiveIntensity = 0.5; } } });
             scene.add(model);
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
-        }, undefined, () => { console.warn("Model not found"); camera.position.copy(STATIONS[0].pos); });
+        }, undefined, function (error) { console.error(error); });
 
-        document.getElementById('blocker').addEventListener('click', function() { 
-            this.style.display = 'none'; 
-            document.getElementById('controls').style.display = 'block';
-            document.getElementById('status').innerText = "Tour Started"; 
-        });
+        // --- UI LOGIC ---
+        document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour Started"; });
 
         window.nextStation = function() {
             if (isAnimating) return;
             if (currentStationIndex === 0) currentStationIndex = 1;
-            else if (currentStationIndex === STATIONS.length - 1) currentStationIndex = 1;
-            else currentStationIndex++;
+            else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
         };
 
         function startAnimation(targetPos) {
-            isAnimating = true; animationProgress = 0; 
-            startPos.copy(camera.position); endPos.copy(targetPos);
+            isAnimating = true; animationProgress = 0; startPos.copy(camera.position); endPos.copy(targetPos);
             const center = POINT_CENTER.clone();
             const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
-            const dist = startPos.distanceTo(endPos);
             const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-            midPoint.add(direction.multiplyScalar(dist * 0.3)); 
-            midPos.copy(midPoint);
+            midPoint.add(direction.multiplyScalar(2)); 
+            window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
         }
 
         function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
-        window.adjustY = function(delta) {
-            const key = document.getElementById('cardSelector').value;
-            cards[key].position.y += delta;
-            updateUIValues(cards[key]);
-        };
-        window.updateSize = function(val) {
-            const key = document.getElementById('cardSelector').value;
-            cards[key].userData.baseScale = parseFloat(val);
-            updateCardTexture(cards[key]);
-            document.getElementById('sizeVal').innerText = val;
-        };
-        document.getElementById('cardSelector').addEventListener('change', (e) => {
-            const card = cards[e.target.value];
-            document.getElementById('cardName').innerText = e.target.value;
-            updateUIValues(card);
-            document.getElementById('sizeSlider').value = card.userData.baseScale;
-            document.getElementById('sizeVal').innerText = card.userData.baseScale;
-        });
-        function updateUIValues(card) {
-            document.getElementById('yVal').innerText = card.position.y.toFixed(2);
-            document.getElementById('liveCoords').innerText = `X:${card.position.x.toFixed(2)} Y:${card.position.y.toFixed(2)} Z:${card.position.z.toFixed(2)}`;
-        }
-        updateUIValues(cards['C']); document.getElementById('cardName').innerText = 'C';
-
+        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
-            const time = clock.getElapsedTime();
+
+            // GLASS LOGIC
+            const distToC = camera.position.distanceTo(STATIONS[1].pos);
+            
+            if (distToC < 2.5) {
+                // AT STATION C: FROSTED GLASS WINDOW
+                floatingPage.lookAt(camera.position);
+                
+                // Opacity 0.4 means 60% transparent. You see the tree clearly.
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.4, 0.1);
+                
+            } else {
+                // AWAY: GHOSTLY / INVISIBLE
+                floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1);
+                
+                // Opacity 0.05 means 95% transparent. Almost gone.
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.05, 0.1);
+            }
 
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
-                if (animationProgress >= 1) { animationProgress = 1; isAnimating = false; document.getElementById('status').innerText = `Arrived: ${STATIONS[currentStationIndex].name}`; }
+                if (animationProgress >= 1) { animationProgress = 1; isAnimating = false; document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; }
                 const t = easeInOutCubic(animationProgress);
-                const x = (1-t)*(1-t)*startPos.x + 2*(1-t)*t*midPos.x + t*t*endPos.x;
-                const y = (1-t)*(1-t)*startPos.y + 2*(1-t)*t*midPos.y + t*t*endPos.y;
-                const z = (1-t)*(1-t)*startPos.z + 2*(1-t)*t*midPos.z + t*t*endPos.z;
+                const p0 = window.animControlPoints.start; const p1 = window.animControlPoints.mid; const p2 = window.animControlPoints.end;
+                const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
+                const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
+                const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
                 camera.position.set(x, y, z);
                 camera.lookAt(POINT_CENTER);
             }
-
-            // ✨ CENTER SHINE: Random 10%-70% opacity, 7-20s interval
-            if (time >= centerShine.userData.nextChangeTime) {
-                centerShine.userData.targetOpacity = Math.random() > 0.5 ? 0.1 : 0.7;
-                centerShine.userData.changeInterval = 7 + Math.random() * 13;
-                centerShine.userData.nextChangeTime = time + centerShine.userData.changeInterval;
-            }
-            centerShine.material.opacity = THREE.MathUtils.lerp(centerShine.material.opacity, centerShine.userData.targetOpacity, 0.02);
-
-            // Cards: Shine & Blur + Random Pulse
-            const activeCardKey = STATIONS[currentStationIndex].cardKey;
-            Object.values(cards).forEach(card => {
-                const isActive = (card.userData.key === activeCardKey) && !isAnimating;
-                const targetOpacity = isActive ? 1.0 : 0.05;
-                const targetRoughness = isActive ? 0.1 : 0.9;
-                card.material.opacity = THREE.MathUtils.lerp(card.material.opacity, targetOpacity, 0.05);
-                card.material.roughness = THREE.MathUtils.lerp(card.material.roughness, targetRoughness, 0.05);
-                if (isActive) {
-                    card.lookAt(camera.position);
-                    card.scale.setScalar(1.0);
-                } else {
-                    card.quaternion.slerp(card.userData.originalQuat, 0.05);
-                    const scale = 1.0 + Math.sin(time * 1.5 + card.userData.randomOffset) * 0.05;
-                    card.scale.setScalar(scale);
-                }
-            });
 
             renderer.render(scene, camera);
         }
