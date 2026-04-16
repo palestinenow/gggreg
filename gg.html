@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Pinyon Script</title>
+    <title>Cinematic Orbit - My Soul Font</title>
     
-    <!-- IMPORT PINYON SCRIPT FONT -->
+    <!-- IMPORT MY SOUL FONT -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=My+Soul:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Pinyon Script', cursive; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: 'My Soul', cursive; }
         
         /* START SCREEN */
         #blocker {
@@ -21,14 +21,14 @@
             color: black; text-align: center; padding: 30px; border: 1px solid #ddd;
             border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        h1 { margin: 0 0 10px 0; color: #333; font-size: 48px; font-weight: 400; }
-        p { margin: 0; color: #666; font-size: 24px; }
+        h1 { margin: 0 0 10px 0; color: #333; font-size: 56px; font-weight: 700; }
+        p { margin: 0; color: #666; font-size: 28px; font-weight: 500; }
 
         /* MAIN BUTTON */
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
         button.main-btn {
             background: #000; color: #fff; border: none; padding: 15px 40px;
-            font-family: 'Pinyon Script', cursive; font-size: 28px; cursor: pointer;
+            font-family: 'My Soul', cursive; font-size: 32px; font-weight: 600; cursor: pointer;
             border-radius: 50px; transition: all 0.3s ease; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
@@ -36,7 +36,7 @@
 
         #status { 
             position: absolute; bottom: 40px; left: 40px; 
-            color: #333; font-size: 24px; z-index: 100; opacity: 0.6; 
+            color: #333; font-size: 28px; font-weight: 500; z-index: 100; opacity: 0.6; 
         }
     </style>
 </head>
@@ -78,13 +78,13 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // --- HELPER TO CREATE PINYON SCRIPT TEXT CARDS ---
+        // --- HELPER TO CREATE MY SOUL TEXT CARDS ---
         function createElegantCard(textTitle, textSub) {
             const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
             const context = canvas.getContext('2d');
             
             // Load Font for Canvas
-            context.font = '120px "Pinyon Script"'; 
+            context.font = '140px "My Soul"'; 
             
             // NO BACKGROUND - Transparent
             
@@ -94,7 +94,7 @@
             context.fillText(textTitle, 512, 400);
             
             // Subtitle
-            context.font = '80px "Pinyon Script"'; 
+            context.font = '90px "My Soul"'; 
             context.fillStyle = '#eeeeee';
             context.fillText(textSub, 512, 550);
             
@@ -112,7 +112,7 @@
             return mesh;
         }
 
-        // --- CREATE CARDS ---
+        // --- CREATE CARDS WITH YOUR EXACT COORDINATES ---
         
         // 1. Intro Card
         const cardIntro = createElegantCard("Welcome", "Start of Journey");
@@ -120,31 +120,31 @@
         cardIntro.lookAt(new THREE.Vector3(-0.006, 9.5, -0.008)); 
         const qIntro = cardIntro.quaternion.clone();
 
-        // 2. Card G (Overview)
+        // 2. Card G (Overview) - Placed near G station
         const cardG = createElegantCard("Overview", "Wide Perspective");
         cardG.position.set(-3.403, 2.5, -4.008); 
         cardG.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
         const qG = cardG.quaternion.clone();
 
-        // 3. Card C
+        // 3. Card C - YOUR COORDINATES
         const cardC = createElegantCard("Viewpoint C", "Detail One");
         cardC.position.set(-3.49, 1.30, 1.23); 
         cardC.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qC = cardC.quaternion.clone();
 
-        // 4. Card D
+        // 4. Card D - Logical position near D station
         const cardD = createElegantCard("Viewpoint D", "Detail Two");
         cardD.position.set(0.077, 1.30, 4.0); 
         cardD.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qD = cardD.quaternion.clone();
 
-        // 5. Card E
+        // 5. Card E - YOUR COORDINATES
         const cardE = createElegantCard("Viewpoint E", "Detail Three");
         cardE.position.set(3.77, 1.30, 1.30); 
         cardE.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qE = cardE.quaternion.clone();
 
-        // 6. Card F
+        // 6. Card F - YOUR COORDINATES
         const cardF = createElegantCard("Viewpoint F", "Detail Four");
         cardF.position.set(2.21, 1.30, -3.16); 
         cardF.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
@@ -153,7 +153,6 @@
         scene.add(cardIntro); scene.add(cardG); scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
 
         // --- STATIONS ---
-        // NOTE: Every station MUST have a 'card' property. Use 'null' if there is no card.
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: cardIntro, quat: qIntro },
@@ -208,7 +207,6 @@
 
             const time = Date.now() * 0.001;
 
-            // SAFE ANIMATION LOOP: Only process stations that actually have a card
             STATIONS.forEach(station => {
                 if (station.card) {
                     const dist = camera.position.distanceTo(station.pos);
