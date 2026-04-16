@@ -125,31 +125,38 @@
         let selectedCardKey = 'C';
         let cards = {};
 
-        // --- HELPER TO CREATE OLD STANDARD TT TEXT CARDS (NO BACKGROUND) ---
+        // --- HELPER TO CREATE OLD STANDARD TT TEXT CARDS (WITH SHADOW) ---
         function createCard(textTitle, textSub, x, y, z) {
             const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
             const context = canvas.getContext('2d');
             
             // NO BACKGROUND - Transparent
 
+            // Add Shadow for visibility against white background
+            context.shadowColor = "rgba(0,0,0,0.5)";
+            context.shadowBlur = 10;
+            context.shadowOffsetX = 2;
+            context.shadowOffsetY = 2;
+
             // Text Title - WHITE
             context.font = 'bold 140px "Old Standard TT"'; 
             context.fillStyle = '#ffffff'; context.textAlign = 'center';
             context.fillText(textTitle, 512, 400);
             
-            // Text Subtitle - WHITE (slightly softer)
+            // Text Subtitle - WHITE
             context.font = 'italic 90px "Old Standard TT"'; 
             context.fillStyle = '#eeeeee';
             context.fillText(textSub, 512, 550);
             
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.MeshBasicMaterial({ 
-                map: texture, transparent: true, opacity: 1.0, side: THREE.DoubleSide, depthWrite: false 
+                map: texture, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false 
             });
             const geometry = new THREE.PlaneGeometry(3, 3); 
             const mesh = new THREE.Mesh(geometry, material);
             
             mesh.position.set(x, y, z);
+            // Initial rotation to face center roughly
             mesh.lookAt(new THREE.Vector3(-0.006, y, -0.008)); 
             
             // Store data for random animation
@@ -186,7 +193,7 @@
         const qF = cardF.quaternion.clone();
         cards['F'] = cardF;
 
-        // Card G (Overview) - ENSURED IT IS ADDED
+        // Card G (Overview)
         const cardG = createCard("Overview", "Wide View", -3.403, 2.5, -4.008);
         const qG = cardG.quaternion.clone();
         cards['G'] = cardG;
@@ -291,7 +298,8 @@
                     if (dist < 2.5) {
                         // AT STATION: Face Camera & 100% Opacity
                         station.card.lookAt(camera.position);
-                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
+                        station.card.material.opacity = 1.0; // Force visible
+                        
                         // Stop random movement when focused
                         if(station.card.userData.originalPos) {
                             station.card.position.lerp(station.card.userData.originalPos, 0.1);
@@ -299,9 +307,9 @@
                     } else {
                         // AWAY: Return to Original Rotation & 5% Opacity (Ghostly)
                         if(station.quat) {
-                            station.card.quaternion.slerp(station.quat, 0.1);
+                            station.card.quaternion.slerp(station.quat, 0.05); // Slower return
                         }
-                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
+                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.05);
                         
                         // RANDOM FLOAT EFFECT
                         if(station.card.userData.originalPos && station.card.userData.randomOffset !== undefined) {
