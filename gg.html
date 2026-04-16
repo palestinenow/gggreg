@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Clean Version</title>
+    <title>Cinematic Orbit - Fixed Card</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         
@@ -87,7 +87,7 @@
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff); // Clean White Sky
+        scene.background = new THREE.Color(0xffffff); 
         
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -113,21 +113,41 @@
         centerLight.position.set(-0.006, 1.041, -0.008);
         scene.add(centerLight);
 
-        // --- FLOATING PAGE (BILLBOARD) ---
-        // Simple clean page at Station C
+        // --- FLOATING PAGE (FIXED SIZE & POSITION) ---
         const canvas = document.createElement('canvas');
         canvas.width = 512; canvas.height = 512;
         const context = canvas.getContext('2d');
-        context.fillStyle = '#ffffff'; context.fillRect(0, 0, 512, 512);
-        context.strokeStyle = '#333333'; context.lineWidth = 10; context.strokeRect(20, 20, 472, 472);
-        context.font = 'bold 40px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
-        context.fillText("VIEWPOINT C", 256, 256);
+        
+        // Clean White Card Design
+        context.fillStyle = '#ffffff'; 
+        context.fillRect(0, 0, 512, 512);
+        
+        // Subtle Border
+        context.strokeStyle = '#dddddd'; 
+        context.lineWidth = 20; 
+        context.strokeRect(20, 20, 472, 472);
+        
+        // Text
+        context.font = 'bold 50px Arial'; 
+        context.fillStyle = '#333'; 
+        context.textAlign = 'center';
+        context.fillText("INFO", 256, 200);
+        
+        context.font = '30px Arial'; 
+        context.fillStyle = '#666'; 
+        context.fillText("Viewpoint C", 256, 280);
+        context.fillText("Always Facing You", 256, 320);
         
         const pageTexture = new THREE.CanvasTexture(canvas);
-        const pageGeometry = new THREE.PlaneGeometry(3, 3);
+        
+        // FIXED: Smaller Size (1.5 instead of 3)
+        const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
         const pageMaterial = new THREE.MeshBasicMaterial({ map: pageTexture, transparent: true, side: THREE.DoubleSide });
         const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
-        floatingPage.position.set(-5.325, 3, 1.727); // Position at Station C
+        
+        // FIXED: Lower Position (Y=2.5 instead of Y=3) and slightly adjusted X/Z to center it better
+        floatingPage.position.set(-5.325, 2.5, 1.727); 
+        
         scene.add(floatingPage);
 
         // --- STATIONS ---
@@ -146,7 +166,7 @@
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 2.5; // Slightly faster for clean feel
+        const ANIMATION_DURATION = 2.5;
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -176,7 +196,6 @@
         window.nextStation = function() {
             if (isAnimating) return;
             
-            // Cycle: Intro -> C -> D -> E -> F -> G -> C...
             if (currentStationIndex === 0) {
                 currentStationIndex = 1;
             } else {
@@ -193,11 +212,10 @@
             startPos.copy(camera.position);
             endPos.copy(targetPos);
             
-            // Calculate Arc Path
             const center = POINT_CENTER.clone();
             const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
             const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-            midPoint.add(direction.multiplyScalar(2)); // Arc height
+            midPoint.add(direction.multiplyScalar(2)); 
             
             window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
         }
@@ -211,7 +229,6 @@
             // Make Page Face Camera
             floatingPage.lookAt(camera.position);
 
-            // Camera Movement
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
                 
@@ -223,7 +240,6 @@
 
                 const t = easeInOutCubic(animationProgress);
                 
-                // Quadratic Bezier Curve for Smooth Arc
                 const p0 = window.animControlPoints.start;
                 const p1 = window.animControlPoints.mid;
                 const p2 = window.animControlPoints.end;
