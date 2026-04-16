@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic fzeezReal Glass Effect</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
@@ -393,15 +393,15 @@
             alert('Config exported to console!');
         };
 
-        // --- VERY SUBTLE MOUSE PARALLAX WITH STRICT LIMITS ---
+        // --- EXTREMELY SUBTLE MOUSE PARALLAX ---
         let mouseX = 0;
         let mouseY = 0;
         let targetMouseX = 0;
         let targetMouseY = 0;
         
-        // Maximum movement limits (very small)
-        const MAX_OFFSET_X = 0.08;
-        const MAX_OFFSET_Y = 0.05;
+        // Ultra-small movement limits
+        const MAX_OFFSET_X = 0.02;
+        const MAX_OFFSET_Y = 0.015;
         
         document.addEventListener('mousemove', (e) => {
             targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -456,7 +456,7 @@
         centerLight.position.set(-0.006, 1.041, -0.008); 
         scene.add(centerLight);
 
-        // --- GLOW PULSE SYSTEM - 10-40% with random 10-30s timing ---
+        // --- GLOW PULSE SYSTEM ---
         let glowStartTime = Date.now();
         let glowDurationUp = 10000 + Math.random() * 20000;
         let glowDurationDown = 10000 + Math.random() * 20000;
@@ -508,7 +508,7 @@
             }
         }
 
-        // --- DYNAMIC BLUR SYSTEM - pulses to 1px then back to 0 ---
+        // --- DYNAMIC BLUR SYSTEM ---
         let blurState = 'waiting';
         let blurStartTime = Date.now();
         let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
@@ -745,28 +745,24 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
         
-        // Very subtle mouse movement with strict limits
+        // Extremely subtle mouse movement
         function updateMouseParallax() {
-            mouseX += (targetMouseX - mouseX) * 0.02;
-            mouseY += (targetMouseY - mouseY) * 0.02;
+            mouseX += (targetMouseX - mouseX) * 0.01;
+            mouseY += (targetMouseY - mouseY) * 0.01;
         }
         
         function applyParallax() {
             if (isAnimating) return;
             
-            // Clamp mouse values to limits
             const clampedX = Math.max(-1, Math.min(1, mouseX));
             const clampedY = Math.max(-1, Math.min(1, mouseY));
             
-            // Tiny offset with strict limits
             const offsetX = clampedX * MAX_OFFSET_X;
             const offsetY = clampedY * MAX_OFFSET_Y;
             
-            // Calculate direction from center
             const direction = new THREE.Vector3().subVectors(POINT_CENTER, baseCameraPosition).normalize();
             const distance = baseCameraPosition.distanceTo(POINT_CENTER);
             
-            // Create rotation quaternions for tiny movement
             const up = new THREE.Vector3(0, 1, 0);
             const right = new THREE.Vector3(1, 0, 0);
             
@@ -775,10 +771,8 @@
             
             const parallaxQuat = new THREE.Quaternion().multiplyQuaternions(yRot, xRot);
             
-            // Apply to direction
             const newDir = direction.clone().applyQuaternion(parallaxQuat);
             
-            // Set new camera position
             camera.position.copy(POINT_CENTER.clone().add(newDir.multiplyScalar(-distance)));
             camera.lookAt(POINT_CENTER);
         }
