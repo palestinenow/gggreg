@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Real Glass Effect</title>
+    <title>Cinematic Orbit - Hydro Ripple Buttons</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400&display=swap');
         
@@ -11,7 +11,7 @@
         #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
         
-        /* Navigation Buttons - Positioned Left & Right, Vertically Centered */
+        /* Navigation Buttons - Hydro Ripple Effect */
         #actions { 
             position: fixed;
             top: 50%;
@@ -22,32 +22,107 @@
             padding: 0 40px;
             box-sizing: border-box;
             z-index: 100;
-            pointer-events: none; /* Let clicks pass through empty areas */
+            pointer-events: none;
         }
         
-        .nav-btn {
-            background: rgba(51, 51, 51, 0.9);
-            color: #fff;
-            border: none;
+        .hydro-btn {
+            position: relative;
             padding: 18px 35px;
             font-weight: bold;
-            cursor: pointer;
             font-size: 16px;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            pointer-events: auto; /* Enable clicks on buttons */
-            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(30, 41, 59, 0.2);
+            backdrop-filter: blur(8px);
+            color: white;
+            cursor: pointer;
+            overflow: visible;
+            transition: transform 0.1s ease-out;
+            pointer-events: auto;
+            
+            /* Hydro Ripple Base State */
+            --proximity: 0;
+            --opacity: calc(0.05 + (0.95 * var(--proximity)));
+            --blur: calc(8px * (1 - var(--proximity)));
+            --scale: calc(0.98 + (0.02 * var(--proximity)));
+            --border: calc(0.05 + (0.45 * var(--proximity)));
+            
+            opacity: var(--opacity);
+            filter: blur(var(--blur));
+            transform: scale(var(--scale));
+            border-color: rgba(255,255,255,var(--border));
         }
         
-        .nav-btn:hover { 
-            background: rgba(0, 0, 0, 0.95); 
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        /* Ripple Bloom Animation */
+        .hydro-btn::before,
+        .hydro-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.4);
+            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
+            pointer-events: none;
+            opacity: 0;
         }
         
-        .nav-btn:active { 
-            transform: translateY(0) scale(0.98);
+        .hydro-btn::after {
+            animation-delay: 0.1s;
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .hydro-btn.bloom::before,
+        .hydro-btn.bloom::after {
+            opacity: 1;
+            animation-name: ripple-bloom;
+        }
+        
+        @keyframes ripple-bloom {
+            0% { 
+                transform: scale(0.9); 
+                opacity: 0.8; 
+                border-width: 2px; 
+            }
+            100% { 
+                transform: scale(1.4); 
+                opacity: 0; 
+                border-width: 0px; 
+            }
+        }
+        
+        /* Inner Glass Highlight */
+        .hydro-btn .highlight {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        
+        .hydro-btn:hover .highlight {
+            opacity: 1;
+        }
+        
+        /* Button Text & Icon */
+        .hydro-btn-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hydro-btn svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+        
+        .hydro-btn:hover svg {
+            transform: translateX(4px);
         }
         
         #status { 
@@ -75,7 +150,7 @@
             transition: backdrop-filter 0.5s ease;
         }
         
-        /* Glass Navigation Bar - Positioned LOWER */
+        /* Glass Navigation Bar */
         .glass-nav {
             position: fixed;
             top: 68%;
@@ -232,7 +307,7 @@
             .send-btn { width: 34px; height: 34px; }
             .send-btn svg { width: 14px; height: 14px; }
             #actions { padding: 0 20px; }
-            .nav-btn { padding: 15px 25px; font-size: 14px; }
+            .hydro-btn { padding: 15px 25px; font-size: 14px; }
         }
         
         /* Control Panel */
@@ -427,21 +502,37 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>The card is now real frosted glass.</p>
+            <p>Click to start.<br>Hydro Ripple Buttons activated.</p>
         </div>
     </div>
 
-    <!-- Navigation Buttons - Left & Right, Vertically Centered -->
+    <!-- Navigation Buttons with Hydro Ripple Effect -->
     <div id="actions">
-        <button class="nav-btn" onclick="prevStation()">⬅️ Previous</button>
-        <button class="nav-btn" onclick="nextStation()">Next ➡️</button>
+        <button class="hydro-btn" id="prevBtn" onclick="prevStation()">
+            <span class="hydro-btn-content">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>Previous</span>
+            </span>
+            <span class="highlight"></span>
+        </button>
+        <button class="hydro-btn" id="nextBtn" onclick="nextStation()">
+            <span class="hydro-btn-content">
+                <span>Next</span>
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+            </span>
+            <span class="highlight"></span>
+        </button>
     </div>
 
     <div id="status">Ready...</div>
     
     <div id="vignette"></div>
     
-    <!-- Glass Navigation Bar - Shows only when ARRIVED at Station C -->
+    <!-- Glass Navigation Bar -->
     <nav class="glass-nav" id="glassNav">
         <div class="dot"></div>
         <div class="input-wrap" id="inputWrap"></div>
@@ -546,7 +637,52 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-        // Glass Nav functionality
+        // === HYDRO RIPPLE BUTTON LOGIC ===
+        const hydroButtons = document.querySelectorAll('.hydro-btn');
+        const MAX_DISTANCE = 600; // Proximity range in pixels
+        
+        function updateButtonProximity(button, mouseX, mouseY) {
+            const rect = button.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const distance = Math.sqrt(
+                Math.pow(mouseX - centerX, 2) + 
+                Math.pow(mouseY - centerY, 2)
+            );
+            
+            // Calculate proximity (1 = close, 0 = far)
+            const normalizedDistance = Math.min(distance / MAX_DISTANCE, 1);
+            const proximity = 1 - normalizedDistance;
+            
+            // Apply CSS variables for smooth interpolation
+            button.style.setProperty('--proximity', proximity);
+        }
+        
+        // Global mousemove listener for proximity effects
+        document.addEventListener('mousemove', (e) => {
+            hydroButtons.forEach(btn => {
+                updateButtonProximity(btn, e.clientX, e.clientY);
+            });
+        });
+        
+        // Auto-bloom every 2 seconds
+        function triggerAutoBloom() {
+            hydroButtons.forEach(btn => {
+                btn.classList.add('bloom');
+                setTimeout(() => btn.classList.remove('bloom'), 1200);
+            });
+        }
+        setInterval(triggerAutoBloom, 2000);
+        
+        // Hover bloom
+        hydroButtons.forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                btn.classList.add('bloom');
+                setTimeout(() => btn.classList.remove('bloom'), 1200);
+            });
+        });
+
+        // === GLASS NAV FUNCTIONALITY ===
         const nav = document.getElementById('glassNav');
         const inputWrap = document.getElementById('inputWrap');
         const btn = document.getElementById('sendBtn');
@@ -647,7 +783,7 @@
             }
         }
 
-        // Make functions globally available
+        // === GLOBAL FUNCTIONS ===
         window.toggleControlPanel = function() {
             const panel = document.getElementById('control-panel');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -717,7 +853,7 @@
             alert('Config exported to console!');
         };
 
-        // --- SCENE SETUP ---
+        // === THREE.JS SCENE SETUP ===
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff); 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -727,7 +863,7 @@
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // --- BLOOM EFFECT ---
+        // === BLOOM EFFECT ===
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
@@ -738,7 +874,7 @@
         composer.addPass(renderScene);
         composer.addPass(bloomPass);
 
-        // --- LIGHTS ---
+        // === LIGHTS ===
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
         scene.add(ambientLight);
         
@@ -757,7 +893,7 @@
         centerLight.position.set(-0.006, 1.041, -0.008); 
         scene.add(centerLight);
 
-        // --- GLOW PULSE SYSTEM ---
+        // === GLOW PULSE SYSTEM ===
         let glowStartTime = Date.now();
         let glowDurationUp = 10000 + Math.random() * 20000;
         let glowDurationDown = 10000 + Math.random() * 20000;
@@ -809,7 +945,7 @@
             }
         }
 
-        // --- DYNAMIC BLUR SYSTEM ---
+        // === DYNAMIC BLUR SYSTEM ===
         let blurState = 'waiting';
         let blurStartTime = Date.now();
         let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
@@ -841,7 +977,7 @@
                 vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
         }
 
-        // --- VIGNETTE CONTROLS ---
+        // === VIGNETTE CONTROLS ===
         const vignette = document.getElementById('vignette');
         
         document.getElementById('vignette-center').addEventListener('input', (e) => {
@@ -870,7 +1006,7 @@
             vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
         }
 
-        // --- STATIONS ---
+        // === STATIONS ===
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
@@ -888,7 +1024,7 @@
             5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
-        // --- CREATE CARDS ---
+        // === CREATE CARDS ===
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -969,7 +1105,7 @@
         let endPos = new THREE.Vector3();
         const ANIMATION_DURATION = 2.5;
 
-        // --- LOAD MODEL ---
+        // === LOAD MODEL ===
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
@@ -989,7 +1125,7 @@
             positionCards();
         }, undefined, function (error) { console.error(error); });
 
-        // --- UI LOGIC ---
+        // === UI LOGIC ===
         document.getElementById('blocker').addEventListener('click', function() { 
             this.style.display = 'none'; 
             document.getElementById('status').innerText = "Tour Started"; 
@@ -1053,7 +1189,7 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
 
-        // --- ANIMATION LOOP ---
+        // === ANIMATION LOOP ===
         function animate() {
             requestAnimationFrame(animate);
             
