@@ -153,6 +153,7 @@
         scene.add(cardIntro); scene.add(cardG); scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
 
         // --- STATIONS ---
+        // NOTE: Every station MUST have a 'card' property. Use 'null' if there is no card.
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: cardIntro, quat: qIntro },
@@ -207,22 +208,33 @@
 
             const time = Date.now() * 0.001;
 
+            // SAFE ANIMATION LOOP: Only process stations that actually have a card
             STATIONS.forEach(station => {
-                // FIX: Only animate if the station has a card
-                if(station.card) {
+                if (station.card) {
                     const dist = camera.position.distanceTo(station.pos);
                     
                     if (dist < 2.5) {
+                        // AT STATION: Face Camera & 100% Opacity
                         station.card.lookAt(camera.position);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
-                        station.card.position.lerp(station.userData.originalPos, 0.1);
+                        
+                        // Stop floating when focused
+                        if(station.card.userData.originalPos) {
+                             station.card.position.lerp(station.card.userData.originalPos, 0.1);
+                        }
                     } else {
-                        station.card.quaternion.slerp(station.quat, 0.1);
+                        // AWAY: Return to Original Rotation & 5% Opacity
+                        if(station.quat) {
+                            station.card.quaternion.slerp(station.quat, 0.1);
+                        }
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
                         
-                        const offset = station.userData.randomOffset;
-                        station.card.position.y = station.userData.originalPos.y + Math.sin(time + offset) * 0.1;
-                        station.card.position.x = station.userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
+                        // Random "Shine/Float" Movement when inactive
+                        if(station.card.userData.originalPos && station.card.userData.randomOffset !== undefined) {
+                            const offset = station.card.userData.randomOffset;
+                            station.card.position.y = station.card.userData.originalPos.y + Math.sin(time + offset) * 0.1;
+                            station.card.position.x = station.card.userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
+                        }
                     }
                 }
             });
