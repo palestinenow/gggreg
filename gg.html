@@ -125,38 +125,40 @@
         let selectedCardKey = 'C';
         let cards = {};
 
-        // --- HELPER TO CREATE OLD STANDARD TT TEXT CARDS (WITH SHADOW) ---
+        // --- HELPER TO CREATE OLD STANDARD TT TEXT CARDS (NO BACKGROUND) ---
         function createCard(textTitle, textSub, x, y, z) {
             const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
             const context = canvas.getContext('2d');
             
             // NO BACKGROUND - Transparent
 
-            // Add Shadow for visibility against white background
-            context.shadowColor = "rgba(0,0,0,0.5)";
-            context.shadowBlur = 10;
-            context.shadowOffsetX = 2;
-            context.shadowOffsetY = 2;
-
             // Text Title - WHITE
             context.font = 'bold 140px "Old Standard TT"'; 
             context.fillStyle = '#ffffff'; context.textAlign = 'center';
             context.fillText(textTitle, 512, 400);
             
-            // Text Subtitle - WHITE
+            // Text Subtitle - WHITE (slightly softer)
             context.font = 'italic 90px "Old Standard TT"'; 
             context.fillStyle = '#eeeeee';
             context.fillText(textSub, 512, 550);
             
             const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.MeshBasicMaterial({ 
-                map: texture, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false 
+            
+            // Use MeshStandardMaterial for better lighting/shine potential
+            const material = new THREE.MeshStandardMaterial({ 
+                map: texture, 
+                transparent: true, 
+                opacity: 1.0, 
+                side: THREE.DoubleSide, 
+                depthWrite: false,
+                roughness: 0.5,
+                metalness: 0.1
             });
+            
             const geometry = new THREE.PlaneGeometry(3, 3); 
             const mesh = new THREE.Mesh(geometry, material);
             
             mesh.position.set(x, y, z);
-            // Initial rotation to face center roughly
             mesh.lookAt(new THREE.Vector3(-0.006, y, -0.008)); 
             
             // Store data for random animation
@@ -193,7 +195,7 @@
         const qF = cardF.quaternion.clone();
         cards['F'] = cardF;
 
-        // Card G (Overview)
+        // Card G (Overview) - ENSURED IT IS ADDED
         const cardG = createCard("Overview", "Wide View", -3.403, 2.5, -4.008);
         const qG = cardG.quaternion.clone();
         cards['G'] = cardG;
@@ -291,31 +293,43 @@
             requestAnimationFrame(animate);
             const time = Date.now() * 0.001;
 
-            // Pure Text Logic with Random Float
+            // Shine/Blur Animation Logic
             STATIONS.forEach(station => {
                 if(station.card && station.card.userData) {
                     const dist = camera.position.distanceTo(station.pos);
                     if (dist < 2.5) {
-                        // AT STATION: Face Camera & 100% Opacity
+                        // AT STATION: Face Camera & 100% Opacity & Sharp
                         station.card.lookAt(camera.position);
-                        station.card.material.opacity = 1.0; // Force visible
+                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
+                        station.card.material.roughness = THREE.MathUtils.lerp(station.card.material.roughness, 0.1, 0.1); // Sharp
                         
                         // Stop random movement when focused
                         if(station.card.userData.originalPos) {
                             station.card.position.lerp(station.card.userData.originalPos, 0.1);
+                            station.card.scale.setScalar(station.card.userData.baseScale); // Reset scale
                         }
                     } else {
-                        // AWAY: Return to Original Rotation & 5% Opacity (Ghostly)
+                        // AWAY: Return to Original Rotation & Ghostly/Shiny
                         if(station.quat) {
-                            station.card.quaternion.slerp(station.quat, 0.05); // Slower return
+                            station.card.quaternion.slerp(station.quat, 0.1);
                         }
-                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.05);
                         
+                        // Animate Opacity for "Shine" effect (pulse between 0.05 and 0.15)
+                        const pulse = Math.sin(time * 2 + station.userData.randomOffset) * 0.05 + 0.1;
+                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, pulse, 0.1);
+                        
+                        // Animate Roughness for "Blur" effect (pulse between 0.8 and 1.0)
+                        station.card.material.roughness = THREE.MathUtils.lerp(station.card.material.roughness, 0.9, 0.1);
+
                         // RANDOM FLOAT EFFECT
                         if(station.card.userData.originalPos && station.card.userData.randomOffset !== undefined) {
                             const offset = station.card.userData.randomOffset;
                             station.card.position.y = station.card.userData.originalPos.y + Math.sin(time + offset) * 0.1;
                             station.card.position.x = station.card.userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
+                            
+                            // Slight scale pulse for "shine"
+                            const scalePulse = 1.0 + Math.sin(time * 3 + offset) * 0.05;
+                            station.card.scale.setScalar(scalePulse);
                         }
                     }
                 }
