@@ -3,42 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aethera | Beyond silence, we build the eternal</title>
+    <title>Aethera® - Cinematic Journey</title>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & ReactDOM -->
-    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
-    
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
     
     <style>
-        @keyframes fadeRise {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
+        /* === CSS RESET & BASE === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .animate-fade-rise { animation: fadeRise 0.8s ease-out forwards; }
-        .animate-fade-rise-delay { animation: fadeRise 0.8s ease-out 0.2s forwards; opacity: 0; }
-        .animate-fade-rise-delay-2 { animation: fadeRise 0.8s ease-out 0.4s forwards; opacity: 0; }
-        .hover-scale-103:hover { transform: scale(1.03); transition: transform 0.3s ease-out; }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; overflow-x: hidden; }
-        
-        /* Landing Page */
-        #landing-page { transition: opacity 0.8s ease-out, visibility 0.8s ease-out; }
-        #landing-page.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        /* 3D Container */
-        #three-canvas-container { 
-            display: none; 
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* === CANVAS (3D Background) === */
+        #canvas-container {
             position: fixed;
             top: 0;
             left: 0;
@@ -46,10 +31,226 @@
             height: 100%;
             z-index: 1;
         }
-        #three-canvas-container.visible { display: block; }
-        #three-canvas-container canvas { display: block; width: 100%; height: 100%; }
-        
-        /* Hydro Buttons */
+
+        /* === WHITEWEB OVERLAY (Splash Screen) === */
+        #whiteweb-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: auto;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 1.5s ease;
+            opacity: 1;
+            color: white;
+        }
+
+        #whiteweb-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #whiteweb-overlay .glass-panel {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+
+        /* WhiteWeb Content */
+        .whiteweb-content {
+            position: relative;
+            z-index: 11;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation */
+        .whiteweb-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 48px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .logo {
+            font-family: 'Instrument Serif', serif;
+            font-size: 2rem;
+            letter-spacing: -0.02em;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .logo sup {
+            font-size: 0.75rem;
+            margin-left: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 400;
+            transition: color 0.3s;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .nav-links a.active {
+            color: white;
+            font-weight: 500;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.2);
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .whiteweb-hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 24px;
+            margin-top: -80px;
+        }
+
+        .hero-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 400;
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            max-width: 1200px;
+            margin: 0 auto 32px;
+            color: white;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            animation: fade-rise 0.8s ease-out forwards;
+        }
+
+        .hero-title .italic {
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .hero-description {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 700px;
+            margin: 0 auto 48px;
+            line-height: 1.6;
+            font-weight: 300;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+            animation: fade-rise 0.8s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+
+        .begin-journey-btn {
+            background: white;
+            color: black;
+            border: none;
+            padding: 18px 56px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            animation: fade-rise 0.8s ease-out 0.4s forwards;
+            opacity: 0;
+        }
+
+        .begin-journey-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            background: #f0f0f0;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .mobile-menu {
+            position: absolute;
+            top: 90px;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            align-items: center;
+            z-index: 20;
+            animation: fade-rise 0.3s ease-out;
+        }
+
+        .mobile-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+
+        /* === TRIPWEB INTERFACE (Hidden initially) === */
+        #tripweb-interface {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        #tripweb-interface.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* TripWeb Buttons */
         #actions { 
             position: fixed;
             top: 50%;
@@ -61,9 +262,7 @@
             box-sizing: border-box;
             z-index: 100;
             pointer-events: none;
-            display: none; /* Hidden initially */
         }
-        #actions.visible { display: flex; }
         
         .hydro-btn {
             position: relative;
@@ -79,18 +278,21 @@
             overflow: visible;
             transition: transform 0.1s ease-out;
             pointer-events: auto;
+            
             --proximity: 0;
             --opacity: calc(0.05 + (0.95 * var(--proximity)));
             --blur: calc(8px * (1 - var(--proximity)));
             --scale: calc(0.98 + (0.02 * var(--proximity)));
             --border: calc(0.05 + (0.45 * var(--proximity)));
+            
             opacity: var(--opacity);
             filter: blur(var(--blur));
             transform: scale(var(--scale));
             border-color: rgba(255,255,255,var(--border));
         }
         
-        .hydro-btn::before, .hydro-btn::after {
+        .hydro-btn::before,
+        .hydro-btn::after {
             content: '';
             position: absolute;
             inset: 0;
@@ -100,8 +302,17 @@
             pointer-events: none;
             opacity: 0;
         }
-        .hydro-btn::after { animation-delay: 0.1s; border-color: rgba(255,255,255,0.2); }
-        .hydro-btn.bloom::before, .hydro-btn.bloom::after { opacity: 1; animation-name: ripple-bloom; }
+        
+        .hydro-btn::after {
+            animation-delay: 0.1s;
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .hydro-btn.bloom::before,
+        .hydro-btn.bloom::after {
+            opacity: 1;
+            animation-name: ripple-bloom;
+        }
         
         @keyframes ripple-bloom {
             0% { transform: scale(0.9); opacity: 0.8; border-width: 2px; }
@@ -117,27 +328,43 @@
             transition: opacity 0.5s ease;
             pointer-events: none;
         }
-        .hydro-btn:hover .highlight { opacity: 1; }
-        .hydro-btn-content { position: relative; z-index: 10; display: flex; align-items: center; gap: 12px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .hydro-btn svg { width: 18px; height: 18px; transition: transform 0.3s ease; }
-        .hydro-btn:hover svg { transform: translateX(4px); }
         
-        /* Status */
+        .hydro-btn:hover .highlight {
+            opacity: 1;
+        }
+        
+        .hydro-btn-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hydro-btn svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+        
+        .hydro-btn:hover svg {
+            transform: translateX(4px);
+        }
+
         #status { 
             position: fixed; 
             bottom: 40px; 
             left: 50%;
             transform: translateX(-50%);
-            color: #333; 
+            color: white; 
             font-size: 16px; 
             z-index: 100; 
             opacity: 0.7;
             font-family: 'Inter', sans-serif;
-            display: none;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
-        #status.visible { display: block; }
         
-        /* Vignette */
         #vignette {
             position: fixed;
             top: 0;
@@ -147,12 +374,9 @@
             pointer-events: none;
             z-index: 50;
             background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);
-            transition: backdrop-filter 0.5s ease;
-            display: none;
         }
-        #vignette.visible { display: block; }
-        
-        /* Glass Nav */
+
+        /* Glass Navigation Bar */
         .glass-nav {
             position: fixed;
             top: 68%;
@@ -175,309 +399,254 @@
             opacity: 0;
             pointer-events: none;
             z-index: 150;
-            display: none;
         }
-        .glass-nav.visible { display: flex; opacity: 1; pointer-events: auto; animation: fadeEnter 1.2s 0.2s forwards; }
-        .glass-nav.vanish { opacity: 0; transform: translate(-50%, -50%) scale(0.94) translateY(-20px); filter: blur(12px); pointer-events: none; }
-        
-        @keyframes fadeEnter { to { opacity: 1; transform: translate(-50%, -50%); } }
-        
-        .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); flex-shrink: 0; transition: all 0.4s ease; }
-        .glass-nav:hover .dot { background: rgba(255,255,255,0.6); box-shadow: 0 0 8px rgba(255,255,255,0.4); }
-        
-        .input-wrap { flex: 1; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
-        .glass-input { width: 100%; background: transparent; border: none; outline: none; color: rgba(255,255,255,0.9); font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.95rem; letter-spacing: 0.3px; padding: 6px 0; text-align: center; }
-        .glass-input::placeholder { color: rgba(255,255,255,0.35); font-family: 'Playfair Display', serif; font-style: italic; }
-        
-        input[type="date"] { color-scheme: dark; cursor: pointer; text-transform: uppercase; }
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.4); cursor: pointer; margin-right: -4px; }
-        
-        .conf-msg { font-family: 'Playfair Display', serif; color: rgba(255,255,255,0.95); font-size: 0.95rem; text-align: center; line-height: 1.4; width: 100%; opacity: 0; transform: translateY(5px); transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+
+        .glass-nav.visible {
+            opacity: 1;
+            pointer-events: auto;
+            animation: fadeEnter 1.2s 0.2s forwards;
+        }
+
+        @keyframes fadeEnter { 
+            to { opacity: 1; transform: translate(-50%, -50%); } 
+        }
+
+        .glass-nav.vanish {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.94) translateY(-20px);
+            filter: blur(12px);
+            pointer-events: none;
+        }
+
+        .dot { 
+            width: 4px; height: 4px; 
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.25); 
+            flex-shrink: 0; 
+        }
+
+        .input-wrap { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+
+        .glass-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: rgba(255,255,255,0.9);
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+            padding: 6px 0;
+            text-align: center;
+        }
+
+        .glass-input::placeholder {
+            color: rgba(255,255,255,0.35);
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+
+        .conf-msg {
+            font-family: 'Playfair Display', serif;
+            color: rgba(255,255,255,0.95);
+            font-size: 0.95rem;
+            text-align: center;
+            line-height: 1.4;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
         .conf-msg.show { opacity: 1; transform: translateY(0); }
         .conf-msg em { font-style: normal; color: #a5b4fc; font-weight: 500; }
-        
-        .send-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; flex-shrink: 0; }
-        .send-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.3); transform: scale(1.08); box-shadow: 0 4px 16px rgba(165, 180, 252, 0.15); }
-        .send-btn:active { transform: scale(0.95); }
-        .send-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        
-        .glass-nav::before { content: ''; position: absolute; top: 0; left: -75%; width: 50%; height: 100%; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 46%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 54%, transparent 60%); transition: left 0.8s ease; pointer-events: none; border-radius: 50px; }
-        .glass-nav:hover::before { left: 130%; }
-        
-        @media (max-width: 500px) {
-            .glass-nav { height: 56px; padding: 0 18px; gap: 12px; }
-            .glass-input, .conf-msg { font-size: 0.85rem; }
-            .send-btn { width: 34px; height: 34px; }
-            .send-btn svg { width: 14px; height: 14px; }
-            #actions { padding: 0 20px; }
-            .hydro-btn { padding: 15px 25px; font-size: 14px; }
+
+        .send-btn {
+            width: 38px; height: 38px; 
+            border-radius: 50%; 
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06); 
+            color: rgba(255,255,255,0.85);
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: all 0.3s ease; 
+            flex-shrink: 0;
         }
-        
-        /* Control Panel */
-        #control-panel {
+
+        .send-btn:hover { 
+            background: rgba(255,255,255,0.14); 
+            border-color: rgba(255,255,255,0.3); 
+            transform: scale(1.08); 
+        }
+
+        /* Animations */
+        @keyframes fade-rise {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .whiteweb-nav {
+                padding: 20px 24px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .nav-button.desktop-only {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero-title {
+                font-size: clamp(2.5rem, 7vw, 4rem);
+            }
+            
+            #actions { 
+                padding: 0 20px; 
+            }
+            
+            .hydro-btn { 
+                padding: 15px 25px; 
+                font-size: 14px; 
+            }
+        }
+
+        /* Loading Indicator */
+        .loading-indicator {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #0f0;
-            padding: 20px;
-            border-radius: 10px;
-            font-family: monospace;
-            z-index: 200;
-            max-height: 90vh;
-            overflow-y: auto;
-            min-width: 300px;
-            border: 2px solid #0f0;
-            box-shadow: 0 0 20px rgba(0,255,0,0.3);
-            pointer-events: auto;
-            display: none;
+            bottom: 30px;
+            left: 30px;
+            color: white;
+            font-size: 12px;
+            opacity: 0.5;
+            z-index: 100;
         }
-        #control-panel.visible { display: block; }
-        
-        #control-panel h3 { margin: 0 0 15px 0; text-align: center; color: #0f0; border-bottom: 1px solid #0f0; padding-bottom: 10px; }
-        #control-panel h4 { margin: 15px 0 10px 0; color: #0f0; }
-        
-        .control-group { margin-bottom: 20px; padding: 10px; background: rgba(0, 255, 0, 0.1); border-radius: 5px; }
-        .station-selector { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
-        .station-btn { background: #003300; color: #0f0; border: 1px solid #0f0; padding: 8px 12px; cursor: pointer; font-family: monospace; font-size: 12px; border-radius: 5px; transition: all 0.2s; flex: 1; }
-        .station-btn:hover { background: #0f0; color: black; }
-        .station-btn.active { background: #0f0; color: black; font-weight: bold; }
-        
-        .pos-control { display: flex; align-items: center; margin-bottom: 8px; }
-        .pos-control label { width: 20px; color: #0f0; font-weight: bold; }
-        .pos-control input { flex: 1; margin: 0 10px; background: #111; border: 1px solid #0f0; color: #0f0; padding: 5px; border-radius: 3px; font-family: monospace; }
-        .pos-control button { background: #003300; color: #0f0; border: 1px solid #0f0; padding: 5px 10px; cursor: pointer; font-family: monospace; border-radius: 3px; margin-left: 5px; }
-        .pos-control button:hover { background: #0f0; color: black; }
-        
-        .slider-control { margin-bottom: 15px; }
-        .slider-control label { display: block; margin-bottom: 5px; color: #0f0; }
-        .slider-control input { width: 100%; margin: 5px 0; }
-        .slider-control span { color: #0f0; float: right; }
-        
-        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
-        .action-btn { background: #003300; color: #0f0; border: 1px solid #0f0; padding: 10px; cursor: pointer; font-family: monospace; border-radius: 5px; flex: 1; font-weight: bold; }
-        .action-btn:hover { background: #0f0; color: black; }
-        
-        #toggle-panel {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #003300;
-            color: #0f0;
-            border: 2px solid #0f0;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-family: monospace;
-            font-weight: bold;
-            border-radius: 5px;
-            z-index: 201;
-            display: none;
-        }
-        #toggle-panel.visible { display: block; }
-        #toggle-panel:hover { background: #0f0; color: black; }
-        
-        .coord-display { color: #0f0; font-size: 11px; margin-top: 5px; text-align: center; }
-        #blur-status { color: #0f0; font-size: 12px; text-align: center; margin-top: 5px; }
     </style>
 </head>
 <body>
-    <!-- LANDING PAGE -->
-    <div id="landing-page">
-        <div id="root"></div>
-    </div>
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
 
-    <!-- 3D TOUR CONTAINER -->
-    <div id="three-canvas-container">
-        <!-- Three.js canvas will be appended here -->
-    </div>
-    
-    <!-- Navigation Buttons -->
-    <div id="actions">
-        <button class="hydro-btn" id="prevBtn" onclick="prevStation()">
-            <span class="hydro-btn-content">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span>Previous</span>
-            </span>
-            <span class="highlight"></span>
-        </button>
-        <button class="hydro-btn" id="nextBtn" onclick="nextStation()">
-            <span class="hydro-btn-content">
-                <span>Next</span>
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-            </span>
-            <span class="highlight"></span>
-        </button>
-    </div>
-
-    <div id="status">Ready...</div>
-    
-    <div id="vignette"></div>
-    
-    <!-- Glass Navigation Bar -->
-    <nav class="glass-nav" id="glassNav">
-        <div class="dot"></div>
-        <div class="input-wrap" id="inputWrap"></div>
-        <button class="send-btn" id="sendBtn" aria-label="Submit">
-            <svg viewBox="0 0 24 24">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-        </button>
-        <div class="dot"></div>
-    </nav>
-    
-    <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
-    
-    <div id="control-panel">
-        <h3>🎛️ DEBUG CONTROLS</h3>
-        
-        <div class="control-group">
-            <h4>📍 SELECT STATION CARD</h4>
-            <div class="station-selector">
-                <button class="station-btn" onclick="selectStation(1)">C: First</button>
-                <button class="station-btn" onclick="selectStation(2)">D: 2</button>
-                <button class="station-btn" onclick="selectStation(3)">E: 3</button>
-                <button class="station-btn" onclick="selectStation(4)">F: 4</button>
-                <button class="station-btn" onclick="selectStation(5)">G: 5</button>
-            </div>
-            <div id="selected-station" class="coord-display">Selected: Station C</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎯 CARD POSITION</h4>
-            <div class="pos-control">
-                <label>X:</label>
-                <input type="number" id="pos-x" step="0.01" value="0.10">
-                <button onclick="moveCard('x', -0.1)">-</button>
-                <button onclick="moveCard('x', 0.1)">+</button>
-            </div>
-            <div class="pos-control">
-                <label>Y:</label>
-                <input type="number" id="pos-y" step="0.01" value="1.20">
-                <button onclick="moveCard('y', -0.1)">-</button>
-                <button onclick="moveCard('y', 0.1)">+</button>
-            </div>
-            <div class="pos-control">
-                <label>Z:</label>
-                <input type="number" id="pos-z" step="0.01" value="4.00">
-                <button onclick="moveCard('z', -0.1)">-</button>
-                <button onclick="moveCard('z', 0.1)">+</button>
-            </div>
-            <div style="margin-top: 10px;">
-                <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
-                <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
-            </div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎨 VIGNETTE EFFECT</h4>
-            <div class="slider-control">
-                <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
-                <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
-                <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
-                <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
-                <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
-            </div>
-            <div id="blur-status">Blur: INACTIVE</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>✨ GLOW EFFECT</h4>
-            <div class="slider-control">
-                <label>Min Strength: <span id="glow-min-val">23%</span></label>
-                <input type="range" id="glow-min" min="0" max="30" value="23" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Max Strength: <span id="glow-max-val">39%</span></label>
-                <input type="range" id="glow-max" min="20" max="80" value="39" step="1">
-            </div>
-        </div>
-        
-        <div class="action-buttons">
-            <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
-            <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
-        </div>
-    </div>
-
-    <!-- React Landing Page Code -->
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        const Navigation = () => {
-            const [isScrolled, setIsScrolled] = useState(false);
-            useEffect(() => {
-                const handleScroll = () => setIsScrolled(window.scrollY > 10);
-                window.addEventListener('scroll', handleScroll);
-                return () => window.removeEventListener('scroll', handleScroll);
-            }, []);
-            return (
-                <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
-                    <div className="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
-                        <div className="text-3xl tracking-tight text-black" style={{ fontFamily: 'Instrument Serif, serif' }}>
-                            Aethera<sup className="text-sm align-super">®</sup>
-                        </div>
-                        <div className="hidden md:flex items-center space-x-8">
-                            <a href="#home" className="text-sm text-black">Home</a>
-                            <a href="#studio" className="text-sm text-[#6F6F6F]">Studio</a>
-                            <a href="#about" className="text-sm text-[#6F6F6F]">About</a>
-                        </div>
-                        <button 
-                            className="rounded-full px-6 py-2.5 text-sm bg-black text-white hover-scale-103 transition-all duration-300"
-                            onClick={() => window.startTourFromLanding()}
-                        >
-                            Join
-                        </button>
-                    </div>
-                </nav>
-            );
-        };
-
-        const HeroSection = () => {
-            return (
-                <div className="relative min-h-screen w-full overflow-hidden bg-white">
-                    <div className="absolute inset-0 z-0 bg-white" />
-                    <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white via-white/95 to-white pointer-events-none" />
-                    <div className="relative z-10"><Navigation /></div>
-                    <div className="relative z-10 flex flex-col items-center justify-center text-center px-6"
-                         style={{ paddingTop: 'calc(8rem - 75px)', paddingBottom: '10rem' }}>
-                        <h1 className="animate-fade-rise text-5xl sm:text-7xl md:text-8xl max-w-7xl font-normal leading-[0.95] tracking-[-2.46px]"
-                            style={{ fontFamily: 'Instrument Serif, serif' }}>
-                            Beyond <span className="text-[#6F6F6F]">silence,</span> we build<br />the <span className="text-[#6F6F6F]">eternal.</span>
-                        </h1>
-                        <p className="animate-fade-rise-delay text-base sm:text-lg max-w-2xl mt-8 leading-relaxed text-[#6F6F6F]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                            Building platforms for brilliant minds, fearless makers, and thoughtful souls.
-                        </p>
-                        <button
-                            className="animate-fade-rise-delay-2 rounded-full px-14 py-5 text-base mt-12 bg-black text-white hover-scale-103 transition-all duration-300"
-                            style={{ fontFamily: 'Inter, sans-serif' }}
-                            onClick={() => window.startTourFromLanding()}
-                        >
-                            Join
-                        </button>
-                    </div>
+    <!-- WhiteWeb Overlay (Splash Screen) -->
+    <div id="whiteweb-overlay">
+        <div class="whiteweb-content">
+            <nav class="whiteweb-nav">
+                <div class="logo">Aethera<sup>®</sup></div>
+                
+                <div class="nav-links">
+                    <a href="#" class="active">Home</a>
+                    <a href="#">Studio</a>
+                    <a href="#">About</a>
+                    <a href="#">Journal</a>
+                    <a href="#">Reach Us</a>
                 </div>
-            );
-        };
+                
+                <button class="nav-button desktop-only">Begin Journey</button>
+                
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </nav>
+            
+            <div id="mobile-menu" class="mobile-menu" style="display: none;">
+                <a href="#">Home</a>
+                <a href="#">Studio</a>
+                <a href="#">About</a>
+                <a href="#">Journal</a>
+                <a href="#">Reach Us</a>
+                <button class="nav-button" style="margin-top: 16px;" onclick="beginJourney()">Begin Journey</button>
+            </div>
+            
+            <main class="whiteweb-hero">
+                <h1 class="hero-title">
+                    Beyond <span class="italic">silence,</span> we build <br/>
+                    <span class="italic">the eternal.</span>
+                </h1>
+                
+                <p class="hero-description">
+                    Building platforms for brilliant minds, fearless makers, and thoughtful souls. 
+                    Through the noise, we craft digital havens for deep work and pure flows.
+                </p>
+                
+                <button class="begin-journey-btn" onclick="beginJourney()">
+                    Begin Journey
+                </button>
+            </main>
+        </div>
+    </div>
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<HeroSection />);
-    </script>
+    <!-- TripWeb Interface (Hidden initially) -->
+    <div id="tripweb-interface">
+        <div id="actions">
+            <button class="hydro-btn" id="prevBtn">
+                <span class="hydro-btn-content">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>Previous</span>
+                </span>
+                <span class="highlight"></span>
+            </button>
+            <button class="hydro-btn" id="nextBtn">
+                <span class="hydro-btn-content">
+                    <span>Next</span>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </span>
+                <span class="highlight"></span>
+            </button>
+        </div>
 
-    <!-- Three.js Imports -->
+        <div id="status">Beginning journey...</div>
+        
+        <div id="vignette"></div>
+        
+        <nav class="glass-nav" id="glassNav">
+            <div class="dot"></div>
+            <div class="input-wrap" id="inputWrap"></div>
+            <button class="send-btn" id="sendBtn" aria-label="Submit">
+                <svg viewBox="0 0 24 24">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+            <div class="dot"></div>
+        </nav>
+    </div>
+
+    <!-- Three.js Import and Script -->
     <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
     </script>
 
     <script type="module">
@@ -487,400 +656,303 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-        let scene, camera, renderer, composer, bloomPass;
-        let cards = [];
-        let currentStationIndex = 1; // Start at Station 1 (C: First)
+        // === STATE ===
+        let isJourneyStarted = false;
+        let currentStationIndex = 0;
         let isAnimating = false;
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 2.5;
+        const ANIMATION_DURATION = 3.5;
         
+        // === STATION DATA ===
+        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
+        const STATIONS = [
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
+            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+        ];
+
+        // === THREE.JS SETUP ===
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050510);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.copy(STATIONS[0].pos);
+        camera.lookAt(POINT_CENTER);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // === POST-PROCESSING ===
+        const renderScene = new RenderPass(scene, camera);
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = 0.1;
+        bloomPass.strength = 0.3;
+        bloomPass.radius = 0.8;
+        
+        const composer = new EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+
+        // === LIGHTS ===
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        
+        const spotLight = new THREE.SpotLight(0xffeeff, 2);
+        spotLight.position.set(0, 10, 0);
+        spotLight.angle = Math.PI / 4;
+        spotLight.penumbra = 0.5;
+        spotLight.decay = 1;
+        spotLight.distance = 50;
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+        spotLight.target.position.copy(POINT_CENTER);
+        scene.add(spotLight.target);
+        
+        const centerLight = new THREE.PointLight(0xff44ff, 0.5, 10);
+        centerLight.position.copy(POINT_CENTER);
+        scene.add(centerLight);
+        
+        // Add some atmospheric lights
+        const backLight1 = new THREE.PointLight(0x4466ff, 0.3, 20);
+        backLight1.position.set(-3, 3, -3);
+        scene.add(backLight1);
+        
+        const backLight2 = new THREE.PointLight(0xff66aa, 0.2, 20);
+        backLight2.position.set(3, 2, -4);
+        scene.add(backLight2);
+
+        // === CARDS ===
+        const cards = [];
         const cardPositions = {
-            1: { x: -3.49, y: 1.30, z: 1.23 },
-            2: { x: 0.08, y: 1.10, z: 4.00 },
-            3: { x: 3.77, y: 1.10, z: 1.30 },
-            4: { x: 2.21, y: 0.90, z: -3.16 },
+            2: { x: 0.10, y: 1.20, z: 4.00 },
+            3: { x: 3.60, y: 1.25, z: 1.20 },
+            4: { x: 2.20, y: 1.20, z: -3.20 },
             5: { x: -2.20, y: 1.25, z: -2.70 }
         };
-
-        const STATIONS = [
-            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: null },
-            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), card: null },
-            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964), card: null },
-            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737), card: null },
-            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664), card: null },
-            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: null }
-        ];
-        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
-
-        window.startTourFromLanding = function() {
-            const landingPage = document.getElementById('landing-page');
-            landingPage.classList.add('hidden');
-            
-            const canvasContainer = document.getElementById('three-canvas-container');
-            canvasContainer.classList.add('visible');
-            
-            document.getElementById('actions').classList.add('visible');
-            document.getElementById('status').classList.add('visible');
-            document.getElementById('vignette').classList.add('visible');
-            document.getElementById('toggle-panel').classList.add('visible');
-            
-            initAndStartTour();
-        };
-
-        window.initAndStartTour = function() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xffffff);
-            
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            
-            const container = document.getElementById('three-canvas-container');
-            container.appendChild(renderer.domElement);
-            
-            const renderScene = new RenderPass(scene, camera);
-            bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-            bloomPass.threshold = 0.1;
-            bloomPass.strength = 0.23;
-            bloomPass.radius = 0.8;
-            
-            composer = new EffectComposer(renderer);
-            composer.addPass(renderScene);
-            composer.addPass(bloomPass);
-            
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-            scene.add(ambientLight);
-            
-            const spotLight = new THREE.SpotLight(0xffeeff, 2);
-            spotLight.position.set(0, 10, 0);
-            spotLight.angle = Math.PI / 4;
-            spotLight.penumbra = 0.5;
-            spotLight.decay = 1;
-            spotLight.distance = 50;
-            spotLight.castShadow = true;
-            scene.add(spotLight);
-            
-            const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10);
-            centerLight.position.set(-0.006, 1.041, -0.008);
-            scene.add(centerLight);
-            
-            // Create cards
-            for (let i = 1; i < STATIONS.length; i++) {
-                cards[i] = createCard(STATIONS[i].name, i);
-                STATIONS[i].card = cards[i];
-                scene.add(cards[i]);
-                positionCard(i);
-            }
-            
-            // Load model
-            const loader = new GLTFLoader();
-            loader.load('./environment_vr_room_baked.glb', function (gltf) {
-                const model = gltf.scene;
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                        if (child.name.toLowerCase().includes('tree')) {
-                            child.material.emissive = new THREE.Color(0xaa00aa);
-                            child.material.emissiveIntensity = 0.5;
-                        }
-                    }
-                });
-                scene.add(model);
-                
-                // Start at Station 1 (C: First)
-                camera.position.copy(STATIONS[1].pos);
-                camera.lookAt(POINT_CENTER);
-                
-                document.getElementById('status').innerText = `Arrived at ${STATIONS[1].name}`;
-            }, undefined, function (error) { console.error(error); });
-            
-            // Setup controls
-            setupGlowControls();
-            setupVignetteControls();
-            
-            animate();
-            window.addEventListener('resize', onWindowResize);
-        };
-
+        
         function createCard(stationName, stationIndex) {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            context.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            // Create glass card effect
+            const gradient = context.createLinearGradient(0, 0, 512, 512);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+            context.fillStyle = gradient;
             context.fillRect(0, 0, 512, 512);
             
-            context.shadowColor = 'rgba(0, 0, 0, 1.0)';
+            // Add border
+            context.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            context.lineWidth = 4;
+            context.strokeRect(2, 2, 508, 508);
+            
+            context.shadowColor = 'rgba(0, 0, 0, 0.5)';
             context.shadowBlur = 20;
             context.shadowOffsetX = 4;
             context.shadowOffsetY = 4;
             
-            context.font = 'bold 70px Arial';
+            context.font = 'bold 70px "Instrument Serif", serif';
             context.fillStyle = '#ffffff';
             context.textAlign = 'center';
             context.fillText(stationName, 256, 200);
             
-            context.font = 'bold 45px Arial';
+            context.font = 'bold 45px "Inter", sans-serif';
             context.fillStyle = '#ffffff';
             context.fillText(`Station ${stationIndex}`, 256, 300);
             
+            context.font = '300 32px "Inter", sans-serif';
+            context.fillStyle = '#ffffff';
+            context.fillText('Viewpoint', 256, 370);
+            
             context.shadowColor = 'transparent';
-            context.shadowBlur = 0;
             
             const pageTexture = new THREE.CanvasTexture(canvas);
-            
             const pageMaterial = new THREE.MeshStandardMaterial({
                 map: pageTexture,
                 transparent: true,
                 opacity: 0.0,
-                roughness: 0.05,
+                roughness: 0.1,
                 metalness: 0.0,
                 side: THREE.DoubleSide,
-                depthWrite: false,
-                blending: THREE.NormalBlending,
                 emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 0.5
+                emissiveIntensity: 0.3
             });
             
             const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
-            const card = new THREE.Mesh(pageGeometry, pageMaterial);
-            
-            card.userData.originalPos = new THREE.Vector3();
-            card.userData.randomOffset = Math.random() * 1000;
-            
-            return card;
-        }
-        
-        function positionCard(index) {
-            if (cards[index] && cardPositions[index]) {
-                cards[index].position.set(cardPositions[index].x, cardPositions[index].y, cardPositions[index].z);
-                cards[index].userData.originalPos.copy(cards[index].position);
-                cards[index].lookAt(POINT_CENTER);
-                STATIONS[index].quat = cards[index].quaternion.clone();
-            }
+            return new THREE.Mesh(pageGeometry, pageMaterial);
         }
 
-        // === GLOW PULSE SYSTEM ===
-        let glowStartTime = Date.now();
-        let glowDurationUp = 10000 + Math.random() * 20000;
-        let glowDurationDown = 10000 + Math.random() * 20000;
-        let isGlowingUp = true;
-        let MIN_STRENGTH = 0.10;
-        let MAX_STRENGTH = 0.40;
-        
-        function setupGlowControls() {
-            const glowMin = document.getElementById('glow-min');
-            const glowMax = document.getElementById('glow-max');
-            
-            glowMin.addEventListener('input', (e) => {
-                MIN_STRENGTH = e.target.value / 100;
-                document.getElementById('glow-min-val').textContent = e.target.value + '%';
-            });
-            glowMax.addEventListener('input', (e) => {
-                MAX_STRENGTH = e.target.value / 100;
-                document.getElementById('glow-max-val').textContent = e.target.value + '%';
-            });
+        // Create cards for stations 2-5
+        for (let i = 2; i < STATIONS.length; i++) {
+            const card = createCard(STATIONS[i].name, i);
+            cards[i] = card;
+            scene.add(card);
         }
-        
-        function updateGlow() {
-            if (!bloomPass) return;
-            const now = Date.now();
-            const elapsed = now - glowStartTime;
-            
-            if (isGlowingUp) {
-                const progress = Math.min(elapsed / glowDurationUp, 1);
-                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength;
-                if (progress >= 1) {
-                    isGlowingUp = false;
-                    glowStartTime = now;
-                    glowDurationDown = 10000 + Math.random() * 20000;
-                }
-            } else {
-                const progress = Math.min(elapsed / glowDurationDown, 1);
-                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength;
-                if (progress >= 1) {
-                    isGlowingUp = true;
-                    glowStartTime = now;
-                    glowDurationUp = 10000 + Math.random() * 20000;
+
+        function positionCards() {
+            for (let i = 2; i <= 5; i++) {
+                if (cards[i] && cardPositions[i]) {
+                    cards[i].position.set(cardPositions[i].x, cardPositions[i].y, cardPositions[i].z);
+                    cards[i].lookAt(POINT_CENTER);
                 }
             }
         }
 
-        // === DYNAMIC BLUR SYSTEM ===
-        let blurState = 'waiting';
-        let blurStartTime = Date.now();
-        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
-        
-        function updateBlur() {
-            const now = Date.now();
-            const vignette = document.getElementById('vignette');
-            const blurStatus = document.getElementById('blur-status');
-            
-            if (blurState === 'waiting' && now >= nextBlurTime) {
-                blurState = 'active';
-                blurStartTime = now;
-                blurStatus.textContent = 'Blur: ACTIVE';
+        // === LOAD 3D MODEL ===
+        const loader = new GLTFLoader();
+        loader.load('./environment_vr_room_baked.glb', 
+            function (gltf) {
+                const model = gltf.scene;
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        if (child.name.toLowerCase().includes('tree')) {
+                            child.material.emissive = new THREE.Color(0xaa44aa);
+                            child.material.emissiveIntensity = 0.4;
+                        }
+                    }
+                });
+                scene.add(model);
+                positionCards();
+            },
+            undefined,
+            function (error) {
+                console.error('Model loading error:', error);
+                // Create a fallback scene with basic geometry
+                createFallbackScene();
+                positionCards();
             }
+        );
+
+        function createFallbackScene() {
+            // Create a simple but beautiful fallback scene
+            const geometry = new THREE.CylinderGeometry(0.5, 1, 3, 8);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x8866aa, 
+                emissive: new THREE.Color(0x442266),
+                emissiveIntensity: 0.5,
+                roughness: 0.3,
+                metalness: 0.1
+            });
+            const tree = new THREE.Mesh(geometry, material);
+            tree.position.copy(POINT_CENTER);
+            tree.position.y = 1.5;
+            scene.add(tree);
             
-            if (blurState === 'active') {
-                const elapsed = (now - blurStartTime) / 1000;
-                if (elapsed >= 1.0) {
-                    blurState = 'waiting';
-                    nextBlurTime = now + 4000 + Math.random() * 14000;
-                    vignette.style.backdropFilter = 'blur(0px)';
-                    blurStatus.textContent = 'Blur: INACTIVE';
-                } else {
-                    vignette.style.backdropFilter = `blur(1px)`;
-                }
+            // Add ground plane
+            const groundGeometry = new THREE.CircleGeometry(10, 32);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1a1a2e, 
+                roughness: 0.8,
+                side: THREE.DoubleSide
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = 0;
+            scene.add(ground);
+            
+            // Add floating particles
+            const particleGeometry = new THREE.BufferGeometry();
+            const particleCount = 500;
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 20;
+                positions[i+1] = Math.random() * 8;
+                positions[i+2] = (Math.random() - 0.5) * 20;
             }
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMaterial = new THREE.PointsMaterial({ 
+                color: 0xaa88ff, 
+                size: 0.02,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            const particles = new THREE.Points(particleGeometry, particleMaterial);
+            scene.add(particles);
         }
 
-        // === VIGNETTE CONTROLS ===
-        const vignette = document.getElementById('vignette');
-        
-        function setupVignetteControls() {
-            const centerInput = document.getElementById('vignette-center');
-            const darknessInput = document.getElementById('vignette-darkness');
-            const midInput = document.getElementById('vignette-mid');
-            
-            centerInput.addEventListener('input', (e) => {
-                document.getElementById('vignette-center-val').textContent = e.target.value + '%';
-                updateVignette();
-            });
-            darknessInput.addEventListener('input', (e) => {
-                document.getElementById('vignette-darkness-val').textContent = e.target.value + '%';
-                updateVignette();
-            });
-            midInput.addEventListener('input', (e) => {
-                document.getElementById('vignette-mid-val').textContent = e.target.value + '%';
-                updateVignette();
-            });
-        }
-        
-        function updateVignette() {
-            const center = document.getElementById('vignette-center').value;
-            const darkness = document.getElementById('vignette-darkness').value / 100;
-            const mid = document.getElementById('vignette-mid').value / 100;
-            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
-        }
-
-        // === NAVIGATION ===
-        window.nextStation = function() {
-            if (isAnimating) return;
-            currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
-            startAnimation(STATIONS[currentStationIndex].pos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            hideNavBar();
-        };
-
-        window.prevStation = function() {
-            if (isAnimating) return;
-            currentStationIndex = currentStationIndex <= 1 ? STATIONS.length - 1 : currentStationIndex - 1;
-            startAnimation(STATIONS[currentStationIndex].pos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            hideNavBar();
-        };
-
-        function startAnimation(targetPos) {
-            isAnimating = true;
-            animationProgress = 0;
-            startPos.copy(camera.position);
-            endPos.copy(targetPos);
-            const center = POINT_CENTER.clone();
-            const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
-            const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-            midPoint.add(direction.multiplyScalar(2));
-            window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
-        }
-
-        function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-
-        // === HYDRO RIPPLE BUTTONS ===
-        const hydroButtons = document.querySelectorAll('.hydro-btn');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        
-        document.addEventListener('mousemove', (e) => {
-            const screenWidth = window.innerWidth;
-            const mouseX = e.clientX;
-            
-            if (prevBtn) {
-                const rect = prevBtn.getBoundingClientRect();
-                const dist = Math.hypot(mouseX - (rect.left + rect.width/2), e.clientY - (rect.top + rect.height/2));
-                const prox = mouseX < screenWidth / 2 ? Math.max(0.3, 1 - dist/800) : Math.max(0, 0.2 * (1 - dist/1200));
-                prevBtn.style.setProperty('--proximity', prox);
-            }
-            if (nextBtn) {
-                const rect = nextBtn.getBoundingClientRect();
-                const dist = Math.hypot(mouseX - (rect.left + rect.width/2), e.clientY - (rect.top + rect.height/2));
-                const prox = mouseX >= screenWidth / 2 ? Math.max(0.3, 1 - dist/800) : Math.max(0, 0.2 * (1 - dist/1200));
-                nextBtn.style.setProperty('--proximity', prox);
-            }
-        });
-        
-        setInterval(() => {
-            hydroButtons.forEach(btn => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
-        }, 2000);
-        
-        hydroButtons.forEach(btn => {
-            btn.addEventListener('mouseenter', () => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
-        });
-
-        // === GLASS NAV ===
+        // === GLASS NAVIGATION (TripWeb) ===
         const nav = document.getElementById('glassNav');
         const inputWrap = document.getElementById('inputWrap');
         const sendBtn = document.getElementById('sendBtn');
-        let step = 1;
+        let navStep = 1;
+        let wishText = '';
         let navVisible = false;
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString + 'T00:00:00').toLocaleDateString('en-US', options);
+        }
 
         function initNav() {
             inputWrap.innerHTML = `<input type="text" class="glass-input" id="mainInput" placeholder="You are in front of the tree of life. Make a wish..." autocomplete="off">`;
             const inp = document.getElementById('mainInput');
-            if (inp) inp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
+            if (inp) {
+                inp.focus();
+                inp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
+            }
         }
 
         function handleSend() {
             const inp = document.querySelector('.glass-input');
-            if (!inp?.value.trim()) return;
+            const val = inp?.value.trim();
             
-            if (step === 1) {
-                step = 2;
+            if (navStep === 1) {
+                if (!val) return;
+                wishText = val;
+                navStep = 2;
+                
                 inputWrap.style.opacity = '0';
                 setTimeout(() => {
                     inputWrap.innerHTML = `<input type="date" class="glass-input" id="dateInput" required>`;
                     inputWrap.style.opacity = '1';
-                    document.getElementById('dateInput').addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
+                    const dateInp = document.getElementById('dateInput');
+                    if (dateInp) {
+                        dateInp.focus();
+                        dateInp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
+                    }
                 }, 250);
-            } else if (step === 2) {
-                step = 3;
+
+            } else if (navStep === 2) {
+                if (!val) return;
+                navStep = 3;
+                
+                const displayDate = formatDate(val);
+                
                 sendBtn.style.opacity = '0';
+                sendBtn.style.pointerEvents = 'none';
                 inputWrap.style.opacity = '0';
+                
                 setTimeout(() => {
-                    inputWrap.innerHTML = `<p class="conf-msg" id="confMsg">Come back on <em>${new Date(inp.value + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</em>.<br>Your wish will become true.</p>`;
+                    inputWrap.innerHTML = `
+                        <p class="conf-msg" id="confMsg">
+                            Come back on <em>${displayDate}</em>.<br>
+                            Your wish will become true.
+                        </p>
+                    `;
                     inputWrap.style.opacity = '1';
-                    document.getElementById('confMsg').classList.add('show');
+                    requestAnimationFrame(() => document.getElementById('confMsg')?.classList.add('show'));
+                    
                     setTimeout(() => {
                         nav.classList.add('vanish');
                         nav.classList.remove('visible');
                         navVisible = false;
-                        step = 1;
+                        navStep = 1;
                         sendBtn.style.opacity = '1';
+                        sendBtn.style.pointerEvents = 'auto';
                     }, 3500);
+                    
                 }, 300);
             }
         }
@@ -893,7 +965,9 @@
                 nav.classList.remove('vanish');
                 nav.classList.add('visible');
                 navVisible = true;
-                step = 1;
+                navStep = 1;
+                sendBtn.style.opacity = '1';
+                sendBtn.style.pointerEvents = 'auto';
                 initNav();
             }
         }
@@ -906,106 +980,194 @@
             }
         }
 
-        // === CONTROL PANEL ===
-        window.toggleControlPanel = function() {
-            document.getElementById('control-panel').classList.toggle('visible');
-        };
+        // === HYDRO BUTTON EFFECTS ===
+        const hydroButtons = document.querySelectorAll('.hydro-btn');
         
-        let selectedStation = 1;
-        window.selectStation = function(index) {
-            selectedStation = index;
-            document.getElementById('selected-station').textContent = `Selected: Station ${STATIONS[index].name}`;
-            if (cards[index]) {
-                document.getElementById('pos-x').value = cards[index].position.x.toFixed(2);
-                document.getElementById('pos-y').value = cards[index].position.y.toFixed(2);
-                document.getElementById('pos-z').value = cards[index].position.z.toFixed(2);
-            }
-        };
+        document.addEventListener('mousemove', (e) => {
+            if (!isJourneyStarted) return;
+            
+            const screenWidth = window.innerWidth;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            [prevBtn, nextBtn].forEach(btn => {
+                if (!btn) return;
+                const rect = btn.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const distance = Math.sqrt(Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2));
+                const proximity = Math.max(0, 1 - Math.min(distance / 800, 1));
+                btn.style.setProperty('--proximity', proximity);
+            });
+        });
         
-        window.moveCard = function(axis, delta) {
-            const input = document.getElementById(`pos-${axis}`);
-            input.value = (parseFloat(input.value) + delta).toFixed(2);
-            applyPosition();
-        };
-        
-        window.applyPosition = function() {
-            if (cards[selectedStation]) {
-                cards[selectedStation].position.set(
-                    parseFloat(document.getElementById('pos-x').value),
-                    parseFloat(document.getElementById('pos-y').value),
-                    parseFloat(document.getElementById('pos-z').value)
-                );
-                cards[selectedStation].userData.originalPos.copy(cards[selectedStation].position);
-            }
-        };
-        
-        window.copyPosition = function() {
-            if (cards[selectedStation]) {
-                const pos = cards[selectedStation].position;
-                navigator.clipboard?.writeText(`Station ${selectedStation}: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`);
-                alert('Position copied!');
-            }
-        };
-        
-        window.saveSettings = function() { alert('Settings saved!'); };
-        window.exportConfig = function() { console.log('Config exported!'); };
+        function triggerAutoBloom() {
+            hydroButtons.forEach(btn => {
+                btn.classList.add('bloom');
+                setTimeout(() => btn.classList.remove('bloom'), 1200);
+            });
+        }
+        setInterval(triggerAutoBloom, 2000);
 
+        // === STATION NAVIGATION ===
+        function startAnimation(targetPos) {
+            isAnimating = true;
+            animationProgress = 0;
+            startPos.copy(camera.position);
+            endPos.copy(targetPos);
+            
+            const center = POINT_CENTER.clone();
+            const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
+            const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
+            midPoint.add(direction.multiplyScalar(2));
+            window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
+        }
+
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function nextStation() {
+            if (isAnimating || !isJourneyStarted) return;
+            
+            if (currentStationIndex === 0) {
+                currentStationIndex = 1;
+            } else if (currentStationIndex < STATIONS.length - 1) {
+                currentStationIndex++;
+            } else {
+                currentStationIndex = 1;
+            }
+            
+            startAnimation(STATIONS[currentStationIndex].pos);
+            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
+            
+            if (currentStationIndex !== 1) hideNavBar();
+        }
+
+        function prevStation() {
+            if (isAnimating || !isJourneyStarted) return;
+            
+            if (currentStationIndex === 0) {
+                currentStationIndex = STATIONS.length - 1;
+            } else if (currentStationIndex > 1) {
+                currentStationIndex--;
+            } else {
+                currentStationIndex = STATIONS.length - 1;
+            }
+            
+            startAnimation(STATIONS[currentStationIndex].pos);
+            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
+            
+            if (currentStationIndex !== 1) hideNavBar();
+        }
+
+        // Attach navigation handlers
+        document.getElementById('prevBtn').onclick = prevStation;
+        document.getElementById('nextBtn').onclick = nextStation;
+
+        // === BEGIN JOURNEY (Transition from WhiteWeb to TripWeb) ===
+        window.beginJourney = function() {
+            if (isJourneyStarted) return;
+            isJourneyStarted = true;
+            
+            // Fade out WhiteWeb overlay
+            document.getElementById('whiteweb-overlay').classList.add('fade-out');
+            document.getElementById('mobile-menu').style.display = 'none';
+            
+            // Show TripWeb interface
+            setTimeout(() => {
+                document.getElementById('tripweb-interface').classList.add('visible');
+            }, 500);
+            
+            // Animate camera to first station
+            currentStationIndex = 1;
+            startAnimation(STATIONS[1].pos);
+            document.getElementById('status').innerText = 'Journey beginning...';
+            
+            // Show nav bar after arrival
+            setTimeout(() => {
+                if (currentStationIndex === 1 && !isAnimating) {
+                    showNavBar();
+                }
+            }, ANIMATION_DURATION * 1000 + 500);
+        };
+
+        // === MOBILE MENU ===
+        window.toggleMobileMenu = function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+        };
+
+        // === GLOW PULSE ===
+        let glowTime = 0;
+        
         // === ANIMATION LOOP ===
         function animate() {
             requestAnimationFrame(animate);
-            if (!scene) return;
             
-            updateGlow();
-            updateBlur();
+            // Pulsing glow effect
+            glowTime += 0.01;
+            const glowPulse = 0.25 + Math.sin(glowTime) * 0.1;
+            bloomPass.strength = glowPulse;
+            centerLight.intensity = 0.3 + Math.sin(glowTime * 1.5) * 0.2;
             
-            const time = Date.now() * 0.001;
-
-            for (let i = 1; i < cards.length; i++) {
+            // Handle card visibility
+            for (let i = 2; i < cards.length; i++) {
                 if (cards[i]) {
-                    if (i === currentStationIndex) {
+                    if (i === currentStationIndex && isJourneyStarted) {
                         cards[i].lookAt(camera.position);
                         cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.8, 0.1);
-                        cards[i].position.lerp(cards[i].userData.originalPos, 0.1);
                     } else {
-                        cards[i].quaternion.slerp(STATIONS[i].quat, 0.1);
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.05, 0.1);
-                        
-                        const offset = cards[i].userData.randomOffset;
-                        cards[i].position.y = cards[i].userData.originalPos.y + Math.sin(time + offset) * 0.1;
-                        cards[i].position.x = cards[i].userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
+                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.0, 0.1);
                     }
                 }
             }
-
+            
+            // Camera animation
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
+                
                 if (animationProgress >= 1) {
                     animationProgress = 1;
                     isAnimating = false;
                     document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
+                    
+                    if (currentStationIndex === 1 && isJourneyStarted) {
+                        showNavBar();
+                    }
                 }
+                
                 const t = easeInOutCubic(animationProgress);
                 const p0 = window.animControlPoints.start;
                 const p1 = window.animControlPoints.mid;
                 const p2 = window.animControlPoints.end;
-                camera.position.set(
-                    (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x,
-                    (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y,
-                    (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z
-                );
+                
+                const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
+                const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
+                const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
+                
+                camera.position.set(x, y, z);
                 camera.lookAt(POINT_CENTER);
             }
-
+            
             composer.render();
         }
+        
+        animate();
 
-        function onWindowResize() {
-            if (!camera || !renderer) return;
+        // === WINDOW RESIZE ===
+        window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             composer.setSize(window.innerWidth, window.innerHeight);
-        }
+        });
+
+        // Start with intro view
+        console.log('✨ Aethera Cinematic Journey - Ready');
     </script>
 </body>
 </html>
