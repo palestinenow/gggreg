@@ -117,50 +117,6 @@
             }
         }
 
-        // --- REAL GLASS CARD ---
-        const canvas = document.createElement('canvas'); 
-        canvas.width = 512; 
-        canvas.height = 512;
-        const context = canvas.getContext('2d');
-        
-        context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
-        context.fillRect(0, 0, 512, 512);
-        
-        context.strokeStyle = '#ffffff'; 
-        context.lineWidth = 20; 
-        context.strokeRect(20, 20, 472, 472);
-        
-        context.font = 'bold 50px Arial'; 
-        context.fillStyle = '#333'; 
-        context.textAlign = 'center';
-        context.fillText("INFO", 256, 200);
-        context.font = '30px Arial'; 
-        context.fillStyle = '#555';
-        context.fillText("Viewpoint C", 256, 280);
-        
-        const pageTexture = new THREE.CanvasTexture(canvas);
-        
-        const pageMaterial = new THREE.MeshStandardMaterial({ 
-            map: pageTexture,
-            transparent: true,
-            opacity: 0.8,
-            roughness: 0.1,
-            metalness: 0.1,
-            side: THREE.DoubleSide,
-            depthWrite: false,
-            blending: THREE.NormalBlending
-        });
-        
-        const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
-        const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
-        
-        floatingPage.position.set(-3.61, 1.30, 1.17);
-        
-        floatingPage.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
-        const INITIAL_QUATERNION = floatingPage.quaternion.clone();
-        
-        scene.add(floatingPage);
-
         // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
@@ -171,6 +127,89 @@
             { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
             { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
+
+        // --- CREATE CARDS FOR EACH STATION (EXCEPT INTRO) ---
+        const cards = [];
+        
+        function createCard(stationName, stationIndex) {
+            const canvas = document.createElement('canvas'); 
+            canvas.width = 512; 
+            canvas.height = 512;
+            const context = canvas.getContext('2d');
+            
+            // Frosted glass background
+            context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
+            context.fillRect(0, 0, 512, 512);
+            
+            // Border
+            context.strokeStyle = '#ffffff'; 
+            context.lineWidth = 20; 
+            context.strokeRect(20, 20, 472, 472);
+            
+            // Station name
+            context.font = 'bold 50px Arial'; 
+            context.fillStyle = '#333'; 
+            context.textAlign = 'center';
+            context.fillText(stationName, 256, 200);
+            
+            // Subtitle
+            context.font = '30px Arial'; 
+            context.fillStyle = '#555';
+            context.fillText(`Station ${stationIndex}`, 256, 280);
+            
+            // Additional info
+            context.font = '20px Arial';
+            context.fillStyle = '#777';
+            context.fillText('Viewpoint', 256, 350);
+            
+            const pageTexture = new THREE.CanvasTexture(canvas);
+            
+            const pageMaterial = new THREE.MeshStandardMaterial({ 
+                map: pageTexture,
+                transparent: true,
+                opacity: 0.0, // Start invisible
+                roughness: 0.1,
+                metalness: 0.1,
+                side: THREE.DoubleSide,
+                depthWrite: false,
+                blending: THREE.NormalBlending
+            });
+            
+            const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
+            const card = new THREE.Mesh(pageGeometry, pageMaterial);
+            
+            return card;
+        }
+
+        // Position cards at each station (except Intro at index 0)
+        function positionCards() {
+            // Station C (index 1)
+            cards[1].position.set(-3.61, 1.30, 1.17);
+            cards[1].lookAt(POINT_CENTER);
+            
+            // Station D (index 2)
+            cards[2].position.set(1.2, 1.40, 4.5);
+            cards[2].lookAt(POINT_CENTER);
+            
+            // Station E (index 3)
+            cards[3].position.set(4.0, 1.35, 1.0);
+            cards[3].lookAt(POINT_CENTER);
+            
+            // Station F (index 4)
+            cards[4].position.set(2.5, 1.30, -3.2);
+            cards[4].lookAt(POINT_CENTER);
+            
+            // Station G (index 5)
+            cards[5].position.set(-2.8, 1.25, -3.0);
+            cards[5].lookAt(POINT_CENTER);
+        }
+
+        // Create cards for stations 1-5 (skip Intro at 0)
+        for (let i = 1; i < STATIONS.length; i++) {
+            const card = createCard(STATIONS[i].name, i);
+            cards[i] = card;
+            scene.add(card);
+        }
 
         let currentStationIndex = 0;
         let isAnimating = false;
@@ -196,6 +235,7 @@
             scene.add(model);
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
+            positionCards(); // Position cards after model is loaded
         }, undefined, function (error) { console.error(error); });
 
         // --- UI LOGIC ---
@@ -234,15 +274,18 @@
             
             updateGlow();
 
-            // GLASS LOGIC
-            const distToC = camera.position.distanceTo(STATIONS[1].pos);
-            
-            if (distToC < 2.5) {
-                floatingPage.lookAt(camera.position);
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.4, 0.1);
-            } else {
-                floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1);
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.05, 0.1);
+            // CARDS LOGIC - Show only card for current station
+            for (let i = 1; i < cards.length; i++) {
+                if (cards[i]) {
+                    if (i === currentStationIndex) {
+                        // Current station card - make visible and face camera
+                        cards[i].lookAt(camera.position);
+                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.5, 0.1);
+                    } else {
+                        // Other cards - hide them
+                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.0, 0.1);
+                    }
+                }
             }
 
             if (isAnimating) {
