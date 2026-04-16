@@ -2,164 +2,106 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Final Clean Version</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Courier New', Courier, monospace; }
-        
-        /* MINIMAL DEBUG PANEL */
-        #debug-panel {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 250px;
-            background: rgba(0, 0, 0, 0.6);
-            color: #0f0;
-            padding: 10px;
-            border: 1px solid #0f0;
-            border-radius: 4px;
-            font-size: 13px;
-            pointer-events: none;
-            z-index: 100;
-        }
-        .row { display: flex; justify-content: space-between; margin-bottom: 3px; }
-        .label { color: #aaa; }
-        .val { font-weight: bold; }
-
-        /* START SCREEN */
-        #blocker {
-            position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95);
-            display: flex; justify-content: center; align-items: center; z-index: 999;
-            cursor: pointer;
-        }
-        #instructions {
-            color: black; text-align: center; padding: 30px; border: 2px solid #0f0; border-radius: 10px; font-family: sans-serif; background: #fff;
-        }
-
-        /* NEXT BUTTON ONLY */
-        #actions {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            z-index: 100;
-        }
-        button {
-            background: #003300;
-            color: #0f0;
-            border: 2px solid #0f0;
-            padding: 15px 30px;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 20px;
-            transition: 0.3s;
-            box-shadow: 0 0 10px #0f0;
-        }
-        button:hover { 
-            background: #0f0; 
-            color: black; 
-            transform: scale(1.1); 
-            box-shadow: 0 0 20px #0f0;
-        }
-
-        #status {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            color: #333;
-            font-size: 16px;
-            z-index: 100;
-        }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
+        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
+        #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
+        #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
+        button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        button.main-btn:hover { background: #000; transform: translateY(-2px); }
+        #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
     </style>
 </head>
 <body>
 
-    <!-- MINIMAL DEBUG -->
-    <div id="debug-panel">
-        <div class="row"><span class="label">STATION:</span> <span class="val" id="current-station">Intro</span></div>
-        <div class="row"><span class="label">GLOW:</span> <span class="val" id="glow-val">0%</span></div>
-    </div>
-
-    <!-- START SCREEN -->
     <div id="blocker">
         <div id="instructions">
-            <h1 style="color:#0f0; margin:0;">CLICK TO BEGIN</h1>
-            <p style="margin-top:10px;">Cinematic orbit around the glowing tree.<br>Click “NEXT STATION” to move.</p>
+            <h1>CINEMATIC TOUR</h1>
+            <p>Click to start.<br>The card is now real frosted glass.</p>
         </div>
     </div>
 
-    <!-- ONLY ONE BUTTON -->
     <div id="actions">
-        <button onclick="nextStation()">➡️ NEXT STATION</button>
+        <button class="main-btn" onclick="nextStation()">NEXT STATION ➡️</button>
     </div>
 
     <div id="status">Ready...</div>
 
-    <!-- IMPORTS -->
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
     </script>
 
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff); // WHITE SKY
-        
+        scene.background = new THREE.Color(0xffffff); 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- BLOOM EFFECT ---
-        const renderScene = new RenderPass(scene, camera);
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.1;
-        bloomPass.strength = 0.0;   // Start at 0%, will animate
-        bloomPass.radius = 0.8;
-
-        const composer = new EffectComposer(renderer);
-        composer.addPass(renderScene);
-        composer.addPass(bloomPass);
-
         // --- LIGHTS ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
-        scene.add(ambientLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
+        const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
+        const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        const spotLight = new THREE.SpotLight(0xffeeff, 2);
-        spotLight.position.set(0, 10, 0);
-        spotLight.angle = Math.PI / 4;
-        spotLight.penumbra = 0.5;
-        spotLight.decay = 1;
-        spotLight.distance = 50;
-        spotLight.castShadow = true;
-        scene.add(spotLight);
-        spotLight.target.position.set(-0.006, 1.041, -0.008);
+        // --- REAL GLASS CARD ---
+        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+        const context = canvas.getContext('2d');
+        
+        // Draw a semi-transparent white background for the "Frosted" look
+        context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
+        context.fillRect(0, 0, 512, 512);
+        
+        // Border
+        context.strokeStyle = '#ffffff'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
+        
+        // Text
+        context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
+        context.fillText("INFO", 256, 200);
+        context.font = '30px Arial'; context.fillStyle = '#555';
+        context.fillText("Viewpoint C", 256, 280);
+        
+        const pageTexture = new THREE.CanvasTexture(canvas);
+        
+        // USE STANDARD MATERIAL WITH HIGH TRANSPARENCY FOR GLASS
+        const pageMaterial = new THREE.MeshStandardMaterial({ 
+            map: pageTexture,
+            transparent: true,
+            opacity: 0.8, // Start high
+            roughness: 0.1, // Smooth like glass
+            metalness: 0.1,
+            side: THREE.DoubleSide,
+            depthWrite: false, // CRITICAL: Allows seeing through overlapping parts
+            blending: THREE.NormalBlending
+        });
+        
+        const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
+        const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
+        
+        // FIXED POSITION
+        floatingPage.position.set(-3.61, 1.30, 1.17);
+        
+        // Initial Rotation
+        floatingPage.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
+        const INITIAL_QUATERNION = floatingPage.quaternion.clone();
+        
+        scene.add(floatingPage);
 
-        const centerLight = new THREE.PointLight(0xff00ff, 0, 10); // Start at 0 intensity
-        centerLight.position.set(-0.006, 1.041, -0.008);
-        scene.add(centerLight);
-
-        // --- STATIONS (NO H:6) ---
+        // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
-
         const STATIONS = [
-            { name: "Intro",     pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First",  pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-            { name: "D: 2",      pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-            { name: "E: 3",      pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-            { name: "F: 4",      pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-            { name: "G: 5",      pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
+            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
         let currentStationIndex = 0;
@@ -167,129 +109,149 @@
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 3.0;
+        const ANIMATION_DURATION = 2.5;
 
-        // --- GLOW PULSE SYSTEM ---
-        let glowStartTime = Date.now();
-        let glowDurationUp = getRandomDuration(); // e.g., 10s
-        let glowDurationDown = getRandomDuration(); // e.g., 16s
-        let isGlowingUp = true;
-
-        function getRandomDuration() {
-            return 7000 + Math.random() * 15000; // 7s to 22s in milliseconds
-        }
-
-        function updateGlow() {
-            const now = Date.now();
-            const elapsed = now - glowStartTime;
-
-            if (isGlowingUp) {
-                // Rising phase: 0% → 100%
-                const progress = Math.min(elapsed / glowDurationUp, 1);
-                bloomPass.strength = progress * 2.0; // Max strength 2.0
-                centerLight.intensity = progress * 2.0;
-                document.getElementById('glow-val').innerText = Math.round(progress * 100) + "%";
-
-                if (progress >= 1) {
-                    isGlowingUp = false;
-                    glowStartTime = now;
-                    glowDurationDown = getRandomDuration();
-                }
-            } else {
-                // Falling phase: 100% → 0%
-                const progress = Math.min(elapsed / glowDurationDown, 1);
-                bloomPass.strength = (1 - progress) * 2.0;
-                centerLight.intensity = (1 - progress) * 2.0;
-                document.getElementById('glow-val').innerText = Math.round((1 - progress) * 100) + "%";
-
-                if (progress >= 1) {
-                    isGlowingUp = true;
-                    glowStartTime = now;
-                    glowDurationUp = getRandomDuration();
-                }
-            }
-        }
+        // --- RANDOM GLOW EFFECT VARIABLES ---
+        let glowState = {
+            isActive: false,
+            nextTrigger: performance.now() + 2000 + Math.random() * 4000,
+            pulseStart: 0,
+            pulseDuration: 0
+        };
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
-            model.traverse((child) => {
+            model.traverse((child) => { 
                 if (child.isMesh) { 
                     child.castShadow = true; 
                     child.receiveShadow = true; 
-                    if (child.name.toLowerCase().includes('tree') || child.name.toLowerCase().includes('plant')) {
-                        child.material.emissive = new THREE.Color(0xaa00aa);
-                        child.material.emissiveIntensity = 0.5;
-                    }
-                }
+                    if (child.name.toLowerCase().includes('tree')) { 
+                        child.material.emissive = new THREE.Color(0xaa00aa); 
+                        child.material.emissiveIntensity = 0.5; 
+                    } 
+                } 
             });
             scene.add(model);
-            
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
-            updateUI();
-        }, undefined, function (error) {
-            console.error(error);
+        }, undefined, function (error) { console.error(error); });
+
+        // --- UI LOGIC ---
+        document.getElementById('blocker').addEventListener('click', function() { 
+            this.style.display = 'none'; 
+            document.getElementById('status').innerText = "Tour Started"; 
         });
 
-        // --- START ON CLICK ---
-        document.getElementById('blocker').addEventListener('click', function() {
-            this.style.display = 'none';
-            document.getElementById('status').innerText = "Tour started. Click 'NEXT STATION'.";
-        });
-
-        // --- NEXT STATION ---
         window.nextStation = function() {
             if (isAnimating) return;
-
-            if (currentStationIndex === 0) {
-                currentStationIndex = 1;
-            } else {
-                currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
-            }
-
+            if (currentStationIndex === 0) currentStationIndex = 1;
+            else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
             startAnimation(STATIONS[currentStationIndex].pos);
-            updateUI();
+            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
         };
 
         function startAnimation(targetPos) {
-            isAnimating = true;
-            animationProgress = 0;
-            startPos.copy(camera.position);
+            isAnimating = true; 
+            animationProgress = 0; 
+            startPos.copy(camera.position); 
             endPos.copy(targetPos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
+            const center = POINT_CENTER.clone();
+            const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
+            const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
+            midPoint.add(direction.multiplyScalar(2)); 
+            window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
         }
 
-        function updateUI() {
-            document.getElementById('current-station').innerText = STATIONS[currentStationIndex].name;
-        }
+        function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
-        // --- EASING ---
-        function easeInOutCubic(t) {
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        // --- RANDOM GLOW PULSE FUNCTION ---
+        function updateRandomGlow(deltaTime) {
+            const now = performance.now();
+            
+            // Trigger new random pulse
+            if (!glowState.isActive && now > glowState.nextTrigger) {
+                glowState.isActive = true;
+                glowState.pulseStart = now;
+                glowState.pulseDuration = 300 + Math.random() * 700; // 300-1000ms pulse
+            }
+            
+            // Animate active pulse
+            if (glowState.isActive) {
+                const elapsed = now - glowState.pulseStart;
+                if (elapsed < glowState.pulseDuration) {
+                    const t = elapsed / glowState.pulseDuration;
+                    const pulseFactor = 1 + Math.sin(t * Math.PI) * 0.8; // Smooth sine pulse 1x → 1.8x → 1x
+                    
+                    // Pulse the center light intensity
+                    centerLight.intensity = THREE.MathUtils.lerp(centerLight.intensity, 1 * pulseFactor, 0.2);
+                    
+                    // Optional: subtle emissive pulse on glass card
+                    floatingPage.material.emissiveIntensity = THREE.MathUtils.lerp(
+                        floatingPage.material.emissiveIntensity || 0, 
+                        0.3 * (pulseFactor - 1), 
+                        0.1
+                    );
+                } else {
+                    // Pulse complete - reset and schedule next random trigger
+                    centerLight.intensity = THREE.MathUtils.lerp(centerLight.intensity, 1, 0.1);
+                    floatingPage.material.emissiveIntensity = THREE.MathUtils.lerp(
+                        floatingPage.material.emissiveIntensity || 0, 
+                        0, 
+                        0.1
+                    );
+                    glowState.isActive = false;
+                    glowState.nextTrigger = now + 2000 + Math.random() * 4000; // Next glow in 2-6 seconds
+                }
+            }
         }
 
         // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
+            const deltaTime = 16; // Approximate frame time in ms
+
+            // ✨ RANDOM GLOW EFFECT ✨
+            updateRandomGlow(deltaTime);
+
+            // GLASS LOGIC
+            const distToC = camera.position.distanceTo(STATIONS[1].pos);
             
-            updateGlow(); // Update random glow pulse
+            if (distToC < 2.5) {
+                // AT STATION C: FROSTED GLASS WINDOW
+                floatingPage.lookAt(camera.position);
+                
+                // Opacity 0.4 means 60% transparent. You see the tree clearly.
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.4, 0.1);
+                
+            } else {
+                // AWAY: GHOSTLY / INVISIBLE (5% opacity as requested)
+                floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1);
+                
+                // Opacity 0.05 = 5% visible, 95% transparent
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.05, 0.1);
+            }
 
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
-                if (animationProgress >= 1) {
-                    animationProgress = 1;
-                    isAnimating = false;
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
+                if (animationProgress >= 1) { 
+                    animationProgress = 1; 
+                    isAnimating = false; 
+                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
                 }
-
-                const easedT = easeInOutCubic(animationProgress);
-                camera.position.lerpVectors(startPos, endPos, easedT);
+                const t = easeInOutCubic(animationProgress);
+                const p0 = window.animControlPoints.start; 
+                const p1 = window.animControlPoints.mid; 
+                const p2 = window.animControlPoints.end;
+                const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
+                const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
+                const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
+                camera.position.set(x, y, z);
                 camera.lookAt(POINT_CENTER);
             }
 
-            composer.render(); // Always use composer for bloom
+            renderer.render(scene, camera);
         }
         animate();
 
@@ -297,7 +259,6 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
 </body>
