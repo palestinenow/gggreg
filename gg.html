@@ -2,129 +2,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Pulsing Glow</title>
+    <title>Cinematic Flow - Ultimate Version</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: 'Courier New', Courier, monospace; }
         
-        /* DEBUG PANEL */
+        /* MINIMAL DEBUG (Bottom Left) */
         #debug-panel {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 320px;
-            background: rgba(0, 0, 0, 0.7);
+            bottom: 20px;
+            left: 20px;
+            width: 250px;
+            background: rgba(0, 0, 0, 0.6);
             color: #0f0;
-            padding: 15px;
+            padding: 10px;
             border: 1px solid #0f0;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13px;
             pointer-events: none;
             z-index: 100;
         }
-        .row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 3px; }
         .label { color: #aaa; }
         .val { font-weight: bold; }
-        h3 { margin-top: 0; color: white; border-bottom: 1px solid #0f0; padding-bottom: 5px; }
 
-        /* CONTROLS OVERLAY */
+        /* START SCREEN */
         #blocker {
-            position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.9);
+            position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95);
             display: flex; justify-content: center; align-items: center; z-index: 999;
             cursor: pointer;
         }
         #instructions {
             color: black; text-align: center; padding: 30px; border: 2px solid #0f0; border-radius: 10px; font-family: sans-serif; background: #fff;
         }
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
-            background: red; border-radius: 50%; transform: translate(-50%, -50%);
-            pointer-events: none; z-index: 50; box-shadow: 0 0 5px red;
-        }
 
-        /* ACTION BUTTONS */
+        /* NEXT BUTTON (Bottom Right) */
         #actions {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            bottom: 30px;
+            right: 30px;
             z-index: 100;
         }
-        button {
+        button.main-btn {
             background: #003300;
             color: #0f0;
-            border: 1px solid #0f0;
-            padding: 12px 24px;
+            border: 2px solid #0f0;
+            padding: 15px 30px;
             font-weight: bold;
             cursor: pointer;
             font-family: monospace;
-            font-size: 18px;
+            font-size: 20px;
             transition: 0.3s;
+            box-shadow: 0 0 10px #0f0;
         }
-        button:hover { background: #0f0; color: black; transform: scale(1.05); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button.main-btn:hover { 
+            background: #0f0; color: black; transform: scale(1.1); box-shadow: 0 0 20px #0f0;
+        }
+
+        /* FLOW CONTROLS (Top Right) */
+        #flow-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            z-index: 100;
+            font-family: sans-serif;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #flow-controls h3 { margin: 0 0 10px 0; font-size: 14px; color: #333; text-transform: uppercase; letter-spacing: 1px; }
+        .toggle-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; color: #555; }
+        .toggle-row input { margin-right: 8px; cursor: pointer; }
+        .toggle-row label { cursor: pointer; user-select: none; }
 
         #status {
             position: absolute;
-            bottom: 20px;
+            bottom: 80px;
             left: 20px;
             color: #333;
             font-size: 16px;
             z-index: 100;
-        }
-
-        /* BLOOM TOGGLE */
-        #bloom-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <!-- DEBUG DATA PANEL -->
+    <!-- MINIMAL DEBUG -->
     <div id="debug-panel">
-        <h3>📍 CURRENT POSITION</h3>
-        <div class="row"><span class="label">POS X:</span> <span class="val" id="p-x">0.00</span></div>
-        <div class="row"><span class="label">POS Y:</span> <span class="val" id="p-y">0.00</span></div>
-        <div class="row"><span class="label">POS Z:</span> <span class="val" id="p-z">0.00</span></div>
-        
-        <h3>🎯 POINT A: CENTER (FIXED)</h3>
-        <div class="row"><span class="label">X:</span> <span class="val">-0.006</span></div>
-        <div class="row"><span class="label">Y:</span> <span class="val">1.041</span></div>
-        <div class="row"><span class="label">Z:</span> <span class="val">-0.008</span></div>
-
-        <h3>🔄 STATION STATUS</h3>
-        <div class="row"><span class="label">CURRENT:</span> <span class="val" id="current-station">Intro</span></div>
-        <div class="row"><span class="label">NEXT:</span> <span class="val" id="next-station">C: First</span></div>
+        <div class="row"><span class="label">STATION:</span> <span class="val" id="current-station">Intro</span></div>
+        <div class="row"><span class="label">GLOW:</span> <span class="val" id="glow-val">0%</span></div>
     </div>
 
-    <div id="crosshair"></div>
-
-    <!-- BLOCKER THAT DISAPPEARS ON CLICK -->
+    <!-- START SCREEN -->
     <div id="blocker">
         <div id="instructions">
-            <h1 style="color:#0f0">CLICK ANYWHERE TO START</h1>
-            <p>Camera will orbit the pulsing glowing tree.<br>Click "NEXT STATION" to move smoothly between viewpoints.<br>Always looking at the center.</p>
+            <h1 style="color:#0f0; margin:0;">CLICK TO BEGIN</h1>
+            <p style="margin-top:10px;">Cinematic orbit around the glowing tree.<br>Use controls top-right to customize flow.</p>
         </div>
     </div>
 
-    <!-- ACTIONS -->
+    <!-- FLOW OPTIONS PANEL -->
+    <div id="flow-controls">
+        <h3>✨ Flow Effects</h3>
+        <div class="toggle-row">
+            <input type="checkbox" id="opt-arc" checked>
+            <label for="opt-arc">Arcing Camera Path</label>
+        </div>
+        <div class="toggle-row">
+            <input type="checkbox" id="opt-particles" checked>
+            <label for="opt-particles">Floating Particles</label>
+        </div>
+        <div class="toggle-row">
+            <input type="checkbox" id="opt-rays" checked>
+            <label for="opt-rays">Rotating God Rays</label>
+        </div>
+    </div>
+
+    <!-- MAIN ACTION BUTTON -->
     <div id="actions">
-        <button id="btn-next" onclick="nextStation()">➡️ NEXT STATION</button>
+        <button class="main-btn" onclick="nextStation()">➡️ NEXT STATION</button>
     </div>
 
-    <!-- BLOOM TOGGLE -->
-    <div id="bloom-toggle">
-        <button onclick="toggleBloom()">✨ GLOW: ON</button>
-    </div>
+    <div id="status">Ready...</div>
 
-    <div id="status">Ready to begin...</div>
-
-    <!-- IMPORT MAP WITH POST PROCESSING -->
+    <!-- IMPORTS -->
     <script type="importmap">
         {
             "imports": {
@@ -141,7 +144,7 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-        // --- SETUP ---
+        // --- SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff); // WHITE SKY
         
@@ -151,38 +154,21 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- POST PROCESSING (BLOOM) ---
+        // --- BLOOM EFFECT ---
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.2;
-        bloomPass.strength = 0;   // Start at 0 — we'll animate this
-        bloomPass.radius = 0.5;
+        bloomPass.threshold = 0.1;
+        bloomPass.strength = 0.0;   
+        bloomPass.radius = 0.8;
 
         const composer = new EffectComposer(renderer);
         composer.addPass(renderScene);
         composer.addPass(bloomPass);
 
-        let bloomEnabled = true;
-
-        window.toggleBloom = function() {
-            bloomEnabled = !bloomEnabled;
-            const btn = document.querySelector('#bloom-toggle button');
-            if (bloomEnabled) {
-                composer.passes[1].enabled = true;
-                btn.innerText = "✨ GLOW: ON";
-                btn.style.background = "#003300";
-            } else {
-                composer.passes[1].enabled = false;
-                btn.innerText = "✨ GLOW: OFF";
-                btn.style.background = "#333";
-            }
-        };
-
         // --- LIGHTS ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
         scene.add(ambientLight);
 
-        // Spotlight on center (tree)
         const spotLight = new THREE.SpotLight(0xffeeff, 2);
         spotLight.position.set(0, 10, 0);
         spotLight.angle = Math.PI / 4;
@@ -191,17 +177,45 @@
         spotLight.distance = 50;
         spotLight.castShadow = true;
         scene.add(spotLight);
-        scene.add(spotLight.target);
         spotLight.target.position.set(-0.006, 1.041, -0.008);
 
-        // Point light at center for glow — we'll animate its intensity
-        const centerLight = new THREE.PointLight(0xff00ff, 0, 10); // Start at 0 intensity
-        centerLight.position.copy(new THREE.Vector3(-0.006, 1.041, -0.008));
+        const centerLight = new THREE.PointLight(0xff00ff, 0, 10);
+        centerLight.position.set(-0.006, 1.041, -0.008);
         scene.add(centerLight);
 
-        // --- DEFINED POINTS (REMOVED H:6) ---
-        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
+        // --- FLOW EFFECTS INITIALIZATION ---
+        
+        // 1. PARTICLES
+        const particleCount = 200;
+        const particlesGeometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = [];
+        for (let i = 0; i < particleCount; i++) {
+            positions[i*3] = (Math.random() - 0.5) * 20;
+            positions[i*3+1] = Math.random() * 10 + 1;
+            positions[i*3+2] = (Math.random() - 0.5) * 20;
+            velocities.push({ x: (Math.random() - 0.5) * 0.02, y: (Math.random() - 0.5) * 0.02, z: (Math.random() - 0.5) * 0.02 });
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particlesMaterial = new THREE.PointsMaterial({ color: 0xffaaee, size: 0.1, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+        const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particleSystem);
 
+        // 2. GOD RAYS
+        const rayGeometry = new THREE.CylinderGeometry(0.1, 0.5, 10, 8, 1, true);
+        const rayMaterial = new THREE.MeshBasicMaterial({ color: 0xffffcc, transparent: true, opacity: 0.1, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+        const godRays = new THREE.Group();
+        for (let i = 0; i < 6; i++) {
+            const ray = new THREE.Mesh(rayGeometry, rayMaterial);
+            ray.position.set(0, 10, 0);
+            ray.rotation.y = (i / 6) * Math.PI * 2;
+            ray.rotation.x = Math.PI / 6;
+            godRays.add(ray);
+        }
+        scene.add(godRays);
+
+        // --- STATIONS ---
+        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro",     pos: new THREE.Vector3(0.092, 8.581, -0.067) },
             { name: "C: First",  pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
@@ -218,12 +232,31 @@
         let endPos = new THREE.Vector3();
         const ANIMATION_DURATION = 3.0;
 
-        // --- PULSE GLOW VARIABLES ---
-        let pulseStartTime = Date.now();
-        const PULSE_DURATION = 7000; // 7 seconds up, 7 seconds down = 14s total cycle
+        // --- GLOW PULSE SYSTEM ---
+        let glowStartTime = Date.now();
+        let glowDurationUp = getRandomDuration();
+        let glowDurationDown = getRandomDuration();
+        let isGlowingUp = true;
 
-        // Store reference to tree mesh for emissive glow
-        let treeMesh = null;
+        function getRandomDuration() { return 7000 + Math.random() * 15000; }
+
+        function updateGlow() {
+            const now = Date.now();
+            const elapsed = now - glowStartTime;
+            if (isGlowingUp) {
+                const progress = Math.min(elapsed / glowDurationUp, 1);
+                bloomPass.strength = progress * 2.0;
+                centerLight.intensity = progress * 2.0;
+                document.getElementById('glow-val').innerText = Math.round(progress * 100) + "%";
+                if (progress >= 1) { isGlowingUp = false; glowStartTime = now; glowDurationDown = getRandomDuration(); }
+            } else {
+                const progress = Math.min(elapsed / glowDurationDown, 1);
+                bloomPass.strength = (1 - progress) * 2.0;
+                centerLight.intensity = (1 - progress) * 2.0;
+                document.getElementById('glow-val').innerText = Math.round((1 - progress) * 100) + "%";
+                if (progress >= 1) { isGlowingUp = true; glowStartTime = now; glowDurationUp = getRandomDuration(); }
+            }
+        }
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -231,39 +264,26 @@
             const model = gltf.scene;
             model.traverse((child) => {
                 if (child.isMesh) { 
-                    child.castShadow = true; 
-                    child.receiveShadow = true; 
-                    // Try to find tree/plant mesh
+                    child.castShadow = true; child.receiveShadow = true; 
                     if (child.name.toLowerCase().includes('tree') || child.name.toLowerCase().includes('plant')) {
-                        treeMesh = child;
                         child.material.emissive = new THREE.Color(0xaa00aa);
-                        child.material.emissiveIntensity = 0; // Start at 0
+                        child.material.emissiveIntensity = 0.5;
                     }
                 }
             });
             scene.add(model);
-            
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
             updateUI();
-        }, undefined, function (error) {
-            console.error(error);
-        });
+        }, undefined, function (error) { console.error(error); });
 
-        // --- CLICK ANYWHERE TO START ---
-        document.getElementById('blocker').addEventListener('click', function() {
-            this.style.display = 'none';
-            document.getElementById('status').innerText = "Started! Click 'NEXT STATION' to begin tour.";
-        });
+        // --- UI & CONTROLS ---
+        document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour started."; });
 
-        // --- NEXT STATION FUNCTION ---
         window.nextStation = function() {
             if (isAnimating) return;
-            if (currentStationIndex === 0) {
-                currentStationIndex = 1;
-            } else {
-                currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
-            }
+            if (currentStationIndex === 0) currentStationIndex = 1;
+            else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
             startAnimation(STATIONS[currentStationIndex].pos);
             updateUI();
         };
@@ -273,52 +293,57 @@
             animationProgress = 0;
             startPos.copy(camera.position);
             endPos.copy(targetPos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
+            
+            // Check if Arcing is enabled
+            if (document.getElementById('opt-arc').checked) {
+                const center = POINT_CENTER.clone();
+                const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
+                const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
+                midPoint.add(direction.multiplyScalar(2)); // Arc height
+                window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
+            }
+            
+            document.getElementById('status').innerText = `Flowing to ${STATIONS[currentStationIndex].name}...`;
         }
 
-        function updateUI() {
-            document.getElementById('current-station').innerText = STATIONS[currentStationIndex].name;
-            let nextIndex = currentStationIndex === 0 ? 1 : (currentStationIndex % (STATIONS.length - 1)) + 1;
-            document.getElementById('next-station').innerText = STATIONS[nextIndex].name;
-        }
+        function updateUI() { document.getElementById('current-station').innerText = STATIONS[currentStationIndex].name; }
 
-        function easeInOutCubic(t) {
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        }
+        function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
-        // --- ANIMATION LOOP WITH PULSING GLOW ---
+        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
-            
-            // === PULSE GLOW LOGIC ===
-            const now = Date.now();
-            const elapsed = now - pulseStartTime;
-            const cycleTime = elapsed % (PULSE_DURATION * 2); // 14s total cycle
+            updateGlow();
 
-            // Calculate glow value: 0 → 1 → 0 over 14s
-            let glowValue = 0;
-            if (cycleTime < PULSE_DURATION) {
-                // Rising: 0 to 1 over 7s
-                glowValue = cycleTime / PULSE_DURATION;
+            // Animate Particles (if enabled)
+            if (document.getElementById('opt-particles').checked) {
+                particleSystem.visible = true;
+                const posAttr = particleSystem.geometry.attributes.position;
+                for (let i = 0; i < particleCount; i++) {
+                    posAttr.array[i*3] += velocities[i].x;
+                    posAttr.array[i*3+1] += velocities[i].y;
+                    posAttr.array[i*3+2] += velocities[i].z;
+                    if (posAttr.array[i*3] > 10) posAttr.array[i*3] = -10;
+                    if (posAttr.array[i*3] < -10) posAttr.array[i*3] = 10;
+                    if (posAttr.array[i*3+1] > 12) posAttr.array[i*3+1] = 1;
+                    if (posAttr.array[i*3+1] < 1) posAttr.array[i*3+1] = 12;
+                    if (posAttr.array[i*3+2] > 10) posAttr.array[i*3+2] = -10;
+                    if (posAttr.array[i*3+2] < -10) posAttr.array[i*3+2] = 10;
+                }
+                posAttr.needsUpdate = true;
             } else {
-                // Falling: 1 to 0 over next 7s
-                glowValue = 1 - ((cycleTime - PULSE_DURATION) / PULSE_DURATION);
+                particleSystem.visible = false;
             }
 
-            // Apply to bloom
-            if (bloomEnabled) {
-                bloomPass.strength = glowValue * 1.5; // Max strength 1.5
+            // Rotate God Rays (if enabled)
+            if (document.getElementById('opt-rays').checked) {
+                godRays.visible = true;
+                godRays.rotation.y += 0.002;
+            } else {
+                godRays.visible = false;
             }
 
-            // Apply to center light
-            centerLight.intensity = glowValue * 2; // Max intensity 2
-
-            // Apply to tree emissive (if found)
-            if (treeMesh && treeMesh.material) {
-                treeMesh.material.emissiveIntensity = glowValue * 1.0; // Max 1.0
-            }
-
-            // === CAMERA MOVEMENT ===
+            // Camera Movement
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
                 if (animationProgress >= 1) {
@@ -326,23 +351,27 @@
                     isAnimating = false;
                     document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
                 }
-                const easedT = easeInOutCubic(animationProgress);
-                camera.position.lerpVectors(startPos, endPos, easedT);
+
+                const t = easeInOutCubic(animationProgress);
+                
+                if (document.getElementById('opt-arc').checked && window.animControlPoints) {
+                    // Arcing Path
+                    const p0 = window.animControlPoints.start;
+                    const p1 = window.animControlPoints.mid;
+                    const p2 = window.animControlPoints.end;
+                    const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
+                    const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
+                    const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
+                    camera.position.set(x, y, z);
+                } else {
+                    // Linear Path
+                    camera.position.lerpVectors(startPos, endPos, t);
+                }
+                
                 camera.lookAt(POINT_CENTER);
             }
 
-            // Update Debug UI
-            const p = camera.position;
-            document.getElementById('p-x').innerText = p.x.toFixed(3);
-            document.getElementById('p-y').innerText = p.y.toFixed(3);
-            document.getElementById('p-z').innerText = p.z.toFixed(3);
-
-            // RENDER
-            if (bloomEnabled) {
-                composer.render();
-            } else {
-                renderer.render(scene, camera);
-            }
+            composer.render();
         }
         animate();
 
