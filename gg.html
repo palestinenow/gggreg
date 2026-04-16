@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Real Glass Effect</title>
+    <title>Cinematic Orbit ezd Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
@@ -567,7 +567,7 @@
             5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
-        // --- CREATE CARDS (NO BORDER, WHITE TEXT) ---
+        // --- CREATE CARDS (PURE WHITE TEXT) ---
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -576,36 +576,37 @@
             canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            // Transparent background - no fill, just glass effect
-            context.fillStyle = 'rgba(255, 255, 255, 0.15)'; 
+            // Very subtle glass background
+            context.fillStyle = 'rgba(255, 255, 255, 0.08)'; 
             context.fillRect(0, 0, 512, 512);
             
-            // NO BORDER - removed strokeRect
+            // Strong text shadow for depth
+            context.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            context.shadowBlur = 15;
+            context.shadowOffsetX = 3;
+            context.shadowOffsetY = 3;
             
-            // White text with shadow for clarity
-            context.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            context.shadowBlur = 10;
-            context.shadowOffsetX = 2;
-            context.shadowOffsetY = 2;
-            
-            // Station name - WHITE
-            context.font = 'bold 60px Arial'; 
+            // Station name - PURE WHITE
+            context.font = 'bold 65px Arial'; 
             context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
             context.fillText(stationName, 256, 200);
             
-            // Subtitle - WHITE
-            context.font = '35px Arial'; 
+            // Subtitle - PURE WHITE
+            context.font = 'bold 40px Arial'; 
             context.fillStyle = '#ffffff';
-            context.fillText(`Station ${stationIndex}`, 256, 280);
+            context.fillText(`Station ${stationIndex}`, 256, 290);
             
-            // Additional info - WHITE
-            context.font = '25px Arial';
+            // Additional info - PURE WHITE
+            context.font = 'bold 28px Arial';
             context.fillStyle = '#ffffff';
-            context.fillText('Viewpoint', 256, 350);
+            context.fillText('Viewpoint', 256, 360);
             
             // Reset shadow
             context.shadowColor = 'transparent';
+            context.shadowBlur = 0;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
             
             const pageTexture = new THREE.CanvasTexture(canvas);
             
@@ -613,11 +614,13 @@
                 map: pageTexture,
                 transparent: true,
                 opacity: 0.0,
-                roughness: 0.1,
-                metalness: 0.1,
+                roughness: 0.05,
+                metalness: 0.0,
                 side: THREE.DoubleSide,
                 depthWrite: false,
-                blending: THREE.NormalBlending
+                blending: THREE.NormalBlending,
+                emissive: new THREE.Color(0xffffff),
+                emissiveIntensity: 0.3
             });
             
             const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
@@ -681,7 +684,7 @@
             } else if (currentStationIndex < STATIONS.length - 1) {
                 currentStationIndex++;
             } else {
-                currentStationIndex = 1; // Loop back to first station
+                currentStationIndex = 1;
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
@@ -698,7 +701,7 @@
             } else if (currentStationIndex > 1) {
                 currentStationIndex--;
             } else {
-                currentStationIndex = STATIONS.length - 1; // Loop to last station
+                currentStationIndex = STATIONS.length - 1;
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
@@ -735,7 +738,7 @@
                 if (cards[i]) {
                     if (i === currentStationIndex) {
                         cards[i].lookAt(camera.position);
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.6, 0.1);
+                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.7, 0.1);
                     } else {
                         cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.0, 0.1);
                     }
