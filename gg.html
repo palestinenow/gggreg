@@ -100,30 +100,30 @@
             return mesh;
         }
 
-        // --- CREATE CARDS (Adjusted Y positions for Eye-Level ~2.0) ---
+        // --- CREATE CARDS (Raised to Y: 2.5 for Eye-Level) ---
         
-        // 1. Card C (Moved up to Y=2.0)
+        // 1. Card C
         const cardC = createElegantText("Viewpoint C", "First Stop");
-        cardC.position.set(-3.49, 2.0, 1.23); 
-        cardC.lookAt(new THREE.Vector3(-0.006, 2.0, -0.008)); 
+        cardC.position.set(-3.49, 2.5, 1.23); 
+        cardC.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
         const qC = cardC.quaternion.clone();
 
-        // 2. Card D (Moved up to Y=2.0)
+        // 2. Card D
         const cardD = createElegantText("Viewpoint D", "Second Stop");
-        cardD.position.set(0.077, 2.0, 4.0); 
-        cardD.lookAt(new THREE.Vector3(-0.006, 2.0, -0.008)); 
+        cardD.position.set(0.077, 2.5, 4.0); 
+        cardD.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
         const qD = cardD.quaternion.clone();
 
-        // 3. Card E (Moved up to Y=2.0)
+        // 3. Card E
         const cardE = createElegantText("Viewpoint E", "Third Stop");
-        cardE.position.set(3.77, 2.0, 1.30); 
-        cardE.lookAt(new THREE.Vector3(-0.006, 2.0, -0.008)); 
+        cardE.position.set(3.77, 2.5, 1.30); 
+        cardE.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
         const qE = cardE.quaternion.clone();
 
-        // 4. Card F (Moved up to Y=2.0)
+        // 4. Card F
         const cardF = createElegantText("Viewpoint F", "Fourth Stop");
-        cardF.position.set(2.21, 2.0, -3.16); 
-        cardF.lookAt(new THREE.Vector3(-0.006, 2.0, -0.008)); 
+        cardF.position.set(2.21, 2.5, -3.16); 
+        cardF.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
         const qF = cardF.quaternion.clone();
 
         scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
@@ -131,8 +131,8 @@
         // --- STATIONS (Order: Intro -> G:5(Empty) -> C -> D -> E -> F) ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
-            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: null }, // NO CARD FOR INTRO
-            { name: "G: Wide View", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: null }, // EMPTY STATION
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: null }, 
+            { name: "G: Wide View", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: null }, 
             { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), card: cardC, quat: qC },
             { name: "D: Second", pos: new THREE.Vector3(0.077, 1.301, 5.964), card: cardD, quat: qD },
             { name: "E: Third", pos: new THREE.Vector3(5.276, 1.338, 1.737), card: cardE, quat: qE },
@@ -161,10 +161,7 @@
 
         window.nextStation = function() {
             if (isAnimating) return;
-            
-            // Move to next index
             currentStationIndex = (currentStationIndex + 1) % STATIONS.length;
-            
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
         };
@@ -184,15 +181,16 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            const time = Date.now() * 0.001; // Slower time factor for gentle float
+            // VERY SLOW TIME FACTOR FOR GENTLE FLOAT
+            const time = Date.now() * 0.0005; 
 
             // TEXT CARD LOGIC
             STATIONS.forEach(station => {
                 if (station.card) {
                     const dist = camera.position.distanceTo(station.pos);
                     
-                    // SLOW FLOATING ANIMATION (Small Bobbing: ±0.05 units)
-                    station.card.position.y = station.card.userData.initialY + Math.sin(time + station.card.userData.floatOffset) * 0.05;
+                    // VERY SUBTLE FLOATING (±0.03 units)
+                    station.card.position.y = station.card.userData.initialY + Math.sin(time + station.card.userData.floatOffset) * 0.03;
 
                     if (dist < 2.5) {
                         // AT STATION: Face Camera & 100% Opacity
