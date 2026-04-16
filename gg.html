@@ -41,9 +41,8 @@
             height: 100%;
             z-index: 10;
             pointer-events: auto;
-            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 1.5s ease;
+            transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 1;
-            color: white;
         }
 
         #whiteweb-overlay.fade-out {
@@ -51,12 +50,17 @@
             pointer-events: none;
         }
 
-        #whiteweb-overlay .glass-panel {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* Enhanced Glass Panel for WhiteWeb */
+        .glass-panel-enhanced {
+            background: rgba(15, 15, 25, 0.35);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 24px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
         }
 
         /* WhiteWeb Content */
@@ -73,66 +77,98 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 24px 48px;
+            padding: 28px 56px;
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
         }
 
+        .nav-glass {
+            background: rgba(10, 10, 20, 0.3);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 60px;
+            padding: 12px 28px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
         .logo {
             font-family: 'Instrument Serif', serif;
-            font-size: 2rem;
+            font-size: 2.2rem;
             letter-spacing: -0.02em;
             color: white;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+            font-weight: 400;
         }
 
         .logo sup {
-            font-size: 0.75rem;
-            margin-left: 2px;
+            font-size: 0.8rem;
+            margin-left: 3px;
+            opacity: 0.9;
         }
 
         .nav-links {
             display: flex;
-            gap: 40px;
+            gap: 48px;
         }
 
         .nav-links a {
-            color: rgba(255, 255, 255, 0.8);
+            color: white;
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 400;
-            transition: color 0.3s;
-            text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+            opacity: 0.9;
+            letter-spacing: 0.3px;
         }
 
         .nav-links a:hover {
-            color: white;
+            opacity: 1;
+            transform: translateY(-1px);
         }
 
         .nav-links a.active {
-            color: white;
+            opacity: 1;
             font-weight: 500;
+            position: relative;
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: white;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
 
         .nav-button {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            padding: 10px 24px;
+            padding: 12px 28px;
             border-radius: 50px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s;
-            text-shadow: 0 1px 5px rgba(0,0,0,0.2);
+            text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
 
         .nav-button:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.2);
             transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
 
         /* Hero Section */
@@ -143,96 +179,126 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 0 24px;
+            padding: 0 32px;
             margin-top: -80px;
         }
 
         .hero-title {
             font-family: 'Instrument Serif', serif;
-            font-size: clamp(3rem, 8vw, 7rem);
+            font-size: clamp(3.5rem, 9vw, 8rem);
             font-weight: 400;
-            line-height: 0.95;
+            line-height: 1;
             letter-spacing: -0.03em;
-            max-width: 1200px;
-            margin: 0 auto 32px;
+            max-width: 1300px;
+            margin: 0 auto 40px;
             color: white;
-            text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            text-shadow: 0 8px 40px rgba(0,0,0,0.6);
             animation: fade-rise 0.8s ease-out forwards;
         }
 
         .hero-title .italic {
             font-style: italic;
-            color: rgba(255, 255, 255, 0.7);
+            opacity: 0.95;
         }
 
         .hero-description {
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            color: rgba(255, 255, 255, 0.85);
-            max-width: 700px;
-            margin: 0 auto 48px;
-            line-height: 1.6;
+            font-size: clamp(1.1rem, 2.2vw, 1.3rem);
+            color: white;
+            max-width: 750px;
+            margin: 0 auto 56px;
+            line-height: 1.7;
             font-weight: 300;
-            text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+            text-shadow: 0 4px 30px rgba(0,0,0,0.6);
             animation: fade-rise 0.8s ease-out 0.2s forwards;
             opacity: 0;
+            letter-spacing: 0.2px;
+        }
+
+        .hero-description-glass {
+            background: rgba(10, 10, 20, 0.25);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 28px 40px;
+            box-shadow: 
+                0 8px 40px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.1);
         }
 
         .begin-journey-btn {
             background: white;
             color: black;
             border: none;
-            padding: 18px 56px;
-            border-radius: 50px;
-            font-size: 1.1rem;
+            padding: 20px 64px;
+            border-radius: 60px;
+            font-size: 1.2rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            box-shadow: 
+                0 8px 40px rgba(0,0,0,0.4),
+                0 0 0 1px rgba(255,255,255,0.1);
             animation: fade-rise 0.8s ease-out 0.4s forwards;
             opacity: 0;
+            letter-spacing: 0.5px;
         }
 
         .begin-journey-btn:hover {
             transform: scale(1.08);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-            background: #f0f0f0;
+            box-shadow: 
+                0 12px 50px rgba(0,0,0,0.5),
+                0 0 0 1px rgba(255,255,255,0.2);
+            background: #f8f8f8;
         }
 
         /* Mobile Menu */
         .mobile-menu-btn {
             display: none;
-            background: none;
-            border: none;
+            background: rgba(10, 10, 20, 0.3);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
             color: white;
             cursor: pointer;
-            padding: 8px;
+            padding: 12px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .mobile-menu {
             position: absolute;
-            top: 90px;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 32px;
+            top: 100px;
+            left: 20px;
+            right: 20px;
+            background: rgba(15, 15, 25, 0.5);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 40px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 28px;
             align-items: center;
             z-index: 20;
             animation: fade-rise 0.3s ease-out;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
 
         .mobile-menu a {
             color: white;
             text-decoration: none;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            font-weight: 300;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
         }
 
-        /* === TRIPWEB INTERFACE (Hidden initially) === */
+        /* === TRIPWEB INTERFACE === */
         #tripweb-interface {
             position: fixed;
             top: 0;
@@ -242,7 +308,7 @@
             z-index: 20;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 1.5s ease;
+            transition: opacity 1.8s ease;
         }
 
         #tripweb-interface.visible {
@@ -250,7 +316,7 @@
             pointer-events: auto;
         }
 
-        /* TripWeb Buttons */
+        /* TripWeb Buttons - Enhanced Glass */
         #actions { 
             position: fixed;
             top: 50%;
@@ -258,7 +324,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 40px;
+            padding: 0 48px;
             box-sizing: border-box;
             z-index: 100;
             pointer-events: none;
@@ -266,29 +332,35 @@
         
         .hydro-btn {
             position: relative;
-            padding: 18px 35px;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-            background: rgba(30, 41, 59, 0.2);
-            backdrop-filter: blur(8px);
+            padding: 20px 40px;
+            font-weight: 500;
+            font-size: 17px;
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(20, 25, 40, 0.4);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             color: white;
             cursor: pointer;
             overflow: visible;
-            transition: transform 0.1s ease-out;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: auto;
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.15);
             
             --proximity: 0;
-            --opacity: calc(0.05 + (0.95 * var(--proximity)));
-            --blur: calc(8px * (1 - var(--proximity)));
+            --opacity: calc(0.3 + (0.7 * var(--proximity)));
+            --blur: calc(20px * (1 - var(--proximity) * 0.5));
             --scale: calc(0.98 + (0.02 * var(--proximity)));
-            --border: calc(0.05 + (0.45 * var(--proximity)));
+            --border: calc(0.15 + (0.35 * var(--proximity)));
             
             opacity: var(--opacity);
-            filter: blur(var(--blur));
+            backdrop-filter: blur(var(--blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
             transform: scale(var(--scale));
             border-color: rgba(255,255,255,var(--border));
+            letter-spacing: 0.5px;
         }
         
         .hydro-btn::before,
@@ -296,8 +368,8 @@
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.5);
             animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
             pointer-events: none;
             opacity: 0;
@@ -305,7 +377,7 @@
         
         .hydro-btn::after {
             animation-delay: 0.1s;
-            border-color: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
         }
         
         .hydro-btn.bloom::before,
@@ -316,17 +388,22 @@
         
         @keyframes ripple-bloom {
             0% { transform: scale(0.9); opacity: 0.8; border-width: 2px; }
-            100% { transform: scale(1.4); opacity: 0; border-width: 0px; }
+            100% { transform: scale(1.5); opacity: 0; border-width: 0px; }
         }
         
         .hydro-btn .highlight {
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
-            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            border-radius: 25px;
             opacity: 0;
             transition: opacity 0.5s ease;
             pointer-events: none;
+        }
+        
+        .hydro-btn:hover {
+            background: rgba(30, 35, 50, 0.5);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
         }
         
         .hydro-btn:hover .highlight {
@@ -338,31 +415,24 @@
             z-index: 10;
             display: flex;
             align-items: center;
-            gap: 12px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            gap: 14px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
         }
         
         .hydro-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             transition: transform 0.3s ease;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
         }
         
         .hydro-btn:hover svg {
-            transform: translateX(4px);
+            transform: translateX(5px);
         }
 
+        /* Remove status text - hidden */
         #status { 
-            position: fixed; 
-            bottom: 40px; 
-            left: 50%;
-            transform: translateX(-50%);
-            color: white; 
-            font-size: 16px; 
-            z-index: 100; 
-            opacity: 0.7;
-            font-family: 'Inter', sans-serif;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            display: none;
         }
         
         #vignette {
@@ -373,28 +443,31 @@
             height: 100%;
             pointer-events: none;
             z-index: 50;
-            background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);
+            background: radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.25) 75%, rgba(0,0,0,0.45) 100%);
         }
 
-        /* Glass Navigation Bar */
+        /* Enhanced Glass Navigation Bar */
         .glass-nav {
             position: fixed;
-            top: 68%;
+            top: 70%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 92%;
-            max-width: 680px;
-            height: 64px;
+            max-width: 700px;
+            height: 70px;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 0 24px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-            backdrop-filter: blur(24px) saturate(1.2);
-            -webkit-backdrop-filter: blur(24px) saturate(1.2);
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 50px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(255,255,255,0.04);
+            gap: 20px;
+            padding: 0 28px;
+            background: rgba(15, 20, 30, 0.35);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 60px;
+            box-shadow: 
+                0 15px 50px rgba(0,0,0,0.6),
+                inset 0 1px 0 rgba(255,255,255,0.2),
+                inset 0 -1px 0 rgba(255,255,255,0.05);
             transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
             opacity: 0;
             pointer-events: none;
@@ -414,15 +487,23 @@
         .glass-nav.vanish {
             opacity: 0;
             transform: translate(-50%, -50%) scale(0.94) translateY(-20px);
-            filter: blur(12px);
+            filter: blur(15px);
             pointer-events: none;
         }
 
         .dot { 
-            width: 4px; height: 4px; 
+            width: 5px; 
+            height: 5px; 
             border-radius: 50%; 
-            background: rgba(255,255,255,0.25); 
-            flex-shrink: 0; 
+            background: rgba(255,255,255,0.4); 
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+            transition: all 0.4s ease; 
+        }
+        
+        .glass-nav:hover .dot { 
+            background: rgba(255,255,255,0.8); 
+            box-shadow: 0 0 15px rgba(255,255,255,0.5); 
         }
 
         .input-wrap { 
@@ -437,61 +518,76 @@
             background: transparent;
             border: none;
             outline: none;
-            color: rgba(255,255,255,0.9);
+            color: white;
             font-family: 'Inter', sans-serif;
             font-weight: 300;
-            font-size: 0.95rem;
-            letter-spacing: 0.3px;
-            padding: 6px 0;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            padding: 8px 0;
             text-align: center;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
         }
 
         .glass-input::placeholder {
-            color: rgba(255,255,255,0.35);
+            color: rgba(255,255,255,0.5);
             font-family: 'Playfair Display', serif;
             font-style: italic;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .conf-msg {
             font-family: 'Playfair Display', serif;
-            color: rgba(255,255,255,0.95);
-            font-size: 0.95rem;
+            color: white;
+            font-size: 1rem;
             text-align: center;
-            line-height: 1.4;
+            line-height: 1.5;
             width: 100%;
             opacity: 0;
             transform: translateY(5px);
             transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            text-shadow: 0 2px 15px rgba(0,0,0,0.4);
         }
 
-        .conf-msg.show { opacity: 1; transform: translateY(0); }
-        .conf-msg em { font-style: normal; color: #a5b4fc; font-weight: 500; }
+        .conf-msg.show { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+        
+        .conf-msg em { 
+            font-style: normal; 
+            color: #c4b5fd; 
+            font-weight: 500;
+            text-shadow: 0 0 20px rgba(196, 181, 253, 0.5);
+        }
 
         .send-btn {
-            width: 38px; height: 38px; 
+            width: 44px; 
+            height: 44px; 
             border-radius: 50%; 
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.06); 
-            color: rgba(255,255,255,0.85);
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1); 
+            color: white;
             cursor: pointer; 
             display: flex; 
             align-items: center; 
             justify-content: center;
             transition: all 0.3s ease; 
             flex-shrink: 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
         .send-btn:hover { 
-            background: rgba(255,255,255,0.14); 
-            border-color: rgba(255,255,255,0.3); 
-            transform: scale(1.08); 
+            background: rgba(255,255,255,0.2); 
+            border-color: rgba(255,255,255,0.4); 
+            transform: scale(1.1); 
+            box-shadow: 0 6px 25px rgba(196, 181, 253, 0.2);
         }
 
         /* Animations */
         @keyframes fade-rise {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(40px);
             }
             to {
                 opacity: 1;
@@ -513,12 +609,12 @@
                 display: none;
             }
             
-            .mobile-menu-btn {
-                display: block;
+            .hero-title {
+                font-size: clamp(2.8rem, 8vw, 4.5rem);
             }
             
-            .hero-title {
-                font-size: clamp(2.5rem, 7vw, 4rem);
+            .hero-description-glass {
+                padding: 20px 24px;
             }
             
             #actions { 
@@ -526,20 +622,20 @@
             }
             
             .hydro-btn { 
-                padding: 15px 25px; 
-                font-size: 14px; 
+                padding: 16px 28px; 
+                font-size: 15px; 
+            }
+            
+            .glass-nav {
+                height: 60px;
+                padding: 0 20px;
             }
         }
 
-        /* Loading Indicator */
-        .loading-indicator {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            color: white;
-            font-size: 12px;
-            opacity: 0.5;
-            z-index: 100;
+        @media (min-width: 769px) {
+            .mobile-menu-btn {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -547,13 +643,13 @@
     <!-- 3D Canvas Container -->
     <div id="canvas-container"></div>
 
-    <!-- WhiteWeb Overlay (Splash Screen) -->
+    <!-- WhiteWeb Overlay -->
     <div id="whiteweb-overlay">
         <div class="whiteweb-content">
             <nav class="whiteweb-nav">
                 <div class="logo">Aethera<sup>®</sup></div>
                 
-                <div class="nav-links">
+                <div class="nav-links nav-glass">
                     <a href="#" class="active">Home</a>
                     <a href="#">Studio</a>
                     <a href="#">About</a>
@@ -561,10 +657,10 @@
                     <a href="#">Reach Us</a>
                 </div>
                 
-                <button class="nav-button desktop-only">Begin Journey</button>
+                <button class="nav-button desktop-only" onclick="beginJourney()">Begin Journey</button>
                 
                 <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
                         <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -578,7 +674,7 @@
                 <a href="#">About</a>
                 <a href="#">Journal</a>
                 <a href="#">Reach Us</a>
-                <button class="nav-button" style="margin-top: 16px;" onclick="beginJourney()">Begin Journey</button>
+                <button class="nav-button" style="margin-top: 20px; width: 100%;" onclick="beginJourney()">Begin Journey</button>
             </div>
             
             <main class="whiteweb-hero">
@@ -587,10 +683,12 @@
                     <span class="italic">the eternal.</span>
                 </h1>
                 
-                <p class="hero-description">
-                    Building platforms for brilliant minds, fearless makers, and thoughtful souls. 
-                    Through the noise, we craft digital havens for deep work and pure flows.
-                </p>
+                <div class="hero-description-glass">
+                    <p class="hero-description" style="margin: 0; animation: none; opacity: 1;">
+                        Building platforms for brilliant minds, fearless makers, and thoughtful souls. 
+                        Through the noise, we craft digital havens for deep work and pure flows.
+                    </p>
+                </div>
                 
                 <button class="begin-journey-btn" onclick="beginJourney()">
                     Begin Journey
@@ -599,13 +697,13 @@
         </div>
     </div>
 
-    <!-- TripWeb Interface (Hidden initially) -->
+    <!-- TripWeb Interface -->
     <div id="tripweb-interface">
         <div id="actions">
             <button class="hydro-btn" id="prevBtn">
                 <span class="hydro-btn-content">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
                     </svg>
                     <span>Previous</span>
                 </span>
@@ -615,14 +713,14 @@
                 <span class="hydro-btn-content">
                     <span>Next</span>
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
                     </svg>
                 </span>
                 <span class="highlight"></span>
             </button>
         </div>
 
-        <div id="status">Beginning journey...</div>
+        <div id="status"></div>
         
         <div id="vignette"></div>
         
@@ -639,7 +737,7 @@
         </nav>
     </div>
 
-    <!-- Three.js Import and Script -->
+    <!-- Three.js Script -->
     <script type="importmap">
         {
             "imports": {
@@ -663,22 +761,22 @@
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 3.5;
+        const ANIMATION_DURATION = 3.8;
         
         // === STATION DATA ===
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+            { name: "First View", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+            { name: "Second View", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+            { name: "Third View", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+            { name: "Fourth View", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+            { name: "Fifth View", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
         // === THREE.JS SETUP ===
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050510);
+        scene.background = new THREE.Color(0x080812);
         
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.copy(STATIONS[0].pos);
@@ -688,46 +786,52 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
         // === POST-PROCESSING ===
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
-        bloomPass.strength = 0.3;
-        bloomPass.radius = 0.8;
+        bloomPass.strength = 0.35;
+        bloomPass.radius = 0.9;
         
         const composer = new EffectComposer(renderer);
         composer.addPass(renderScene);
         composer.addPass(bloomPass);
 
-        // === LIGHTS ===
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        // === ENHANCED LIGHTING ===
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
         scene.add(ambientLight);
         
-        const spotLight = new THREE.SpotLight(0xffeeff, 2);
-        spotLight.position.set(0, 10, 0);
-        spotLight.angle = Math.PI / 4;
-        spotLight.penumbra = 0.5;
-        spotLight.decay = 1;
-        spotLight.distance = 50;
+        const spotLight = new THREE.SpotLight(0xffeeff, 2.5);
+        spotLight.position.set(0, 12, 2);
+        spotLight.angle = Math.PI / 3;
+        spotLight.penumbra = 0.6;
+        spotLight.decay = 0.8;
+        spotLight.distance = 60;
         spotLight.castShadow = true;
+        spotLight.shadow.mapSize.width = 1024;
+        spotLight.shadow.mapSize.height = 1024;
         scene.add(spotLight);
         spotLight.target.position.copy(POINT_CENTER);
         scene.add(spotLight.target);
         
-        const centerLight = new THREE.PointLight(0xff44ff, 0.5, 10);
+        const centerLight = new THREE.PointLight(0xff66cc, 0.8, 12);
         centerLight.position.copy(POINT_CENTER);
         scene.add(centerLight);
         
-        // Add some atmospheric lights
-        const backLight1 = new THREE.PointLight(0x4466ff, 0.3, 20);
-        backLight1.position.set(-3, 3, -3);
-        scene.add(backLight1);
+        const fillLight1 = new THREE.PointLight(0x6688ff, 0.4, 25);
+        fillLight1.position.set(-4, 3, -3);
+        scene.add(fillLight1);
         
-        const backLight2 = new THREE.PointLight(0xff66aa, 0.2, 20);
-        backLight2.position.set(3, 2, -4);
-        scene.add(backLight2);
+        const fillLight2 = new THREE.PointLight(0xff9966, 0.3, 25);
+        fillLight2.position.set(4, 2.5, -4);
+        scene.add(fillLight2);
+        
+        const backLight = new THREE.PointLight(0xaa88ff, 0.3, 30);
+        backLight.position.set(0, 4, -8);
+        scene.add(backLight);
 
         // === CARDS ===
         const cards = [];
@@ -744,35 +848,34 @@
             canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            // Create glass card effect
+            // Enhanced glass card design
             const gradient = context.createLinearGradient(0, 0, 512, 512);
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
             gradient.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
             context.fillStyle = gradient;
             context.fillRect(0, 0, 512, 512);
             
-            // Add border
-            context.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            context.lineWidth = 4;
+            context.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            context.lineWidth = 5;
             context.strokeRect(2, 2, 508, 508);
             
-            context.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            context.shadowBlur = 20;
-            context.shadowOffsetX = 4;
-            context.shadowOffsetY = 4;
+            context.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            context.shadowBlur = 25;
+            context.shadowOffsetX = 5;
+            context.shadowOffsetY = 5;
             
-            context.font = 'bold 70px "Instrument Serif", serif';
+            context.font = 'bold 75px "Instrument Serif", serif';
             context.fillStyle = '#ffffff';
             context.textAlign = 'center';
             context.fillText(stationName, 256, 200);
             
-            context.font = 'bold 45px "Inter", sans-serif';
+            context.font = 'bold 50px "Inter", sans-serif';
             context.fillStyle = '#ffffff';
-            context.fillText(`Station ${stationIndex}`, 256, 300);
+            context.fillText(`View ${stationIndex-1}`, 256, 310);
             
-            context.font = '300 32px "Inter", sans-serif';
+            context.font = '300 35px "Inter", sans-serif';
             context.fillStyle = '#ffffff';
-            context.fillText('Viewpoint', 256, 370);
+            context.fillText('Viewpoint', 256, 380);
             
             context.shadowColor = 'transparent';
             
@@ -781,18 +884,18 @@
                 map: pageTexture,
                 transparent: true,
                 opacity: 0.0,
-                roughness: 0.1,
+                roughness: 0.08,
                 metalness: 0.0,
                 side: THREE.DoubleSide,
                 emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 0.3
+                emissiveIntensity: 0.4
             });
             
-            const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
+            const pageGeometry = new THREE.PlaneGeometry(2.0, 2.0);
             return new THREE.Mesh(pageGeometry, pageMaterial);
         }
 
-        // Create cards for stations 2-5
+        // Create cards
         for (let i = 2; i < STATIONS.length; i++) {
             const card = createCard(STATIONS[i].name, i);
             cards[i] = card;
@@ -818,8 +921,8 @@
                         child.castShadow = true;
                         child.receiveShadow = true;
                         if (child.name.toLowerCase().includes('tree')) {
-                            child.material.emissive = new THREE.Color(0xaa44aa);
-                            child.material.emissiveIntensity = 0.4;
+                            child.material.emissive = new THREE.Color(0xcc66cc);
+                            child.material.emissiveIntensity = 0.5;
                         }
                     }
                 });
@@ -829,65 +932,58 @@
             undefined,
             function (error) {
                 console.error('Model loading error:', error);
-                // Create a fallback scene with basic geometry
                 createFallbackScene();
                 positionCards();
             }
         );
 
         function createFallbackScene() {
-            // Create a simple but beautiful fallback scene
-            const geometry = new THREE.CylinderGeometry(0.5, 1, 3, 8);
-            const material = new THREE.MeshStandardMaterial({ 
-                color: 0x8866aa, 
-                emissive: new THREE.Color(0x442266),
-                emissiveIntensity: 0.5,
-                roughness: 0.3,
-                metalness: 0.1
-            });
-            const tree = new THREE.Mesh(geometry, material);
-            tree.position.copy(POINT_CENTER);
-            tree.position.y = 1.5;
-            scene.add(tree);
+            // Elegant fallback scene
+            const treeGroup = new THREE.Group();
             
-            // Add ground plane
-            const groundGeometry = new THREE.CircleGeometry(10, 32);
-            const groundMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x1a1a2e, 
-                roughness: 0.8,
-                side: THREE.DoubleSide
-            });
-            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            const trunkGeo = new THREE.CylinderGeometry(0.6, 0.9, 3.5, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x665588, emissive: new THREE.Color(0x332244), emissiveIntensity: 0.4 });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 1.75;
+            treeGroup.add(trunk);
+            
+            const foliageGeo = new THREE.SphereGeometry(1.8, 7);
+            const foliageMat = new THREE.MeshStandardMaterial({ color: 0x9966aa, emissive: new THREE.Color(0x552266), emissiveIntensity: 0.5 });
+            const foliage = new THREE.Mesh(foliageGeo, foliageMat);
+            foliage.position.y = 3.8;
+            treeGroup.add(foliage);
+            
+            treeGroup.position.copy(POINT_CENTER);
+            scene.add(treeGroup);
+            
+            // Ground
+            const groundGeo = new THREE.CircleGeometry(12, 32);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.7, side: THREE.DoubleSide });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.position.y = 0;
             scene.add(ground);
             
-            // Add floating particles
-            const particleGeometry = new THREE.BufferGeometry();
-            const particleCount = 500;
+            // Particles
+            const particleGeo = new THREE.BufferGeometry();
+            const particleCount = 800;
             const positions = new Float32Array(particleCount * 3);
             for (let i = 0; i < particleCount * 3; i += 3) {
-                positions[i] = (Math.random() - 0.5) * 20;
-                positions[i+1] = Math.random() * 8;
-                positions[i+2] = (Math.random() - 0.5) * 20;
+                positions[i] = (Math.random() - 0.5) * 22;
+                positions[i+1] = Math.random() * 9;
+                positions[i+2] = (Math.random() - 0.5) * 22;
             }
-            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            const particleMaterial = new THREE.PointsMaterial({ 
-                color: 0xaa88ff, 
-                size: 0.02,
-                transparent: true,
-                blending: THREE.AdditiveBlending
-            });
-            const particles = new THREE.Points(particleGeometry, particleMaterial);
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMat = new THREE.PointsMaterial({ color: 0xbb99ff, size: 0.025, transparent: true, blending: THREE.AdditiveBlending });
+            const particles = new THREE.Points(particleGeo, particleMat);
             scene.add(particles);
         }
 
-        // === GLASS NAVIGATION (TripWeb) ===
+        // === GLASS NAVIGATION ===
         const nav = document.getElementById('glassNav');
         const inputWrap = document.getElementById('inputWrap');
         const sendBtn = document.getElementById('sendBtn');
         let navStep = 1;
-        let wishText = '';
         let navVisible = false;
 
         function formatDate(dateString) {
@@ -896,7 +992,7 @@
         }
 
         function initNav() {
-            inputWrap.innerHTML = `<input type="text" class="glass-input" id="mainInput" placeholder="You are in front of the tree of life. Make a wish..." autocomplete="off">`;
+            inputWrap.innerHTML = `<input type="text" class="glass-input" id="mainInput" placeholder="Make a wish beneath the tree of life..." autocomplete="off">`;
             const inp = document.getElementById('mainInput');
             if (inp) {
                 inp.focus();
@@ -910,7 +1006,6 @@
             
             if (navStep === 1) {
                 if (!val) return;
-                wishText = val;
                 navStep = 2;
                 
                 inputWrap.style.opacity = '0';
@@ -937,8 +1032,8 @@
                 setTimeout(() => {
                     inputWrap.innerHTML = `
                         <p class="conf-msg" id="confMsg">
-                            Come back on <em>${displayDate}</em>.<br>
-                            Your wish will become true.
+                            Return on <em>${displayDate}</em><br>
+                            Your wish shall be fulfilled
                         </p>
                     `;
                     inputWrap.style.opacity = '1';
@@ -951,7 +1046,7 @@
                         navStep = 1;
                         sendBtn.style.opacity = '1';
                         sendBtn.style.pointerEvents = 'auto';
-                    }, 3500);
+                    }, 4000);
                     
                 }, 300);
             }
@@ -986,10 +1081,6 @@
         document.addEventListener('mousemove', (e) => {
             if (!isJourneyStarted) return;
             
-            const screenWidth = window.innerWidth;
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-            
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
             
@@ -998,8 +1089,8 @@
                 const rect = btn.getBoundingClientRect();
                 const centerX = rect.left + rect.width / 2;
                 const centerY = rect.top + rect.height / 2;
-                const distance = Math.sqrt(Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2));
-                const proximity = Math.max(0, 1 - Math.min(distance / 800, 1));
+                const distance = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
+                const proximity = Math.max(0, 1 - Math.min(distance / 700, 1));
                 btn.style.setProperty('--proximity', proximity);
             });
         });
@@ -1010,7 +1101,7 @@
                 setTimeout(() => btn.classList.remove('bloom'), 1200);
             });
         }
-        setInterval(triggerAutoBloom, 2000);
+        setInterval(triggerAutoBloom, 2500);
 
         // === STATION NAVIGATION ===
         function startAnimation(targetPos) {
@@ -1022,7 +1113,7 @@
             const center = POINT_CENTER.clone();
             const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
             const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-            midPoint.add(direction.multiplyScalar(2));
+            midPoint.add(direction.multiplyScalar(2.5));
             window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
         }
 
@@ -1042,7 +1133,6 @@
             }
             
             startAnimation(STATIONS[currentStationIndex].pos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
             if (currentStationIndex !== 1) hideNavBar();
         }
@@ -1059,40 +1149,33 @@
             }
             
             startAnimation(STATIONS[currentStationIndex].pos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
             if (currentStationIndex !== 1) hideNavBar();
         }
 
-        // Attach navigation handlers
         document.getElementById('prevBtn').onclick = prevStation;
         document.getElementById('nextBtn').onclick = nextStation;
 
-        // === BEGIN JOURNEY (Transition from WhiteWeb to TripWeb) ===
+        // === BEGIN JOURNEY ===
         window.beginJourney = function() {
             if (isJourneyStarted) return;
             isJourneyStarted = true;
             
-            // Fade out WhiteWeb overlay
             document.getElementById('whiteweb-overlay').classList.add('fade-out');
             document.getElementById('mobile-menu').style.display = 'none';
             
-            // Show TripWeb interface
             setTimeout(() => {
                 document.getElementById('tripweb-interface').classList.add('visible');
-            }, 500);
+            }, 600);
             
-            // Animate camera to first station
             currentStationIndex = 1;
             startAnimation(STATIONS[1].pos);
-            document.getElementById('status').innerText = 'Journey beginning...';
             
-            // Show nav bar after arrival
             setTimeout(() => {
                 if (currentStationIndex === 1 && !isAnimating) {
                     showNavBar();
                 }
-            }, ANIMATION_DURATION * 1000 + 500);
+            }, ANIMATION_DURATION * 1000 + 600);
         };
 
         // === MOBILE MENU ===
@@ -1101,39 +1184,34 @@
             menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
         };
 
-        // === GLOW PULSE ===
+        // === ANIMATION LOOP ===
         let glowTime = 0;
         
-        // === ANIMATION LOOP ===
         function animate() {
             requestAnimationFrame(animate);
             
-            // Pulsing glow effect
-            glowTime += 0.01;
-            const glowPulse = 0.25 + Math.sin(glowTime) * 0.1;
+            glowTime += 0.015;
+            const glowPulse = 0.3 + Math.sin(glowTime) * 0.15;
             bloomPass.strength = glowPulse;
-            centerLight.intensity = 0.3 + Math.sin(glowTime * 1.5) * 0.2;
+            centerLight.intensity = 0.5 + Math.sin(glowTime * 1.3) * 0.3;
             
-            // Handle card visibility
             for (let i = 2; i < cards.length; i++) {
                 if (cards[i]) {
                     if (i === currentStationIndex && isJourneyStarted) {
                         cards[i].lookAt(camera.position);
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.8, 0.1);
+                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.85, 0.08);
                     } else {
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.0, 0.1);
+                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.0, 0.08);
                     }
                 }
             }
             
-            // Camera animation
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
                 
                 if (animationProgress >= 1) {
                     animationProgress = 1;
                     isAnimating = false;
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
                     
                     if (currentStationIndex === 1 && isJourneyStarted) {
                         showNavBar();
@@ -1158,16 +1236,13 @@
         
         animate();
 
-        // === WINDOW RESIZE ===
+        // === RESIZE HANDLER ===
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             composer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        // Start with intro view
-        console.log('✨ Aethera Cinematic Journey - Ready');
     </script>
 </body>
 </html>
