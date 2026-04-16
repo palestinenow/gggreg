@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Cinematic VR Room - High End</title>
-    <!-- Load Old Standard TT Font -->
     <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: 'Old Standard TT', serif; }
-        
-        /* START SCREEN */
         #blocker {
             position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.98);
             display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer;
@@ -20,8 +17,6 @@
         }
         h1 { margin: 0 0 10px 0; font-weight: 700; letter-spacing: 2px; }
         p { margin: 0; color: #666; font-style: italic; }
-
-        /* MAIN BUTTON */
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
         button.main-btn {
             background: #111; color: #fff; border: none; padding: 15px 35px;
@@ -29,18 +24,11 @@
             font-size: 16px; letter-spacing: 1px; transition: all 0.3s ease;
         }
         button.main-btn:hover { background: #444; transform: translateY(-2px); }
-
-        #status { 
-            position: absolute; bottom: 40px; left: 40px; color: #111; 
-            font-size: 14px; z-index: 100; font-style: italic; 
-        }
-
-        /* CONTROL PANEL */
+        #status { position: absolute; bottom: 40px; left: 40px; color: #111; font-size: 14px; z-index: 100; font-style: italic; }
         #controls {
             position: absolute; top: 20px; right: 20px; width: 280px;
             background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
-            padding: 20px; border: 1px solid #eee; z-index: 100;
-            display: none; /* Hidden until start */
+            padding: 20px; border: 1px solid #eee; z-index: 100; display: none;
         }
         .control-group { margin-bottom: 15px; }
         label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #333; }
@@ -52,25 +40,19 @@
     </style>
 </head>
 <body>
-
-    <!-- START SCREEN -->
     <div id="blocker">
         <div id="instructions">
             <h1>THE VR ROOM</h1>
             <p>Click to begin the cinematic journey.</p>
         </div>
     </div>
-
-    <!-- UI ELEMENTS -->
     <div id="actions">
         <button class="main-btn" onclick="nextStation()">NEXT STATION ➡️</button>
     </div>
     <div id="status">Ready...</div>
-
-    <!-- CONTROL PANEL -->
     <div id="controls">
         <div class="control-group">
-            <label>SELECT CARD</label>
+            <label>SELECT CARD <span id="cardName" class="val-display">C</span></label>
             <select id="cardSelector">
                 <option value="C">Card C (Left)</option>
                 <option value="D">Card D (South)</option>
@@ -103,7 +85,6 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        // --- SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff); 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -112,7 +93,6 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // --- LIGHTS ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); scene.add(ambientLight);
         const spotLight = new THREE.SpotLight(0xffeeff, 2); 
         spotLight.position.set(0, 10, 0); 
@@ -121,19 +101,34 @@
         spotLight.castShadow = true; 
         scene.add(spotLight);
 
-        // --- FONT LOADER ---
+        // ✨ CENTER SHINE EFFECT
+        function createCenterShine() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.4, 'rgba(255, 200, 255, 0.3)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 256, 256);
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(8, 8, 1);
+            sprite.position.set(0, 1, 0);
+            sprite.userData = { targetOpacity: 0.1, nextChangeTime: 0, changeInterval: 0 };
+            scene.add(sprite);
+            return sprite;
+        }
+        const centerShine = createCenterShine();
+
         const fontFace = new FontFace('Old Standard TT', 'url(https://fonts.gstatic.com/s/oldstandardtt/v15/MwQmbgXt-WfZ8GzhbP-1GZsUbjY.woff2)');
-        let fontLoaded = false;
         fontFace.load().then(function(loadedFace) {
             document.fonts.add(loadedFace);
-            fontLoaded = true;
-            // Regenerate textures once font is loaded
             Object.values(cards).forEach(c => updateCardTexture(c));
-        }).catch(function(error) {
-            console.warn('Font load failed, falling back to serif');
-        });
+        }).catch(() => console.warn('Font fallback'));
 
-        // --- CARD MANAGEMENT ---
         const cards = {};
         const cardData = {
             C: { pos: new THREE.Vector3(-3.49, 1.30, 1.23), title: "Viewpoint C", sub: "Detail One" },
@@ -148,63 +143,32 @@
             const canvas = document.createElement('canvas');
             canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            
-            // Initial Draw
             drawCardContent(ctx, data.title, data.sub, 1.0);
-
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.MeshStandardMaterial({ 
-                map: texture, 
-                transparent: true, 
-                opacity: 0.05, // Start ghostly
-                roughness: 0.9, // Start blurry
-                metalness: 0.1, 
-                side: THREE.DoubleSide, 
-                depthWrite: false 
+                map: texture, transparent: true, opacity: 0.05, roughness: 0.9, metalness: 0.1, side: THREE.DoubleSide, depthWrite: false 
             });
             const geometry = new THREE.PlaneGeometry(1.5, 1.5);
             const mesh = new THREE.Mesh(geometry, material);
-            
             mesh.position.copy(data.pos);
-            mesh.lookAt(new THREE.Vector3(0, 1, 0)); // Default look at center
-            
-            // Store extra data for animation
+            mesh.lookAt(new THREE.Vector3(0, 1, 0));
             mesh.userData = {
-                key: key,
-                baseScale: 1.0,
-                randomOffset: Math.random() * 100, // For random pulse timing
-                originalQuat: mesh.quaternion.clone(),
-                canvas: canvas,
-                ctx: ctx,
-                title: data.title,
-                sub: data.sub
+                key, baseScale: 1.0, randomOffset: Math.random() * 100,
+                originalQuat: mesh.quaternion.clone(), canvas, ctx,
+                title: data.title, sub: data.sub
             };
-            
             scene.add(mesh);
             return mesh;
         }
 
         function drawCardContent(ctx, title, sub, scale) {
             ctx.clearRect(0, 0, 512, 512);
-            
-            // Glass Background (White with low opacity)
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; 
+            // ✅ NO BORDER - Pure white background only
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'; 
             ctx.fillRect(0, 0, 512, 512);
-            
-            // Elegant Border
-            ctx.strokeStyle = '#000000'; 
-            ctx.lineWidth = 10; 
-            ctx.strokeRect(20, 20, 472, 472);
-            
-            // Text Settings
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#000000';
-            
-            // Title
+            ctx.textAlign = 'center'; ctx.fillStyle = '#000000';
             ctx.font = `bold ${60 * scale}px "Old Standard TT", serif`;
             ctx.fillText(title, 256, 220);
-            
-            // Subtitle
             ctx.font = `${40 * scale}px "Old Standard TT", serif`;
             ctx.fillStyle = '#444444';
             ctx.fillText(sub, 256, 290);
@@ -216,51 +180,31 @@
             mesh.material.map.needsUpdate = true;
         }
 
-        // Initialize Cards
-        ['C', 'D', 'E', 'F', 'G'].forEach(key => {
-            cards[key] = createCardMesh(key);
-        });
+        ['C', 'D', 'E', 'F', 'G'].forEach(key => { cards[key] = createCardMesh(key); });
 
-        // --- STATIONS CONFIG ---
         const POINT_CENTER = new THREE.Vector3(0, 1, 0);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 9.50, -0.067), cardKey: null },
-            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 2.50, -4.008), cardKey: 'G' },
+            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 2.50, -4.008), cardKey: 'G' }, // ✅ FIXED POSITION
             { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), cardKey: 'C' },
             { name: "D: Second", pos: new THREE.Vector3(0.077, 1.301, 5.964), cardKey: 'D' },
             { name: "E: Third", pos: new THREE.Vector3(5.276, 1.338, 1.737), cardKey: 'E' },
             { name: "F: Fourth", pos: new THREE.Vector3(3.257, 1.258, -4.664), cardKey: 'F' }
         ];
 
-        let currentStationIndex = 0;
-        let isAnimating = false;
-        let animationProgress = 0;
-        let startPos = new THREE.Vector3();
-        let endPos = new THREE.Vector3();
-        let midPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 2.5;
-        const clock = new THREE.Clock();
+        let currentStationIndex = 0, isAnimating = false, animationProgress = 0;
+        let startPos = new THREE.Vector3(), endPos = new THREE.Vector3(), midPos = new THREE.Vector3();
+        const ANIMATION_DURATION = 2.5, clock = new THREE.Clock();
 
-        // --- LOAD MODEL ---
         const loader = new GLTFLoader();
-        // Note: Ensure this file exists in your folder
-        loader.load('./environment_vr_room_baked.glb', function (gltf) {
+        loader.load('./environment_vr_room_baked.glb', function(gltf) {
             const model = gltf.scene;
-            model.traverse((child) => { 
-                if (child.isMesh) { 
-                    child.castShadow = true; 
-                    child.receiveShadow = true; 
-                } 
-            });
+            model.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
             scene.add(model);
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
-        }, undefined, function (error) { 
-            console.warn("Model not found, using empty room"); 
-            camera.position.copy(STATIONS[0].pos);
-        });
+        }, undefined, () => { console.warn("Model not found"); camera.position.copy(STATIONS[0].pos); });
 
-        // --- UI LOGIC ---
         document.getElementById('blocker').addEventListener('click', function() { 
             this.style.display = 'none'; 
             document.getElementById('controls').style.display = 'block';
@@ -269,85 +213,58 @@
 
         window.nextStation = function() {
             if (isAnimating) return;
-            
-            // Loop logic: Intro -> G -> C -> D -> E -> F -> G -> C...
-            if (currentStationIndex === 0) {
-                currentStationIndex = 1; // Go to G
-            } else if (currentStationIndex === STATIONS.length - 1) {
-                currentStationIndex = 1; // Loop back to G (skip Intro)
-            } else {
-                currentStationIndex++;
-            }
-
+            if (currentStationIndex === 0) currentStationIndex = 1;
+            else if (currentStationIndex === STATIONS.length - 1) currentStationIndex = 1;
+            else currentStationIndex++;
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
         };
 
         function startAnimation(targetPos) {
-            isAnimating = true; 
-            animationProgress = 0; 
-            startPos.copy(camera.position); 
-            endPos.copy(targetPos);
-            
-            // Calculate Arc Midpoint
+            isAnimating = true; animationProgress = 0; 
+            startPos.copy(camera.position); endPos.copy(targetPos);
             const center = POINT_CENTER.clone();
             const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
             const dist = startPos.distanceTo(endPos);
             const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-            // Higher arc for longer distances
             midPoint.add(direction.multiplyScalar(dist * 0.3)); 
-            
             midPos.copy(midPoint);
         }
 
         function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
-        // --- CONTROL PANEL LOGIC ---
         window.adjustY = function(delta) {
             const key = document.getElementById('cardSelector').value;
-            const card = cards[key];
-            card.position.y += delta;
-            updateUIValues(card);
+            cards[key].position.y += delta;
+            updateUIValues(cards[key]);
         };
-
         window.updateSize = function(val) {
             const key = document.getElementById('cardSelector').value;
-            const card = cards[key];
-            card.userData.baseScale = parseFloat(val);
-            updateCardTexture(card);
+            cards[key].userData.baseScale = parseFloat(val);
+            updateCardTexture(cards[key]);
             document.getElementById('sizeVal').innerText = val;
         };
-
         document.getElementById('cardSelector').addEventListener('change', (e) => {
             const card = cards[e.target.value];
+            document.getElementById('cardName').innerText = e.target.value;
             updateUIValues(card);
             document.getElementById('sizeSlider').value = card.userData.baseScale;
             document.getElementById('sizeVal').innerText = card.userData.baseScale;
         });
-
         function updateUIValues(card) {
             document.getElementById('yVal').innerText = card.position.y.toFixed(2);
-            document.getElementById('liveCoords').innerText = 
-                `X:${card.position.x.toFixed(2)} Y:${card.position.y.toFixed(2)} Z:${card.position.z.toFixed(2)}`;
+            document.getElementById('liveCoords').innerText = `X:${card.position.x.toFixed(2)} Y:${card.position.y.toFixed(2)} Z:${card.position.z.toFixed(2)}`;
         }
-        // Init UI
-        updateUIValues(cards['C']);
+        updateUIValues(cards['C']); document.getElementById('cardName').innerText = 'C';
 
-        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
             const time = clock.getElapsedTime();
 
-            // 1. HANDLE CAMERA MOVEMENT
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
-                if (animationProgress >= 1) { 
-                    animationProgress = 1; 
-                    isAnimating = false; 
-                    document.getElementById('status').innerText = `Arrived: ${STATIONS[currentStationIndex].name}`; 
-                }
+                if (animationProgress >= 1) { animationProgress = 1; isAnimating = false; document.getElementById('status').innerText = `Arrived: ${STATIONS[currentStationIndex].name}`; }
                 const t = easeInOutCubic(animationProgress);
-                // Quadratic Bezier for smooth arc
                 const x = (1-t)*(1-t)*startPos.x + 2*(1-t)*t*midPos.x + t*t*endPos.x;
                 const y = (1-t)*(1-t)*startPos.y + 2*(1-t)*t*midPos.y + t*t*endPos.y;
                 const z = (1-t)*(1-t)*startPos.z + 2*(1-t)*t*midPos.z + t*t*endPos.z;
@@ -355,33 +272,28 @@
                 camera.lookAt(POINT_CENTER);
             }
 
-            // 2. HANDLE CARD "SHINE & BLUR" + RANDOM PULSE
-            const activeCardKey = STATIONS[currentStationIndex].cardKey;
+            // ✨ CENTER SHINE: Random 10%-70% opacity, 7-20s interval
+            if (time >= centerShine.userData.nextChangeTime) {
+                centerShine.userData.targetOpacity = Math.random() > 0.5 ? 0.1 : 0.7;
+                centerShine.userData.changeInterval = 7 + Math.random() * 13;
+                centerShine.userData.nextChangeTime = time + centerShine.userData.changeInterval;
+            }
+            centerShine.material.opacity = THREE.MathUtils.lerp(centerShine.material.opacity, centerShine.userData.targetOpacity, 0.02);
 
+            // Cards: Shine & Blur + Random Pulse
+            const activeCardKey = STATIONS[currentStationIndex].cardKey;
             Object.values(cards).forEach(card => {
                 const isActive = (card.userData.key === activeCardKey) && !isAnimating;
-                
-                // Target Values
-                const targetOpacity = isActive ? 1.0 : 0.05; // 100% vs 5%
-                const targetRoughness = isActive ? 0.1 : 0.9; // Sharp vs Blurry
-                
-                // Animate Properties
+                const targetOpacity = isActive ? 1.0 : 0.05;
+                const targetRoughness = isActive ? 0.1 : 0.9;
                 card.material.opacity = THREE.MathUtils.lerp(card.material.opacity, targetOpacity, 0.05);
                 card.material.roughness = THREE.MathUtils.lerp(card.material.roughness, targetRoughness, 0.05);
-
                 if (isActive) {
-                    // ACTIVE STATE: Face Camera directly, stop pulsing
                     card.lookAt(camera.position);
-                    card.scale.setScalar(1.0); // Reset scale
+                    card.scale.setScalar(1.0);
                 } else {
-                    // INACTIVE STATE: Return to original angle
                     card.quaternion.slerp(card.userData.originalQuat, 0.05);
-                    
-                    // RANDOM PULSE EFFECT (Ghostly breathing)
-                    const pulseSpeed = 1.5;
-                    const pulseAmt = 0.05;
-                    const offset = card.userData.randomOffset;
-                    const scale = 1.0 + Math.sin(time * pulseSpeed + offset) * pulseAmt;
+                    const scale = 1.0 + Math.sin(time * 1.5 + card.userData.randomOffset) * 0.05;
                     card.scale.setScalar(scale);
                 }
             });
