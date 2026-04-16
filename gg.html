@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Real Glass Effect</title>
+    <title>Cinematifzec Orbit - Real Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
@@ -393,24 +393,19 @@
             alert('Config exported to console!');
         };
 
-        // --- MICROSCOPIC MOUSE PARALLAX ---
+        // --- HORIZONTAL-ONLY MOUSE PARALLAX ---
         let mouseX = 0;
-        let mouseY = 0;
         let targetMouseX = 0;
-        let targetMouseY = 0;
         
-        // Almost invisible movement limits
-        const MAX_OFFSET_X = 0.005;
-        const MAX_OFFSET_Y = 0.003;
+        // Very close limit for left/right only
+        const MAX_OFFSET_X = 0.01;
         
         document.addEventListener('mousemove', (e) => {
             targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
-            targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
         });
         
         document.addEventListener('mouseleave', () => {
             targetMouseX = 0;
-            targetMouseY = 0;
         });
 
         // --- SCENE SETUP ---
@@ -745,33 +740,24 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
         
-        // Microscopic mouse movement - almost invisible
+        // Horizontal-only, fast response, very close limit
         function updateMouseParallax() {
-            mouseX += (targetMouseX - mouseX) * 0.005;
-            mouseY += (targetMouseY - mouseY) * 0.005;
+            mouseX += (targetMouseX - mouseX) * 0.1;
         }
         
         function applyParallax() {
             if (isAnimating) return;
             
-            const clampedX = Math.max(-1, Math.min(1, mouseX)) * 0.5;
-            const clampedY = Math.max(-1, Math.min(1, mouseY)) * 0.5;
-            
+            const clampedX = Math.max(-1, Math.min(1, mouseX));
             const offsetX = clampedX * MAX_OFFSET_X;
-            const offsetY = clampedY * MAX_OFFSET_Y;
             
             const direction = new THREE.Vector3().subVectors(POINT_CENTER, baseCameraPosition).normalize();
             const distance = baseCameraPosition.distanceTo(POINT_CENTER);
             
             const up = new THREE.Vector3(0, 1, 0);
-            const right = new THREE.Vector3(1, 0, 0);
-            
             const yRot = new THREE.Quaternion().setFromAxisAngle(up, offsetX);
-            const xRot = new THREE.Quaternion().setFromAxisAngle(right, offsetY);
             
-            const parallaxQuat = new THREE.Quaternion().multiplyQuaternions(yRot, xRot);
-            
-            const newDir = direction.clone().applyQuaternion(parallaxQuat);
+            const newDir = direction.clone().applyQuaternion(yRot);
             
             camera.position.copy(POINT_CENTER.clone().add(newDir.multiplyScalar(-distance)));
             camera.lookAt(POINT_CENTER);
