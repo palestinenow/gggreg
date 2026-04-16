@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Smart Glass Card (Fixed)</title>
+    <title>Cinematic Orbit - Fixed Glass Card</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         
@@ -28,43 +28,6 @@
         button.main-btn:hover { background: #000; transform: translateY(-2px); }
 
         #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
-
-        /* CARD CONTROLS PANEL */
-        #card-controls {
-            position: absolute; top: 20px; right: 20px;
-            background: rgba(255, 255, 255, 0.95); padding: 15px;
-            border: 1px solid #ddd; border-radius: 8px; z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-family: monospace; width: 140px;
-        }
-        #card-controls h3 { margin: 0 0 10px 0; font-size: 14px; color: #333; text-transform: uppercase; }
-        
-        .coord-display {
-            background: #f0f0f0; padding: 8px; border-radius: 4px;
-            font-size: 11px; margin-bottom: 10px; color: #555; line-height: 1.4;
-        }
-        
-        .control-group { margin-bottom: 8px; text-align: center; }
-        .depth-btns { display: flex; justify-content: center; gap: 10px; margin-bottom: 5px; }
-        .xy-btns { display: grid; grid-template-columns: 30px 30px 30px; gap: 4px; justify-content: center; }
-        
-        .ctrl-btn {
-            width: 30px; height: 30px;
-            background: #eee; border: 1px solid #ccc;
-            border-radius: 4px; cursor: pointer;
-            font-weight: bold; color: #333;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px;
-        }
-        .ctrl-btn:hover { background: #ddd; }
-        .ctrl-btn:active { background: #333; color: white; }
-        
-        .reset-btn {
-            width: 100%; padding: 8px;
-            background: #ffdddd; border: 1px solid #ffcccc;
-            color: #cc0000; cursor: pointer; border-radius: 4px;
-            font-size: 12px; font-weight: bold;
-        }
-        .reset-btn:hover { background: #ffcccc; }
     </style>
 </head>
 <body>
@@ -73,38 +36,8 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start. The card faces you at Station C.<br>It turns to glass when you leave.</p>
+            <p>Click to start.<br>The card is fixed in place. It turns to frosted glass when you leave.</p>
         </div>
-    </div>
-
-    <!-- CARD CONTROLS -->
-    <div id="card-controls">
-        <h3>Card Position</h3>
-        <div class="coord-display" id="coord-text">X: 0.00<br>Y: 0.00<br>Z: 0.00</div>
-        
-        <!-- Depth Control -->
-        <div class="control-group">
-            <div style="font-size:10px; color:#999; margin-bottom:2px;">DEPTH</div>
-            <div class="depth-btns">
-                <button class="ctrl-btn" onclick="moveCard('fwd')">⬆️ Fwd</button>
-                <button class="ctrl-btn" onclick="moveCard('back')">⬇️ Back</button>
-            </div>
-        </div>
-
-        <!-- XY Control -->
-        <div class="control-group">
-            <div style="font-size:10px; color:#999; margin-bottom:2px;">POSITION</div>
-            <div class="xy-btns">
-                <div></div>
-                <button class="ctrl-btn" onclick="moveCard('up')">▲</button>
-                <div></div>
-                <button class="ctrl-btn" onclick="moveCard('left')">◀</button>
-                <button class="ctrl-btn" onclick="moveCard('down')">▼</button>
-                <button class="ctrl-btn" onclick="moveCard('right')">▶</button>
-            </div>
-        </div>
-        
-        <button class="reset-btn" onclick="resetCard()">RESET</button>
     </div>
 
     <!-- MAIN ACTION -->
@@ -135,15 +68,22 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // --- SMART GLASS CARD ---
-        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+        // --- FIXED GLASS CARD ---
+        // Create a high-res canvas for better blur effect
+        const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
         const context = canvas.getContext('2d');
-        context.fillStyle = '#ffffff'; context.fillRect(0, 0, 512, 512);
-        context.strokeStyle = '#dddddd'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
-        context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
-        context.fillText("INFO", 256, 200);
-        context.font = '30px Arial'; context.fillStyle = '#666';
-        context.fillText("Viewpoint C", 256, 280);
+        
+        // White Background
+        context.fillStyle = '#ffffff'; context.fillRect(0, 0, 1024, 1024);
+        
+        // Border
+        context.strokeStyle = '#cccccc'; context.lineWidth = 40; context.strokeRect(50, 50, 924, 924);
+        
+        // Text
+        context.font = 'bold 100px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
+        context.fillText("INFO", 512, 400);
+        context.font = '60px Arial'; context.fillStyle = '#666';
+        context.fillText("Viewpoint C", 512, 550);
         
         const pageTexture = new THREE.CanvasTexture(canvas);
         
@@ -152,20 +92,19 @@
             transparent: true, 
             opacity: 1.0,
             side: THREE.DoubleSide,
-            roughness: 0.2,
-            metalness: 0.1
+            roughness: 0.1, // Smooth glass
+            metalness: 0.0
         });
         
         const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
         const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
         
-        // Default Position
-        const DEFAULT_POS = new THREE.Vector3(-5.325, 2.5, 1.727);
-        floatingPage.position.copy(DEFAULT_POS);
+        // FIXED POSITION FROM YOUR SCREENSHOT
+        // X: -3.61, Y: 1.30, Z: 1.17
+        floatingPage.position.set(-3.61, 1.30, 1.17);
         
-        // Set Initial Rotation using Quaternion (Fixes the crash)
-        // We make it look at the center initially
-        floatingPage.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
+        // Initial Rotation: Face the center/tree
+        floatingPage.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const INITIAL_QUATERNION = floatingPage.quaternion.clone();
         
         scene.add(floatingPage);
@@ -201,39 +140,6 @@
         // --- UI LOGIC ---
         document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour Started"; });
 
-        // --- CARD MOVEMENT ---
-        const MOVE_STEP = 0.2;
-
-        window.moveCard = function(direction) {
-            const camDir = new THREE.Vector3();
-            camera.getWorldDirection(camDir);
-            camDir.y = 0; 
-            camDir.normalize();
-
-            if(direction === 'fwd') floatingPage.position.addScaledVector(camDir, MOVE_STEP);
-            else if(direction === 'back') floatingPage.position.addScaledVector(camDir, -MOVE_STEP);
-            else if(direction === 'up') floatingPage.position.y += MOVE_STEP;
-            else if(direction === 'down') floatingPage.position.y -= MOVE_STEP;
-            else if(direction === 'left') floatingPage.position.x -= MOVE_STEP;
-            else if(direction === 'right') floatingPage.position.x += MOVE_STEP;
-            
-            updateCoordDisplay();
-        };
-
-        window.resetCard = function() {
-            floatingPage.position.copy(DEFAULT_POS);
-            floatingPage.quaternion.copy(INITIAL_QUATERNION);
-            floatingPage.material.opacity = 1.0;
-            updateCoordDisplay();
-        };
-
-        function updateCoordDisplay() {
-            const p = floatingPage.position;
-            document.getElementById('coord-text').innerHTML = 
-                `X: ${p.x.toFixed(2)}<br>Y: ${p.y.toFixed(2)}<br>Z: ${p.z.toFixed(2)}`;
-        }
-        updateCoordDisplay();
-
         window.nextStation = function() {
             if (isAnimating) return;
             if (currentStationIndex === 0) currentStationIndex = 1;
@@ -257,17 +163,23 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // SMART CARD LOGIC (FIXED WITH QUATERNIONS)
+            // SMART GLASS LOGIC
             const distToC = camera.position.distanceTo(STATIONS[1].pos);
             
-            if (distToC < 2.0) {
-                // AT STATION C: Face Camera & Opaque
+            if (distToC < 2.5) {
+                // AT STATION C: Clear & Opaque
                 floatingPage.lookAt(camera.position);
                 floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 1.0, 0.1);
+                floatingPage.material.color.setHex(0xffffff); // White
             } else {
-                // AWAY: Return to Initial Rotation & Transparent
-                floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1); // Smooth rotation fix
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.3, 0.1);
+                // AWAY: Frosted Glass & Blurry
+                floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1);
+                
+                // Make it very transparent (0.1) to look like glass
+                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.1, 0.1);
+                
+                // Tint it slightly blue/grey to look like thick glass
+                floatingPage.material.color.setHex(0xeefbff);
             }
 
             if (isAnimating) {
