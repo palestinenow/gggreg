@@ -2,640 +2,412 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Hydro Ripple & Bloom</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aethera | Beyond silence, we build the eternal</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400&display=swap');
+        /* Custom animations and styles */
+        @keyframes fadeRise {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-rise { animation: fadeRise 0.8s ease-out forwards; }
+        .animate-fade-rise-delay { animation: fadeRise 0.8s ease-out 0.2s forwards; opacity: 0; }
+        .animate-fade-rise-delay-2 { animation: fadeRise 0.8s ease-out 0.4s forwards; opacity: 0; }
+        .hover-scale-103:hover { transform: scale(1.03); transition: transform 0.3s ease-out; }
         
-        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
-        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
-        #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; overflow-x: hidden; }
         
-        /* Navigation Buttons - Hydro Ripple Effect */
-        #actions { 
-            position: fixed;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            box-sizing: border-box;
-            z-index: 100;
-            pointer-events: none;
-        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
         
-        .hydro-btn {
-            position: relative;
-            padding: 18px 35px;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-            background: rgba(30, 41, 59, 0.2);
-            backdrop-filter: blur(8px);
-            color: white;
-            cursor: pointer;
-            overflow: visible;
-            transition: transform 0.1s ease-out;
-            pointer-events: auto;
-            
-            /* Hydro Ripple Base State */
-            --proximity: 0;
-            --opacity: calc(0.05 + (0.95 * var(--proximity)));
-            --blur: calc(8px * (1 - var(--proximity)));
-            --scale: calc(0.98 + (0.02 * var(--proximity)));
-            --border: calc(0.05 + (0.45 * var(--proximity)));
-            
-            opacity: var(--opacity);
-            filter: blur(var(--blur));
-            transform: scale(var(--scale));
-            border-color: rgba(255,255,255,var(--border));
-        }
+        /* Transition for landing page fade */
+        #landing-page { transition: opacity 0.8s ease-out, visibility 0.8s ease-out; }
+        #landing-page.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         
-        /* Ripple Bloom Animation */
-        .hydro-btn::before,
-        .hydro-btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.4);
-            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
-            pointer-events: none;
-            opacity: 0;
-        }
-        
-        .hydro-btn::after {
-            animation-delay: 0.1s;
-            border-color: rgba(255,255,255,0.2);
-        }
-        
-        .hydro-btn.bloom::before,
-        .hydro-btn.bloom::after {
-            opacity: 1;
-            animation-name: ripple-bloom;
-        }
-        
-        @keyframes ripple-bloom {
-            0% { 
-                transform: scale(0.9); 
-                opacity: 0.8; 
-                border-width: 2px; 
-            }
-            100% { 
-                transform: scale(1.4); 
-                opacity: 0; 
-                border-width: 0px; 
-            }
-        }
-        
-        /* Inner Glass Highlight */
-        .hydro-btn .highlight {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
-            border-radius: 20px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none;
-        }
-        
-        .hydro-btn:hover .highlight {
-            opacity: 1;
-        }
-        
-        /* Button Text & Icon */
-        .hydro-btn-content {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .hydro-btn svg {
-            width: 18px;
-            height: 18px;
-            transition: transform 0.3s ease;
-        }
-        
-        .hydro-btn:hover svg {
-            transform: translateX(4px);
-        }
-        
-        #status { 
-            position: fixed; 
-            bottom: 40px; 
-            left: 50%;
-            transform: translateX(-50%);
-            color: #333; 
-            font-size: 16px; 
-            z-index: 100; 
-            opacity: 0.7;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        /* Vignette overlay */
-        #vignette {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 50;
-            background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);
-            transition: backdrop-filter 0.5s ease;
-        }
-        
-        /* Glass Navigation Bar */
-        .glass-nav {
-            position: fixed;
-            top: 68%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 92%;
-            max-width: 680px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 0 24px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-            backdrop-filter: blur(24px) saturate(1.2);
-            -webkit-backdrop-filter: blur(24px) saturate(1.2);
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 50px;
-            box-shadow: 
-                0 12px 40px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.15),
-                inset 0 -1px 0 rgba(255,255,255,0.04);
-            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 150;
-        }
-
-        .glass-nav.visible {
-            opacity: 1;
-            pointer-events: auto;
-            animation: fadeEnter 1.2s 0.2s forwards;
-        }
-
-        @keyframes fadeEnter { 
-            to { opacity: 1; transform: translate(-50%, -50%); } 
-        }
-
-        .glass-nav.vanish {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.94) translateY(-20px);
-            filter: blur(12px);
-            pointer-events: none;
-        }
-
-        .dot { 
-            width: 4px; height: 4px; 
-            border-radius: 50%; 
-            background: rgba(255,255,255,0.25); 
-            flex-shrink: 0; 
-            transition: all 0.4s ease; 
-        }
-        .glass-nav:hover .dot { 
-            background: rgba(255,255,255,0.6); 
-            box-shadow: 0 0 8px rgba(255,255,255,0.4); 
-        }
-
-        .input-wrap { 
-            flex: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: opacity 0.3s ease;
-        }
-
-        .glass-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: rgba(255,255,255,0.9);
-            font-family: 'Inter', sans-serif;
-            font-weight: 300;
-            font-size: 0.95rem;
-            letter-spacing: 0.3px;
-            padding: 6px 0;
-            text-align: center;
-        }
-
-        .glass-input::placeholder {
-            color: rgba(255,255,255,0.35);
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-        }
-
-        input[type="date"] { 
-            color-scheme: dark; 
-            cursor: pointer; 
-            text-transform: uppercase;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1) opacity(0.4);
-            cursor: pointer;
-            margin-right: -4px;
-        }
-
-        .conf-msg {
-            font-family: 'Playfair Display', serif;
-            color: rgba(255,255,255,0.95);
-            font-size: 0.95rem;
-            text-align: center;
-            line-height: 1.4;
-            width: 100%;
-            opacity: 0;
-            transform: translateY(5px);
-            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .conf-msg.show { opacity: 1; transform: translateY(0); }
-        .conf-msg em { font-style: normal; color: #a5b4fc; font-weight: 500; }
-
-        .send-btn {
-            width: 38px; height: 38px; 
-            border-radius: 50%; 
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.06); 
-            color: rgba(255,255,255,0.85);
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: all 0.3s ease; 
-            flex-shrink: 0;
-        }
-        .send-btn:hover { 
-            background: rgba(255,255,255,0.14); 
-            border-color: rgba(255,255,255,0.3); 
-            transform: scale(1.08); 
-            box-shadow: 0 4px 16px rgba(165, 180, 252, 0.15);
-        }
-        .send-btn:active { transform: scale(0.95); }
-        .send-btn svg { 
-            width: 16px; height: 16px; 
-            stroke: currentColor; 
-            fill: none; 
-            stroke-width: 2; 
-            stroke-linecap: round; 
-            stroke-linejoin: round; 
-        }
-
-        .glass-nav::before {
-            content: ''; 
-            position: absolute; 
-            top: 0; left: -75%; 
-            width: 50%; height: 100%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 46%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 54%, transparent 60%);
-            transition: left 0.8s ease; 
-            pointer-events: none;
-            border-radius: 50px;
-        }
-        .glass-nav:hover::before { left: 130%; }
-
-        @media (max-width: 500px) {
-            .glass-nav { height: 56px; padding: 0 18px; gap: 12px; }
-            .glass-input, .conf-msg { font-size: 0.85rem; }
-            .send-btn { width: 34px; height: 34px; }
-            .send-btn svg { width: 14px; height: 14px; }
-            #actions { padding: 0 20px; }
-            .hydro-btn { padding: 15px 25px; font-size: 14px; }
-        }
-        
-        /* Control Panel */
-        #control-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #0f0;
-            padding: 20px;
-            border-radius: 10px;
-            font-family: monospace;
-            z-index: 200;
-            max-height: 90vh;
-            overflow-y: auto;
-            min-width: 300px;
-            border: 2px solid #0f0;
-            box-shadow: 0 0 20px rgba(0,255,0,0.3);
-            pointer-events: auto;
-        }
-        
-        #control-panel h3 {
-            margin: 0 0 15px 0;
-            text-align: center;
-            color: #0f0;
-            border-bottom: 1px solid #0f0;
-            padding-bottom: 10px;
-        }
-        
-        #control-panel h4 {
-            margin: 15px 0 10px 0;
-            color: #0f0;
-        }
-        
-        .control-group {
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(0, 255, 0, 0.1);
-            border-radius: 5px;
-        }
-        
-        .station-selector {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .station-btn {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 12px;
-            border-radius: 5px;
-            transition: all 0.2s;
-            flex: 1;
-        }
-        
-        .station-btn:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .station-btn.active {
-            background: #0f0;
-            color: black;
-            font-weight: bold;
-        }
-        
-        .pos-control {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .pos-control label {
-            width: 20px;
-            color: #0f0;
-            font-weight: bold;
-        }
-        
-        .pos-control input {
-            flex: 1;
-            margin: 0 10px;
-            background: #111;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        
-        .pos-control button {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: monospace;
-            border-radius: 3px;
-            margin-left: 5px;
-        }
-        
-        .pos-control button:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .slider-control {
-            margin-bottom: 15px;
-        }
-        
-        .slider-control label {
-            display: block;
-            margin-bottom: 5px;
-            color: #0f0;
-        }
-        
-        .slider-control input {
-            width: 100%;
-            margin: 5px 0;
-        }
-        
-        .slider-control span {
-            color: #0f0;
-            float: right;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .action-btn {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 10px;
-            cursor: pointer;
-            font-family: monospace;
-            border-radius: 5px;
-            flex: 1;
-            font-weight: bold;
-        }
-        
-        .action-btn:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        #toggle-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #003300;
-            color: #0f0;
-            border: 2px solid #0f0;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-family: monospace;
-            font-weight: bold;
-            border-radius: 5px;
-            z-index: 201;
-        }
-        
-        #toggle-panel:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .coord-display {
-            color: #0f0;
-            font-size: 11px;
-            margin-top: 5px;
-            text-align: center;
-        }
-        
-        #blur-status {
-            color: #0f0;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 5px;
-        }
+        /* Hide canvas initially */
+        #three-canvas-container { display: none; }
+        #three-canvas-container.visible { display: block; }
     </style>
 </head>
 <body>
-
-    <div id="blocker">
-        <div id="instructions">
-            <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>Hydro Ripple Buttons & Bloom Effect active.</p>
-        </div>
+    <!-- LANDING PAGE (React App) -->
+    <div id="landing-page">
+        <div id="root"></div>
     </div>
 
-    <!-- Navigation Buttons with Hydro Ripple Effect -->
-    <div id="actions">
-        <button class="hydro-btn" id="prevBtn" onclick="prevStation()">
-            <span class="hydro-btn-content">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    <!-- 3D TOUR CONTAINER (Hidden until Join is clicked) -->
+    <div id="three-canvas-container">
+        <!-- Three.js canvas will be appended here -->
+        
+        <!-- Navigation Buttons with Hydro Ripple Effect -->
+        <div id="actions">
+            <button class="hydro-btn" id="prevBtn" onclick="prevStation()">
+                <span class="hydro-btn-content">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>Previous</span>
+                </span>
+                <span class="highlight"></span>
+            </button>
+            <button class="hydro-btn" id="nextBtn" onclick="nextStation()">
+                <span class="hydro-btn-content">
+                    <span>Next</span>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                </span>
+                <span class="highlight"></span>
+            </button>
+        </div>
+
+        <div id="status">Ready...</div>
+        
+        <div id="vignette"></div>
+        
+        <!-- Glass Navigation Bar -->
+        <nav class="glass-nav" id="glassNav">
+            <div class="dot"></div>
+            <div class="input-wrap" id="inputWrap"></div>
+            <button class="send-btn" id="sendBtn" aria-label="Submit">
+                <svg viewBox="0 0 24 24">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>
-                <span>Previous</span>
-            </span>
-            <span class="highlight"></span>
-        </button>
-        <button class="hydro-btn" id="nextBtn" onclick="nextStation()">
-            <span class="hydro-btn-content">
-                <span>Next</span>
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-            </span>
-            <span class="highlight"></span>
-        </button>
-    </div>
-
-    <div id="status">Ready...</div>
-    
-    <div id="vignette"></div>
-    
-    <!-- Glass Navigation Bar -->
-    <nav class="glass-nav" id="glassNav">
-        <div class="dot"></div>
-        <div class="input-wrap" id="inputWrap"></div>
-        <button class="send-btn" id="sendBtn" aria-label="Submit">
-            <svg viewBox="0 0 24 24">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-        </button>
-        <div class="dot"></div>
-    </nav>
-    
-    <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
-    
-    <div id="control-panel" style="display: none;">
-        <h3>🎛️ DEBUG CONTROLS</h3>
+            </button>
+            <div class="dot"></div>
+        </nav>
         
-        <div class="control-group">
-            <h4>📍 SELECT STATION CARD</h4>
-            <div class="station-selector">
-                <button class="station-btn" onclick="selectStation(2)">D: 2</button>
-                <button class="station-btn" onclick="selectStation(3)">E: 3</button>
-                <button class="station-btn" onclick="selectStation(4)">F: 4</button>
-                <button class="station-btn" onclick="selectStation(5)">G: 5</button>
-            </div>
-            <div id="selected-station" class="coord-display">Selected: Station D</div>
-        </div>
+        <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
         
-        <div class="control-group">
-            <h4>🎯 CARD POSITION</h4>
-            <div class="pos-control">
-                <label>X:</label>
-                <input type="number" id="pos-x" step="0.01" value="0.10">
-                <button onclick="moveCard('x', -0.1)">-</button>
-                <button onclick="moveCard('x', 0.1)">+</button>
+        <div id="control-panel" style="display: none;">
+            <h3>🎛️ DEBUG CONTROLS</h3>
+            
+            <div class="control-group">
+                <h4>📍 SELECT STATION CARD</h4>
+                <div class="station-selector">
+                    <button class="station-btn" onclick="selectStation(2)">D: 2</button>
+                    <button class="station-btn" onclick="selectStation(3)">E: 3</button>
+                    <button class="station-btn" onclick="selectStation(4)">F: 4</button>
+                    <button class="station-btn" onclick="selectStation(5)">G: 5</button>
+                </div>
+                <div id="selected-station" class="coord-display">Selected: Station D</div>
             </div>
-            <div class="pos-control">
-                <label>Y:</label>
-                <input type="number" id="pos-y" step="0.01" value="1.20">
-                <button onclick="moveCard('y', -0.1)">-</button>
-                <button onclick="moveCard('y', 0.1)">+</button>
+            
+            <div class="control-group">
+                <h4>🎯 CARD POSITION</h4>
+                <div class="pos-control">
+                    <label>X:</label>
+                    <input type="number" id="pos-x" step="0.01" value="0.10">
+                    <button onclick="moveCard('x', -0.1)">-</button>
+                    <button onclick="moveCard('x', 0.1)">+</button>
+                </div>
+                <div class="pos-control">
+                    <label>Y:</label>
+                    <input type="number" id="pos-y" step="0.01" value="1.20">
+                    <button onclick="moveCard('y', -0.1)">-</button>
+                    <button onclick="moveCard('y', 0.1)">+</button>
+                </div>
+                <div class="pos-control">
+                    <label>Z:</label>
+                    <input type="number" id="pos-z" step="0.01" value="4.00">
+                    <button onclick="moveCard('z', -0.1)">-</button>
+                    <button onclick="moveCard('z', 0.1)">+</button>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
+                    <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
+                </div>
             </div>
-            <div class="pos-control">
-                <label>Z:</label>
-                <input type="number" id="pos-z" step="0.01" value="4.00">
-                <button onclick="moveCard('z', -0.1)">-</button>
-                <button onclick="moveCard('z', 0.1)">+</button>
+            
+            <div class="control-group">
+                <h4>🎨 VIGNETTE EFFECT</h4>
+                <div class="slider-control">
+                    <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
+                    <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
+                </div>
+                <div class="slider-control">
+                    <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
+                    <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
+                </div>
+                <div class="slider-control">
+                    <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
+                    <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
+                </div>
+                <div class="slider-control">
+                    <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
+                    <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
+                </div>
+                <div id="blur-status">Blur: INACTIVE</div>
             </div>
-            <div style="margin-top: 10px;">
-                <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
-                <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
+            
+            <div class="control-group">
+                <h4>✨ GLOW EFFECT</h4>
+                <div class="slider-control">
+                    <label>Min Strength: <span id="glow-min-val">23%</span></label>
+                    <input type="range" id="glow-min" min="0" max="30" value="23" step="1">
+                </div>
+                <div class="slider-control">
+                    <label>Max Strength: <span id="glow-max-val">39%</span></label>
+                    <input type="range" id="glow-max" min="20" max="80" value="39" step="1">
+                </div>
             </div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎨 VIGNETTE EFFECT</h4>
-            <div class="slider-control">
-                <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
-                <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
+            
+            <div class="action-buttons">
+                <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
+                <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
             </div>
-            <div class="slider-control">
-                <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
-                <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
-                <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
-                <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
-            </div>
-            <div id="blur-status">Blur: INACTIVE</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>✨ GLOW EFFECT</h4>
-            <div class="slider-control">
-                <label>Min Strength: <span id="glow-min-val">23%</span></label>
-                <input type="range" id="glow-min" min="0" max="30" value="23" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Max Strength: <span id="glow-max-val">39%</span></label>
-                <input type="range" id="glow-max" min="20" max="80" value="39" step="1">
-            </div>
-        </div>
-        
-        <div class="action-buttons">
-            <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
-            <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
         </div>
     </div>
 
+    <!-- React Landing Page Code -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Navigation Component
+        const Navigation = () => {
+            const [isScrolled, setIsScrolled] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setIsScrolled(window.scrollY > 10);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            return (
+                <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+                    isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'
+                }`}>
+                    <div className="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
+                        {/* Logo */}
+                        <div className="text-3xl tracking-tight text-black" style={{ fontFamily: 'Instrument Serif, serif' }}>
+                            Aethera<sup className="text-sm align-super">®</sup>
+                        </div>
+
+                        {/* Desktop Menu */}
+                        <div className="hidden md:flex items-center space-x-8">
+                            <a href="#home" className="text-sm text-black transition-colors duration-200 hover:text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>Home</a>
+                            <a href="#studio" className="text-sm text-[#6F6F6F] transition-colors duration-200 hover:text-black" style={{ fontFamily: 'Inter, sans-serif' }}>Studio</a>
+                            <a href="#about" className="text-sm text-[#6F6F6F] transition-colors duration-200 hover:text-black" style={{ fontFamily: 'Inter, sans-serif' }}>About</a>
+                            <a href="#journal" className="text-sm text-[#6F6F6F] transition-colors duration-200 hover:text-black" style={{ fontFamily: 'Inter, sans-serif' }}>Journal</a>
+                            <a href="#reach-us" className="text-sm text-[#6F6F6F] transition-colors duration-200 hover:text-black" style={{ fontFamily: 'Inter, sans-serif' }}>Reach Us</a>
+                        </div>
+
+                        {/* CTA Button - NOW TRIGGERS TOUR START */}
+                        <button 
+                            className="rounded-full px-6 py-2.5 text-sm bg-black text-white hover-scale-103 transition-all duration-300" 
+                            style={{ fontFamily: 'Inter, sans-serif' }}
+                            onclick="startTourFromLanding()"
+                        >
+                            Join
+                        </button>
+
+                        {/* Mobile Menu Button */}
+                        <button className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </nav>
+            );
+        };
+
+        // Hero Section Component
+        const HeroSection = () => {
+            const videoRef = useRef(null);
+            const fadeFrameRef = useRef(null);
+
+            useEffect(() => {
+                const video = videoRef.current;
+                if (!video) return;
+
+                const handleFadeTransition = () => {
+                    if (!video) return;
+                    
+                    const duration = video.duration;
+                    const currentTime = video.currentTime;
+                    
+                    // Fade in at start (first 0.5s)
+                    if (currentTime < 0.5) {
+                        const fadeProgress = currentTime / 0.5;
+                        video.style.opacity = fadeProgress.toString();
+                    }
+                    // Fade out before end (last 0.5s)
+                    else if (currentTime > duration - 0.5) {
+                        const fadeOutProgress = (duration - currentTime) / 0.5;
+                        video.style.opacity = fadeOutProgress.toString();
+                    }
+                    // Fully opaque during middle
+                    else {
+                        video.style.opacity = '1';
+                    }
+                };
+
+                const animateFade = () => {
+                    handleFadeTransition();
+                    fadeFrameRef.current = requestAnimationFrame(animateFade);
+                };
+
+                const handleEnded = () => {
+                    if (!video) return;
+                    // Fade out completely
+                    video.style.opacity = '0';
+                    // Wait 100ms, reset and play
+                    setTimeout(() => {
+                        if (video) {
+                            video.currentTime = 0;
+                            video.play().catch(e => console.warn('Video play failed:', e));
+                        }
+                    }, 100);
+                };
+
+                const handleCanPlay = () => {
+                    video.style.opacity = '0';
+                    video.play().catch(e => console.warn('Video play failed:', e));
+                    // Start fade animation loop
+                    fadeFrameRef.current = requestAnimationFrame(animateFade);
+                };
+
+                video.addEventListener('ended', handleEnded);
+                video.addEventListener('canplay', handleCanPlay);
+
+                // Initial load check
+                if (video.readyState >= 3) {
+                    handleCanPlay();
+                } else {
+                    video.load();
+                }
+
+                return () => {
+                    if (fadeFrameRef.current) {
+                        cancelAnimationFrame(fadeFrameRef.current);
+                    }
+                    video.removeEventListener('ended', handleEnded);
+                    video.removeEventListener('canplay', handleCanPlay);
+                };
+            }, []);
+
+            return (
+                <div className="relative min-h-screen w-full overflow-hidden bg-white">
+                    {/* Video Background Layer */}
+                    <div className="absolute inset-0 z-0">
+                        <video
+                            ref={videoRef}
+                            className="absolute w-full h-full object-cover"
+                            style={{
+                                top: '300px',
+                                inset: 'auto 0 0 0',
+                                opacity: 0,
+                                transition: 'none',
+                            }}
+                            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_083109_283f3553-e28f-428b-a723-d639c617eb2b.mp4"
+                            muted
+                            playsInline
+                            preload="auto"
+                            loop={false}
+                        />
+                    </div>
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white via-transparent to-white pointer-events-none" />
+
+                    {/* Navigation Bar */}
+                    <div className="relative z-10">
+                        <Navigation />
+                    </div>
+
+                    {/* Hero Content */}
+                    <div className="relative z-10 flex flex-col items-center justify-center text-center px-6"
+                         style={{ paddingTop: 'calc(8rem - 75px)', paddingBottom: '10rem' }}>
+                        {/* Headline */}
+                        <h1 className="animate-fade-rise text-5xl sm:text-7xl md:text-8xl max-w-7xl font-normal leading-[0.95] tracking-[-2.46px]"
+                            style={{ fontFamily: 'Instrument Serif, serif' }}>
+                            Beyond <span className="text-[#6F6F6F]">silence,</span> we build
+                            <br />
+                            the <span className="text-[#6F6F6F]">eternal.</span>
+                        </h1>
+
+                        {/* Description */}
+                        <p className="animate-fade-rise-delay text-base sm:text-lg max-w-2xl mt-8 leading-relaxed text-[#6F6F6F]"
+                           style={{ fontFamily: 'Inter, sans-serif' }}>
+                            Building platforms for brilliant minds, fearless makers, and thoughtful souls.
+                            Through the noise, we craft digital havens for deep work and pure flows.
+                        </p>
+
+                        {/* Hero CTA Button - NOW TRIGGERS TOUR START */}
+                        <button
+                            className="animate-fade-rise-delay-2 rounded-full px-14 py-5 text-base mt-12 bg-black text-white hover-scale-103 transition-all duration-300"
+                            style={{ fontFamily: 'Inter, sans-serif' }}
+                            onclick="startTourFromLanding()"
+                        >
+                            Join
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // App Component
+        const App = () => {
+            return (
+                <div className="App">
+                    <HeroSection />
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+
+    <!-- Three.js Imports -->
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
     </script>
 
+    <!-- Three.js Tour Code (Module) -->
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        // === GLOBAL FUNCTIONS FOR LANDING PAGE INTEGRATION ===
+        window.startTourFromLanding = function() {
+            // Fade out landing page
+            const landingPage = document.getElementById('landing-page');
+            landingPage.classList.add('hidden');
+            
+            // Show Three.js container
+            const canvasContainer = document.getElementById('three-canvas-container');
+            canvasContainer.classList.add('visible');
+            
+            // Initialize and start the tour
+            initAndStartTour();
+        };
 
         // === HYDRO RIPPLE BUTTON LOGIC ===
         const hydroButtons = document.querySelectorAll('.hydro-btn');
@@ -886,171 +658,16 @@
         };
 
         // === THREE.JS SCENE SETUP ===
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff); 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
-
-        // === POST-PROCESSING: BLOOM EFFECT ===
-        const renderScene = new RenderPass(scene, camera);
+        let scene, camera, renderer, composer, bloomPass;
+        let cards = [];
+        let currentStationIndex = 0;
+        let isAnimating = false;
+        let animationProgress = 0;
+        let startPos = new THREE.Vector3();
+        let endPos = new THREE.Vector3();
+        const ANIMATION_DURATION = 2.5;
         
-        // Bloom pass - Cinematic glow configuration
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.1;   // Low threshold = more things glow
-        bloomPass.strength = 0.23;   // Soft, elegant bloom strength
-        bloomPass.radius = 0.8;      // Wide, dreamy halo effect
-        
-        const composer = new EffectComposer(renderer);
-        composer.addPass(renderScene);
-        composer.addPass(bloomPass);
-
-        // === LIGHTS ===
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
-        scene.add(ambientLight);
-        
-        const spotLight = new THREE.SpotLight(0xffeeff, 2); 
-        spotLight.position.set(0, 10, 0); 
-        spotLight.angle = Math.PI / 4; 
-        spotLight.penumbra = 0.5; 
-        spotLight.decay = 1; 
-        spotLight.distance = 50; 
-        spotLight.castShadow = true; 
-        scene.add(spotLight); 
-        spotLight.target.position.set(-0.006, 1.041, -0.008);
-        scene.add(spotLight.target);
-        
-        const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10); 
-        centerLight.position.set(-0.006, 1.041, -0.008); 
-        scene.add(centerLight);
-
-        // === GLOW PULSE SYSTEM ===
-        let glowStartTime = Date.now();
-        let glowDurationUp = 10000 + Math.random() * 20000;
-        let glowDurationDown = 10000 + Math.random() * 20000;
-        let isGlowingUp = true;
-        
-        let MIN_STRENGTH = 0.10;
-        let MAX_STRENGTH = 0.40;
-        
-        document.getElementById('glow-min').addEventListener('input', (e) => {
-            MIN_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-min-val').textContent = e.target.value + '%';
-        });
-        
-        document.getElementById('glow-max').addEventListener('input', (e) => {
-            MAX_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-max-val').textContent = e.target.value + '%';
-        });
-        
-        function getRandomDuration() {
-            return 10000 + Math.random() * 20000;
-        }
-        
-        function updateGlow() {
-            const now = Date.now();
-            const elapsed = now - glowStartTime;
-            
-            if (isGlowingUp) {
-                const progress = Math.min(elapsed / glowDurationUp, 1);
-                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength; // Update bloom strength dynamically
-                centerLight.intensity = strength * 2.0;
-                
-                if (progress >= 1) {
-                    isGlowingUp = false;
-                    glowStartTime = now;
-                    glowDurationDown = getRandomDuration();
-                }
-            } else {
-                const progress = Math.min(elapsed / glowDurationDown, 1);
-                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength; // Update bloom strength dynamically
-                centerLight.intensity = strength * 2.0;
-                
-                if (progress >= 1) {
-                    isGlowingUp = true;
-                    glowStartTime = now;
-                    glowDurationUp = getRandomDuration();
-                }
-            }
-        }
-
-        // === DYNAMIC BLUR SYSTEM ===
-        let blurState = 'waiting';
-        let blurStartTime = Date.now();
-        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
-        
-        function updateBlur() {
-            const now = Date.now();
-            const vignette = document.getElementById('vignette');
-            const blurStatus = document.getElementById('blur-status');
-            
-            if (blurState === 'waiting' && now >= nextBlurTime) {
-                blurState = 'active';
-                blurStartTime = now;
-                blurStatus.textContent = 'Blur: ACTIVE';
-            }
-            
-            if (blurState === 'active') {
-                const elapsed = (now - blurStartTime) / 1000;
-                if (elapsed >= 1.0) {
-                    blurState = 'waiting';
-                    nextBlurTime = now + 4000 + Math.random() * 14000;
-                    vignette.style.backdropFilter = 'blur(0px)';
-                    blurStatus.textContent = 'Blur: INACTIVE';
-                } else {
-                    vignette.style.backdropFilter = `blur(1px)`;
-                }
-            }
-            
-            document.getElementById('vignette-blur-val').textContent = 
-                vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
-        }
-
-        // === VIGNETTE CONTROLS ===
-        const vignette = document.getElementById('vignette');
-        
-        document.getElementById('vignette-center').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-center-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        document.getElementById('vignette-darkness').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-darkness-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        document.getElementById('vignette-mid').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-mid-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        function updateVignette() {
-            const center = document.getElementById('vignette-center').value;
-            const darkness = document.getElementById('vignette-darkness').value / 100;
-            const mid = document.getElementById('vignette-mid').value / 100;
-            
-            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
-        }
-
-        // === STATIONS ===
-        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
-        const STATIONS = [
-            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
-        ];
-
+        // Card positions
         const cardPositions = {
             2: { x: 0.10, y: 1.20, z: 4.00 },
             3: { x: 3.60, y: 1.25, z: 1.20 },
@@ -1058,8 +675,90 @@
             5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
+        // === POST-PROCESSING: BLOOM EFFECT ===
+        function setupPostProcessing() {
+            const renderScene = new RenderPass(scene, camera);
+            
+            // Bloom pass - Cinematic glow configuration
+            bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+            bloomPass.threshold = 0.1;   // Low threshold = more things glow
+            bloomPass.strength = 0.23;   // Soft, elegant bloom strength
+            bloomPass.radius = 0.8;      // Wide, dreamy halo effect
+            
+            composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
+        }
+
+        // === INIT AND START TOUR ===
+        window.initAndStartTour = function() {
+            // Setup scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff); 
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            
+            // Append canvas to container
+            const container = document.getElementById('three-canvas-container');
+            container.appendChild(renderer.domElement);
+            
+            // Setup post-processing
+            setupPostProcessing();
+            
+            // Setup lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
+            scene.add(ambientLight);
+            
+            const spotLight = new THREE.SpotLight(0xffeeff, 2); 
+            spotLight.position.set(0, 10, 0); 
+            spotLight.angle = Math.PI / 4; 
+            spotLight.penumbra = 0.5; 
+            spotLight.decay = 1; 
+            spotLight.distance = 50; 
+            spotLight.castShadow = true; 
+            scene.add(spotLight); 
+            spotLight.target.position.set(-0.006, 1.041, -0.008);
+            scene.add(spotLight.target);
+            
+            const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10); 
+            centerLight.position.set(-0.006, 1.041, -0.008); 
+            scene.add(centerLight);
+            
+            // Create cards
+            createCards();
+            
+            // Load model
+            loadModel();
+            
+            // Start animation loop
+            animate();
+            
+            // Setup resize listener
+            window.addEventListener('resize', onWindowResize);
+        };
+
         // === CREATE CARDS ===
-        const cards = [];
+        function createCards() {
+            const STATIONS = [
+                { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
+                { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+                { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+                { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+                { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+                { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+            ];
+            
+            for (let i = 2; i < STATIONS.length; i++) {
+                const card = createCard(STATIONS[i].name, i);
+                cards[i] = card;
+                scene.add(card);
+            }
+            
+            positionCards();
+        }
         
         function createCard(stationName, stationIndex) {
             const canvas = document.createElement('canvas'); 
@@ -1116,8 +815,9 @@
             
             return card;
         }
-
+        
         function positionCards() {
+            const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
             for (let i = 2; i <= 5; i++) {
                 if (cards[i] && cardPositions[i]) {
                     cards[i].position.set(cardPositions[i].x, cardPositions[i].y, cardPositions[i].z);
@@ -1126,47 +826,194 @@
             }
         }
 
-        for (let i = 2; i < STATIONS.length; i++) {
-            const card = createCard(STATIONS[i].name, i);
-            cards[i] = card;
-            scene.add(card);
+        // === LOAD MODEL ===
+        function loadModel() {
+            const loader = new GLTFLoader();
+            loader.load('./environment_vr_room_baked.glb', function (gltf) {
+                const model = gltf.scene;
+                model.traverse((child) => { 
+                    if (child.isMesh) { 
+                        child.castShadow = true; 
+                        child.receiveShadow = true; 
+                        if (child.name.toLowerCase().includes('tree')) { 
+                            child.material.emissive = new THREE.Color(0xaa00aa); 
+                            child.material.emissiveIntensity = 0.5; 
+                        } 
+                    } 
+                });
+                scene.add(model);
+                
+                // Set initial camera position
+                const STATIONS = [
+                    { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
+                    { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+                    { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+                    { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+                    { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+                    { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+                ];
+                const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
+                camera.position.copy(STATIONS[0].pos);
+                camera.lookAt(POINT_CENTER);
+            }, undefined, function (error) { console.error(error); });
         }
 
-        let currentStationIndex = 0;
-        let isAnimating = false;
-        let animationProgress = 0;
-        let startPos = new THREE.Vector3();
-        let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 2.5;
-
-        // === LOAD MODEL ===
-        const loader = new GLTFLoader();
-        loader.load('./environment_vr_room_baked.glb', function (gltf) {
-            const model = gltf.scene;
-            model.traverse((child) => { 
-                if (child.isMesh) { 
-                    child.castShadow = true; 
-                    child.receiveShadow = true; 
-                    if (child.name.toLowerCase().includes('tree')) { 
-                        child.material.emissive = new THREE.Color(0xaa00aa); 
-                        child.material.emissiveIntensity = 0.5; 
-                    } 
-                } 
+        // === GLOW PULSE SYSTEM ===
+        let glowStartTime = Date.now();
+        let glowDurationUp = 10000 + Math.random() * 20000;
+        let glowDurationDown = 10000 + Math.random() * 20000;
+        let isGlowingUp = true;
+        
+        let MIN_STRENGTH = 0.10;
+        let MAX_STRENGTH = 0.40;
+        
+        // Setup glow controls
+        const glowMinInput = document.getElementById('glow-min');
+        const glowMaxInput = document.getElementById('glow-max');
+        if (glowMinInput) {
+            glowMinInput.value = 23;
+            glowMinInput.addEventListener('input', (e) => {
+                MIN_STRENGTH = e.target.value / 100;
+                document.getElementById('glow-min-val').textContent = e.target.value + '%';
             });
-            scene.add(model);
-            camera.position.copy(STATIONS[0].pos);
-            camera.lookAt(POINT_CENTER);
-            positionCards();
-        }, undefined, function (error) { console.error(error); });
+        }
+        if (glowMaxInput) {
+            glowMaxInput.value = 39;
+            glowMaxInput.addEventListener('input', (e) => {
+                MAX_STRENGTH = e.target.value / 100;
+                document.getElementById('glow-max-val').textContent = e.target.value + '%';
+            });
+        }
+        
+        function getRandomDuration() {
+            return 10000 + Math.random() * 20000;
+        }
+        
+        function updateGlow() {
+            if (!bloomPass) return;
+            
+            const now = Date.now();
+            const elapsed = now - glowStartTime;
+            
+            if (isGlowingUp) {
+                const progress = Math.min(elapsed / glowDurationUp, 1);
+                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
+                bloomPass.strength = strength;
+                
+                if (progress >= 1) {
+                    isGlowingUp = false;
+                    glowStartTime = now;
+                    glowDurationDown = getRandomDuration();
+                }
+            } else {
+                const progress = Math.min(elapsed / glowDurationDown, 1);
+                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
+                bloomPass.strength = strength;
+                
+                if (progress >= 1) {
+                    isGlowingUp = true;
+                    glowStartTime = now;
+                    glowDurationUp = getRandomDuration();
+                }
+            }
+        }
 
-        // === UI LOGIC ===
-        document.getElementById('blocker').addEventListener('click', function() { 
-            this.style.display = 'none'; 
-            document.getElementById('status').innerText = "Tour Started"; 
-        });
+        // === DYNAMIC BLUR SYSTEM ===
+        let blurState = 'waiting';
+        let blurStartTime = Date.now();
+        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
+        
+        function updateBlur() {
+            const now = Date.now();
+            const vignette = document.getElementById('vignette');
+            const blurStatus = document.getElementById('blur-status');
+            
+            if (blurState === 'waiting' && now >= nextBlurTime) {
+                blurState = 'active';
+                blurStartTime = now;
+                blurStatus.textContent = 'Blur: ACTIVE';
+            }
+            
+            if (blurState === 'active') {
+                const elapsed = (now - blurStartTime) / 1000;
+                if (elapsed >= 1.0) {
+                    blurState = 'waiting';
+                    nextBlurTime = now + 4000 + Math.random() * 14000;
+                    vignette.style.backdropFilter = 'blur(0px)';
+                    blurStatus.textContent = 'Blur: INACTIVE';
+                } else {
+                    vignette.style.backdropFilter = `blur(1px)`;
+                }
+            }
+            
+            if (document.getElementById('vignette-blur-val')) {
+                document.getElementById('vignette-blur-val').textContent = 
+                    vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
+            }
+        }
+
+        // === VIGNETTE CONTROLS ===
+        const vignette = document.getElementById('vignette');
+        
+        function updateVignette() {
+            if (!vignette) return;
+            
+            const centerInput = document.getElementById('vignette-center');
+            const darknessInput = document.getElementById('vignette-darkness');
+            const midInput = document.getElementById('vignette-mid');
+            
+            if (!centerInput || !darknessInput || !midInput) return;
+            
+            const center = centerInput.value;
+            const darkness = darknessInput.value / 100;
+            const mid = midInput.value / 100;
+            
+            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
+        }
+        
+        // Setup vignette controls
+        const vignetteCenter = document.getElementById('vignette-center');
+        const vignetteDarkness = document.getElementById('vignette-darkness');
+        const vignetteMid = document.getElementById('vignette-mid');
+        
+        if (vignetteCenter) {
+            vignetteCenter.value = 51;
+            vignetteCenter.addEventListener('input', (e) => {
+                document.getElementById('vignette-center-val').textContent = e.target.value + '%';
+                updateVignette();
+            });
+        }
+        if (vignetteDarkness) {
+            vignetteDarkness.value = 50;
+            vignetteDarkness.addEventListener('input', (e) => {
+                document.getElementById('vignette-darkness-val').textContent = e.target.value + '%';
+                updateVignette();
+            });
+        }
+        if (vignetteMid) {
+            vignetteMid.value = 30;
+            vignetteMid.addEventListener('input', (e) => {
+                document.getElementById('vignette-mid-val').textContent = e.target.value + '%';
+                updateVignette();
+            });
+        }
+        
+        // Initial vignette update
+        updateVignette();
+
+        // === STATION NAVIGATION ===
+        const STATIONS = [
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
+            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+        ];
+        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
 
         window.nextStation = function() {
-            if (isAnimating) return;
+            if (isAnimating || !scene) return;
             if (currentStationIndex === 0) {
                 currentStationIndex = 1;
             } else if (currentStationIndex < STATIONS.length - 1) {
@@ -1187,7 +1034,7 @@
         };
 
         window.prevStation = function() {
-            if (isAnimating) return;
+            if (isAnimating || !scene) return;
             if (currentStationIndex === 0) {
                 currentStationIndex = STATIONS.length - 1;
             } else if (currentStationIndex > 1) {
@@ -1226,6 +1073,8 @@
         // === ANIMATION LOOP ===
         function animate() {
             requestAnimationFrame(animate);
+            
+            if (!scene) return;
             
             updateGlow();
             updateBlur();
@@ -1267,24 +1116,20 @@
                 camera.lookAt(POINT_CENTER);
             }
 
-            composer.render(); // Render with bloom effect
+            composer.render();
         }
-        animate();
-        
-        setTimeout(() => selectStation(2), 100);
-        
-        document.getElementById('glow-min').value = 23;
-        document.getElementById('glow-max').value = 39;
-        MIN_STRENGTH = 0.23;
-        MAX_STRENGTH = 0.39;
-        updateVignette();
 
-        window.addEventListener('resize', () => {
+        // === RESIZE HANDLER ===
+        function onWindowResize() {
+            if (!camera || !renderer) return;
+            
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
-        });
+            if (composer) {
+                composer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
     </script>
 </body>
 </html>
