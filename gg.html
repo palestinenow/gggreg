@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Flow - Brute Force Blur</title>
+    <title>Cinematic Flow - With Floating Page</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: 'Courier New', Courier, monospace; }
         
@@ -49,40 +49,20 @@
         .control-group { margin-bottom: 15px; }
         .control-label { font-size: 12px; color: #555; margin-bottom: 8px; font-weight: bold; }
         
-        /* Blur Buttons Grid */
-        .blur-buttons {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 5px;
-        }
+        .blur-buttons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
         .blur-btn {
-            background: #eee;
-            border: 1px solid #ccc;
-            padding: 8px 0;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-            transition: 0.2s;
-            color: #555;
+            background: #eee; border: 1px solid #ccc; padding: 8px 0;
+            font-size: 10px; font-weight: bold; cursor: pointer; text-align: center;
+            transition: 0.2s; color: #555;
         }
         .blur-btn:hover { background: #ddd; }
-        .blur-btn.active {
-            background: #0f0;
-            color: white;
-            border-color: #0f0;
-            box-shadow: 0 0 5px #0f0;
-        }
+        .blur-btn.active { background: #0f0; color: white; border-color: #0f0; box-shadow: 0 0 5px #0f0; }
         
-        /* Checkbox Styling */
         .toggle-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; color: #555; }
         .toggle-row input { margin-right: 8px; cursor: pointer; transform: scale(1.2); }
         .toggle-row label { cursor: pointer; user-select: none; }
 
-        #status {
-            position: absolute; bottom: 80px; left: 20px;
-            color: #333; font-size: 16px; z-index: 100; font-weight: bold;
-        }
+        #status { position: absolute; bottom: 80px; left: 20px; color: #333; font-size: 16px; z-index: 100; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -95,17 +75,15 @@
     <div id="blocker">
         <div id="instructions">
             <h1 style="color:#0f0; margin:0;">CLICK TO BEGIN</h1>
-            <p style="margin-top:10px;">Cinematic orbit with adjustable Depth of Field.<br>Use the buttons above to set blur intensity.</p>
+            <p style="margin-top:10px;">Look for the floating holographic page near Station C.</p>
         </div>
     </div>
 
     <!-- FLOW OPTIONS -->
     <div id="flow-controls">
         <h3>✨ Flow Controls</h3>
-        
-        <!-- Blur Buttons -->
         <div class="control-group">
-            <div class="control-label">Blur Scale (Visor Effect)</div>
+            <div class="control-label">Blur Scale</div>
             <div class="blur-buttons">
                 <button class="blur-btn active" onclick="setBlurLevel(0)">0%</button>
                 <button class="blur-btn" onclick="setBlurLevel(1)">25%</button>
@@ -114,37 +92,17 @@
                 <button class="blur-btn" onclick="setBlurLevel(4)">100%</button>
             </div>
         </div>
-
         <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
-
-        <!-- Checkboxes -->
-        <div class="toggle-row">
-            <input type="checkbox" id="opt-arc" checked>
-            <label for="opt-arc">Arcing Camera Path</label>
-        </div>
-        <div class="toggle-row">
-            <input type="checkbox" id="opt-particles" checked>
-            <label for="opt-particles">Floating Particles</label>
-        </div>
-        <div class="toggle-row">
-            <input type="checkbox" id="opt-rays" checked>
-            <label for="opt-rays">Rotating God Rays</label>
-        </div>
+        <div class="toggle-row"><input type="checkbox" id="opt-arc" checked><label for="opt-arc">Arcing Path</label></div>
+        <div class="toggle-row"><input type="checkbox" id="opt-particles" checked><label for="opt-particles">Particles</label></div>
+        <div class="toggle-row"><input type="checkbox" id="opt-rays" checked><label for="opt-rays">God Rays</label></div>
     </div>
 
-    <div id="actions">
-        <button class="main-btn" onclick="nextStation()">➡️ NEXT STATION</button>
-    </div>
-
+    <div id="actions"><button class="main-btn" onclick="nextStation()">➡️ NEXT STATION</button></div>
     <div id="status">Ready...</div>
 
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
     </script>
 
     <script type="module">
@@ -158,151 +116,102 @@
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff);
-        
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- POST PROCESSING INITIALIZATION ---
+        // --- POST PROCESSING ---
         let composer, bloomPass, bokehPass;
-        
-        // Define Blur Levels (Aperture values)
-        // 0: Sharp, 1: Low, 2: Med, 3: High, 4: Max
         const BLUR_LEVELS = [0.0, 0.0001, 0.0002, 0.0003, 0.0004];
         let currentBlurIndex = 0;
 
         function initPostProcessing() {
             const renderScene = new RenderPass(scene, camera);
-            
             bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-            bloomPass.threshold = 0.1;
-            bloomPass.strength = 0.0;   
-            bloomPass.radius = 0.8;
-
-            // Initialize with current blur level
+            bloomPass.threshold = 0.1; bloomPass.strength = 0.0; bloomPass.radius = 0.8;
             const aperture = BLUR_LEVELS[currentBlurIndex];
-            bokehPass = new BokehPass(scene, camera, {
-                focus: 10.0,
-                aperture: aperture,
-                maxblur: 0.015,
-                width: window.innerWidth,
-                height: window.innerHeight
-            });
-
+            bokehPass = new BokehPass(scene, camera, { focus: 10.0, aperture: aperture, maxblur: 0.015, width: window.innerWidth, height: window.innerHeight });
             composer = new EffectComposer(renderer);
-            composer.addPass(renderScene);
-            composer.addPass(bloomPass);
-            composer.addPass(bokehPass);
+            composer.addPass(renderScene); composer.addPass(bloomPass); composer.addPass(bokehPass);
         }
-
-        // Call init
         initPostProcessing();
 
         // --- LIGHTS ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
-        scene.add(ambientLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
+        const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
+        const centerLight = new THREE.PointLight(0xff00ff, 0, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        const spotLight = new THREE.SpotLight(0xffeeff, 2);
-        spotLight.position.set(0, 10, 0);
-        spotLight.angle = Math.PI / 4;
-        spotLight.penumbra = 0.5;
-        spotLight.decay = 1;
-        spotLight.distance = 50;
-        spotLight.castShadow = true;
-        scene.add(spotLight);
-        spotLight.target.position.set(-0.006, 1.041, -0.008);
-
-        const centerLight = new THREE.PointLight(0xff00ff, 0, 10);
-        centerLight.position.set(-0.006, 1.041, -0.008);
-        scene.add(centerLight);
-
-        // --- FLOW EFFECTS ---
+        // --- FLOATING PAGE (BILLBOARD) ---
+        // Create a canvas texture for the page content
+        const canvas = document.createElement('canvas');
+        canvas.width = 512; canvas.height = 512;
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#000000'; context.fillRect(0, 0, 512, 512);
+        context.strokeStyle = '#00ff00'; context.lineWidth = 20; context.strokeRect(10, 10, 492, 492);
+        context.font = 'bold 40px Courier New'; context.fillStyle = '#00ff00'; context.textAlign = 'center';
+        context.fillText("PROJECT INFO", 256, 100);
+        context.font = '30px Courier New'; context.fillStyle = '#ffffff';
+        context.fillText("This is a floating", 256, 200);
+        context.fillText("holographic page.", 256, 240);
+        context.fillText("It always faces you.", 256, 280);
         
-        // 1. PARTICLES
-        const particleCount = 200;
-        const particlesGeometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(particleCount * 3);
-        const velocities = [];
-        for (let i = 0; i < particleCount; i++) {
-            positions[i*3] = (Math.random() - 0.5) * 20;
-            positions[i*3+1] = Math.random() * 10 + 1;
-            positions[i*3+2] = (Math.random() - 0.5) * 20;
-            velocities.push({ x: (Math.random() - 0.5) * 0.02, y: (Math.random() - 0.5) * 0.02, z: (Math.random() - 0.5) * 0.02 });
-        }
+        const pageTexture = new THREE.CanvasTexture(canvas);
+        const pageGeometry = new THREE.PlaneGeometry(4, 4);
+        const pageMaterial = new THREE.MeshBasicMaterial({ 
+            map: pageTexture, 
+            transparent: true, 
+            opacity: 0.9, 
+            side: THREE.DoubleSide // See it from back too
+        });
+        const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
+        
+        // Position it near Station C (First)
+        floatingPage.position.set(-5.325, 3, 1.727); 
+        scene.add(floatingPage);
+
+        // --- PARTICLES & RAYS (Same as before) ---
+        const particleCount = 200; const particlesGeometry = new THREE.BufferGeometry(); const positions = new Float32Array(particleCount * 3); const velocities = [];
+        for (let i = 0; i < particleCount; i++) { positions[i*3] = (Math.random() - 0.5) * 20; positions[i*3+1] = Math.random() * 10 + 1; positions[i*3+2] = (Math.random() - 0.5) * 20; velocities.push({ x: (Math.random() - 0.5) * 0.02, y: (Math.random() - 0.5) * 0.02, z: (Math.random() - 0.5) * 0.02 }); }
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         const particlesMaterial = new THREE.PointsMaterial({ color: 0xffaaee, size: 0.1, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
-        const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particleSystem);
+        const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial); scene.add(particleSystem);
 
-        // 2. GOD RAYS
         const rayGeometry = new THREE.CylinderGeometry(0.1, 0.5, 10, 8, 1, true);
         const rayMaterial = new THREE.MeshBasicMaterial({ color: 0xffffcc, transparent: true, opacity: 0.1, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
         const godRays = new THREE.Group();
-        for (let i = 0; i < 6; i++) {
-            const ray = new THREE.Mesh(rayGeometry, rayMaterial);
-            ray.position.set(0, 10, 0);
-            ray.rotation.y = (i / 6) * Math.PI * 2;
-            ray.rotation.x = Math.PI / 6;
-            godRays.add(ray);
-        }
+        for (let i = 0; i < 6; i++) { const ray = new THREE.Mesh(rayGeometry, rayMaterial); ray.position.set(0, 10, 0); ray.rotation.y = (i / 6) * Math.PI * 2; ray.rotation.x = Math.PI / 6; godRays.add(ray); }
         scene.add(godRays);
 
         // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
-            { name: "Intro",     pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First",  pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-            { name: "D: 2",      pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-            { name: "E: 3",      pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-            { name: "F: 4",      pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-            { name: "G: 5",      pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
+            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
+            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
+            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
+            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
-        let currentStationIndex = 0;
-        let isAnimating = false;
-        let animationProgress = 0;
-        let startPos = new THREE.Vector3();
-        let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 3.0;
+        let currentStationIndex = 0; let isAnimating = false; let animationProgress = 0; let startPos = new THREE.Vector3(); let endPos = new THREE.Vector3(); const ANIMATION_DURATION = 3.0;
 
-        // --- GLOW PULSE SYSTEM (10% to 80%) ---
-        let glowStartTime = Date.now();
-        let glowDurationUp = getRandomDuration();
-        let glowDurationDown = getRandomDuration();
-        let isGlowingUp = true;
-
-        const MIN_GLOW = 0.1; // 10%
-        const MAX_GLOW = 0.8; // 80%
-        const RANGE_GLOW = MAX_GLOW - MIN_GLOW;
-
-        function getRandomDuration() { return 7000 + Math.random() * 15000; }
-
+        // --- GLOW PULSE ---
+        let glowStartTime = Date.now(); let glowDurationUp = 7000 + Math.random() * 15000; let glowDurationDown = 7000 + Math.random() * 15000; let isGlowingUp = true;
+        const MIN_GLOW = 0.1; const MAX_GLOW = 0.8; const RANGE_GLOW = MAX_GLOW - MIN_GLOW;
         function updateGlow() {
-            const now = Date.now();
-            const elapsed = now - glowStartTime;
-            
+            const now = Date.now(); const elapsed = now - glowStartTime;
             if (isGlowingUp) {
-                const progress = Math.min(elapsed / glowDurationUp, 1);
-                const currentGlow = MIN_GLOW + (progress * RANGE_GLOW);
-                
-                bloomPass.strength = currentGlow * 2.5;
-                centerLight.intensity = currentGlow * 2.5;
-                
+                const progress = Math.min(elapsed / glowDurationUp, 1); const currentGlow = MIN_GLOW + (progress * RANGE_GLOW);
+                bloomPass.strength = currentGlow * 2.5; centerLight.intensity = currentGlow * 2.5;
                 document.getElementById('glow-val').innerText = Math.round(currentGlow * 100) + "%";
-                
-                if (progress >= 1) { isGlowingUp = false; glowStartTime = now; glowDurationDown = getRandomDuration(); }
+                if (progress >= 1) { isGlowingUp = false; glowStartTime = now; glowDurationDown = 7000 + Math.random() * 15000; }
             } else {
-                const progress = Math.min(elapsed / glowDurationDown, 1);
-                const currentGlow = MAX_GLOW - (progress * RANGE_GLOW);
-                
-                bloomPass.strength = currentGlow * 2.5;
-                centerLight.intensity = currentGlow * 2.5;
-                
+                const progress = Math.min(elapsed / glowDurationDown, 1); const currentGlow = MAX_GLOW - (progress * RANGE_GLOW);
+                bloomPass.strength = currentGlow * 2.5; centerLight.intensity = currentGlow * 2.5;
                 document.getElementById('glow-val').innerText = Math.round(currentGlow * 100) + "%";
-                
-                if (progress >= 1) { isGlowingUp = true; glowStartTime = now; glowDurationUp = getRandomDuration(); }
+                if (progress >= 1) { isGlowingUp = true; glowStartTime = now; glowDurationUp = 7000 + Math.random() * 15000; }
             }
         }
 
@@ -310,82 +219,34 @@
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
-            model.traverse((child) => {
-                if (child.isMesh) { 
-                    child.castShadow = true; child.receiveShadow = true; 
-                    if (child.name.toLowerCase().includes('tree') || child.name.toLowerCase().includes('plant')) {
-                        child.material.emissive = new THREE.Color(0xaa00aa);
-                        child.material.emissiveIntensity = 0.5;
-                    }
-                }
-            });
-            scene.add(model);
-            camera.position.copy(STATIONS[0].pos);
-            camera.lookAt(POINT_CENTER);
-            updateUI();
+            model.traverse((child) => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; if (child.name.toLowerCase().includes('tree')) { child.material.emissive = new THREE.Color(0xaa00aa); child.material.emissiveIntensity = 0.5; } } });
+            scene.add(model); camera.position.copy(STATIONS[0].pos); camera.lookAt(POINT_CENTER); updateUI();
         }, undefined, function (error) { console.error(error); });
 
-        // --- UI & CONTROLS ---
+        // --- UI LOGIC ---
         document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour started."; });
-
-        // --- BRUTE FORCE BLUR UPDATE ---
         window.setBlurLevel = function(index) {
             currentBlurIndex = index;
-            
-            // Update UI
-            const buttons = document.querySelectorAll('.blur-btn');
-            buttons.forEach((btn, i) => {
-                if(i === index) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-
-            // Re-create Bokeh Pass with new aperture
-            // This forces the GPU to pick up the new value
-            const aperture = BLUR_LEVELS[index];
-            
-            // Remove old pass
-            composer.passes.pop(); 
-            
-            // Create new pass
-            bokehPass = new BokehPass(scene, camera, {
-                focus: 10.0,
-                aperture: aperture,
-                maxblur: 0.015,
-                width: window.innerWidth,
-                height: window.innerHeight
-            });
-            
-            // Add new pass
+            const buttons = document.querySelectorAll('.blur-btn'); buttons.forEach((btn, i) => { if(i === index) btn.classList.add('active'); else btn.classList.remove('active'); });
+            const aperture = BLUR_LEVELS[index]; composer.passes.pop();
+            bokehPass = new BokehPass(scene, camera, { focus: 10.0, aperture: aperture, maxblur: 0.015, width: window.innerWidth, height: window.innerHeight });
             composer.addPass(bokehPass);
         };
-
         window.nextStation = function() {
             if (isAnimating) return;
-            if (currentStationIndex === 0) currentStationIndex = 1;
-            else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
-            startAnimation(STATIONS[currentStationIndex].pos);
-            updateUI();
+            if (currentStationIndex === 0) currentStationIndex = 1; else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
+            startAnimation(STATIONS[currentStationIndex].pos); updateUI();
         };
-
         function startAnimation(targetPos) {
-            isAnimating = true;
-            animationProgress = 0;
-            startPos.copy(camera.position);
-            endPos.copy(targetPos);
-            
+            isAnimating = true; animationProgress = 0; startPos.copy(camera.position); endPos.copy(targetPos);
             if (document.getElementById('opt-arc').checked) {
-                const center = POINT_CENTER.clone();
-                const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
-                const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-                midPoint.add(direction.multiplyScalar(2));
+                const center = POINT_CENTER.clone(); const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
+                const direction = new THREE.Vector3().subVectors(midPoint, center).normalize(); midPoint.add(direction.multiplyScalar(2));
                 window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
             }
-            
             document.getElementById('status').innerText = `Flowing to ${STATIONS[currentStationIndex].name}...`;
         }
-
         function updateUI() { document.getElementById('current-station').innerText = STATIONS[currentStationIndex].name; }
-
         function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
         // --- ANIMATION LOOP ---
@@ -393,72 +254,49 @@
             requestAnimationFrame(animate);
             updateGlow();
 
-            // Animate Particles
+            // MAKE PAGE FACE CAMERA (BILLBOARDING)
+            floatingPage.lookAt(camera.position);
+
+            // Particles
             if (document.getElementById('opt-particles').checked) {
-                particleSystem.visible = true;
-                const posAttr = particleSystem.geometry.attributes.position;
+                particleSystem.visible = true; const posAttr = particleSystem.geometry.attributes.position;
                 for (let i = 0; i < particleCount; i++) {
-                    posAttr.array[i*3] += velocities[i].x;
-                    posAttr.array[i*3+1] += velocities[i].y;
-                    posAttr.array[i*3+2] += velocities[i].z;
-                    if (posAttr.array[i*3] > 10) posAttr.array[i*3] = -10;
-                    if (posAttr.array[i*3] < -10) posAttr.array[i*3] = 10;
-                    if (posAttr.array[i*3+1] > 12) posAttr.array[i*3+1] = 1;
-                    if (posAttr.array[i*3+1] < 1) posAttr.array[i*3+1] = 12;
-                    if (posAttr.array[i*3+2] > 10) posAttr.array[i*3+2] = -10;
-                    if (posAttr.array[i*3+2] < -10) posAttr.array[i*3+2] = 10;
+                    posAttr.array[i*3] += velocities[i].x; posAttr.array[i*3+1] += velocities[i].y; posAttr.array[i*3+2] += velocities[i].z;
+                    if (posAttr.array[i*3] > 10) posAttr.array[i*3] = -10; if (posAttr.array[i*3] < -10) posAttr.array[i*3] = 10;
+                    if (posAttr.array[i*3+1] > 12) posAttr.array[i*3+1] = 1; if (posAttr.array[i*3+1] < 1) posAttr.array[i*3+1] = 12;
+                    if (posAttr.array[i*3+2] > 10) posAttr.array[i*3+2] = -10; if (posAttr.array[i*3+2] < -10) posAttr.array[i*3+2] = 10;
                 }
                 posAttr.needsUpdate = true;
             } else { particleSystem.visible = false; }
 
-            // Rotate God Rays
-            if (document.getElementById('opt-rays').checked) {
-                godRays.visible = true;
-                godRays.rotation.y += 0.002;
-            } else { godRays.visible = false; }
+            // God Rays
+            if (document.getElementById('opt-rays').checked) { godRays.visible = true; godRays.rotation.y += 0.002; } else { godRays.visible = false; }
 
-            // UPDATE DEPTH OF FIELD FOCUS
-            // Always focus on the tree so it stays sharp while edges blur
+            // Focus
             const dist = camera.position.distanceTo(POINT_CENTER);
-            if(bokehPass.uniforms && bokehPass.uniforms['focus']) {
-                bokehPass.uniforms['focus'].value = dist;
-            }
+            if(bokehPass.uniforms && bokehPass.uniforms['focus']) { bokehPass.uniforms['focus'].value = dist; }
 
-            // Camera Movement
+            // Camera Move
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
-                if (animationProgress >= 1) {
-                    animationProgress = 1;
-                    isAnimating = false;
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
-                }
-
+                if (animationProgress >= 1) { animationProgress = 1; isAnimating = false; document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; }
                 const t = easeInOutCubic(animationProgress);
-                
                 if (document.getElementById('opt-arc').checked && window.animControlPoints) {
-                    const p0 = window.animControlPoints.start;
-                    const p1 = window.animControlPoints.mid;
-                    const p2 = window.animControlPoints.end;
+                    const p0 = window.animControlPoints.start; const p1 = window.animControlPoints.mid; const p2 = window.animControlPoints.end;
                     const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
                     const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
                     const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
                     camera.position.set(x, y, z);
-                } else {
-                    camera.position.lerpVectors(startPos, endPos, t);
-                }
-                
+                } else { camera.position.lerpVectors(startPos, endPos, t); }
                 camera.lookAt(POINT_CENTER);
             }
-
             composer.render();
         }
         animate();
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight); composer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
 </body>
