@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Real Glass Effect</title>
+    <title>Cinematic Orbvfdit - Re cx xal Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
@@ -550,22 +550,22 @@
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
+            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },  // No card
             { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
             { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
             { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
             { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
-        // EXACT CARD POSITIONS (Station 1 removed)
+        // CARD POSITIONS (Station 1/C has no card)
         const cardPositions = {
-            2: { x: 0.10, y: 1.20, z: 4.00 },
-            3: { x: 3.60, y: 1.25, z: 1.20 },
-            4: { x: 2.20, y: 1.20, z: -3.20 },
-            5: { x: -2.20, y: 1.25, z: -2.70 }
+            2: { x: 0.10, y: 1.20, z: 4.00 },   // D
+            3: { x: 3.60, y: 1.25, z: 1.20 },   // E
+            4: { x: 2.20, y: 1.20, z: -3.20 },  // F
+            5: { x: -2.20, y: 1.25, z: -2.70 }  // G
         };
 
-        // --- CREATE CARDS (PURE WHITE TEXT, STATION 1 SKIPPED) ---
+        // --- CREATE CARDS (ONLY FOR STATIONS 2-5) ---
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -574,16 +574,17 @@
             canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            // Completely transparent background - no fill for pure glass
-            context.clearRect(0, 0, 512, 512);
+            // Very subtle glass background
+            context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
+            context.fillRect(0, 0, 512, 512);
             
-            // Very strong text shadow for maximum contrast
+            // Strong text shadow for depth
             context.shadowColor = 'rgba(0, 0, 0, 1.0)';
             context.shadowBlur = 20;
             context.shadowOffsetX = 4;
             context.shadowOffsetY = 4;
             
-            // Station name - BRIGHT WHITE
+            // Station name - SUPER BRIGHT WHITE
             context.font = 'bold 70px Arial'; 
             context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
@@ -592,13 +593,13 @@
             // Second pass for extra brightness
             context.fillText(stationName, 256, 200);
             
-            // Subtitle - BRIGHT WHITE
+            // Subtitle - SUPER BRIGHT WHITE
             context.font = 'bold 45px Arial'; 
             context.fillStyle = '#ffffff';
             context.fillText(`Station ${stationIndex}`, 256, 300);
             context.fillText(`Station ${stationIndex}`, 256, 300);
             
-            // Additional info - BRIGHT WHITE
+            // Additional info - SUPER BRIGHT WHITE
             context.font = 'bold 32px Arial';
             context.fillStyle = '#ffffff';
             context.fillText('Viewpoint', 256, 370);
@@ -616,7 +617,7 @@
                 map: pageTexture,
                 transparent: true,
                 opacity: 0.0,
-                roughness: 0.0,
+                roughness: 0.05,
                 metalness: 0.0,
                 side: THREE.DoubleSide,
                 depthWrite: false,
@@ -640,7 +641,7 @@
             }
         }
 
-        // Skip station 1 (C), start from station 2 (D)
+        // Create cards only for stations 2-5 (D, E, F, G)
         for (let i = 2; i < STATIONS.length; i++) {
             const card = createCard(STATIONS[i].name, i);
             cards[i] = card;
@@ -683,16 +684,16 @@
         window.nextStation = function() {
             if (isAnimating) return;
             if (currentStationIndex === 0) {
-                currentStationIndex = 2; // Skip station 1
+                currentStationIndex = 1;
             } else if (currentStationIndex < STATIONS.length - 1) {
                 currentStationIndex++;
             } else {
-                currentStationIndex = 2; // Loop back to D
+                currentStationIndex = 1;
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
-            if (currentStationIndex > 1) {
+            if (currentStationIndex >= 2) {
                 selectStation(currentStationIndex);
             }
         };
@@ -701,15 +702,15 @@
             if (isAnimating) return;
             if (currentStationIndex === 0) {
                 currentStationIndex = STATIONS.length - 1;
-            } else if (currentStationIndex > 2) {
+            } else if (currentStationIndex > 1) {
                 currentStationIndex--;
             } else {
-                currentStationIndex = STATIONS.length - 1; // Loop to G
+                currentStationIndex = STATIONS.length - 1;
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
-            if (currentStationIndex > 1) {
+            if (currentStationIndex >= 2) {
                 selectStation(currentStationIndex);
             }
         };
