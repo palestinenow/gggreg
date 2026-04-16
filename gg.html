@@ -218,7 +218,7 @@
                         <button 
                             className="rounded-full px-6 py-2.5 text-sm bg-black text-white hover-scale-103 transition-all duration-300" 
                             style={{ fontFamily: 'Inter, sans-serif' }}
-                            onclick="startTourFromLanding()"
+                            onClick={() => window.startTourFromLanding()}
                         >
                             Join
                         </button>
@@ -236,102 +236,13 @@
 
         // Hero Section Component
         const HeroSection = () => {
-            const videoRef = useRef(null);
-            const fadeFrameRef = useRef(null);
-
-            useEffect(() => {
-                const video = videoRef.current;
-                if (!video) return;
-
-                const handleFadeTransition = () => {
-                    if (!video) return;
-                    
-                    const duration = video.duration;
-                    const currentTime = video.currentTime;
-                    
-                    // Fade in at start (first 0.5s)
-                    if (currentTime < 0.5) {
-                        const fadeProgress = currentTime / 0.5;
-                        video.style.opacity = fadeProgress.toString();
-                    }
-                    // Fade out before end (last 0.5s)
-                    else if (currentTime > duration - 0.5) {
-                        const fadeOutProgress = (duration - currentTime) / 0.5;
-                        video.style.opacity = fadeOutProgress.toString();
-                    }
-                    // Fully opaque during middle
-                    else {
-                        video.style.opacity = '1';
-                    }
-                };
-
-                const animateFade = () => {
-                    handleFadeTransition();
-                    fadeFrameRef.current = requestAnimationFrame(animateFade);
-                };
-
-                const handleEnded = () => {
-                    if (!video) return;
-                    // Fade out completely
-                    video.style.opacity = '0';
-                    // Wait 100ms, reset and play
-                    setTimeout(() => {
-                        if (video) {
-                            video.currentTime = 0;
-                            video.play().catch(e => console.warn('Video play failed:', e));
-                        }
-                    }, 100);
-                };
-
-                const handleCanPlay = () => {
-                    video.style.opacity = '0';
-                    video.play().catch(e => console.warn('Video play failed:', e));
-                    // Start fade animation loop
-                    fadeFrameRef.current = requestAnimationFrame(animateFade);
-                };
-
-                video.addEventListener('ended', handleEnded);
-                video.addEventListener('canplay', handleCanPlay);
-
-                // Initial load check
-                if (video.readyState >= 3) {
-                    handleCanPlay();
-                } else {
-                    video.load();
-                }
-
-                return () => {
-                    if (fadeFrameRef.current) {
-                        cancelAnimationFrame(fadeFrameRef.current);
-                    }
-                    video.removeEventListener('ended', handleEnded);
-                    video.removeEventListener('canplay', handleCanPlay);
-                };
-            }, []);
-
             return (
                 <div className="relative min-h-screen w-full overflow-hidden bg-white">
-                    {/* Video Background Layer */}
-                    <div className="absolute inset-0 z-0">
-                        <video
-                            ref={videoRef}
-                            className="absolute w-full h-full object-cover"
-                            style={{
-                                top: '300px',
-                                inset: 'auto 0 0 0',
-                                opacity: 0,
-                                transition: 'none',
-                            }}
-                            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_083109_283f3553-e28f-428b-a723-d639c617eb2b.mp4"
-                            muted
-                            playsInline
-                            preload="auto"
-                            loop={false}
-                        />
-                    </div>
+                    {/* White Background Only - Video Removed */}
+                    <div className="absolute inset-0 z-0 bg-white" />
 
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white via-transparent to-white pointer-events-none" />
+                    {/* Gradient Overlay - Subtle */}
+                    <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white via-white/95 to-white pointer-events-none" />
 
                     {/* Navigation Bar */}
                     <div className="relative z-10">
@@ -360,7 +271,7 @@
                         <button
                             className="animate-fade-rise-delay-2 rounded-full px-14 py-5 text-base mt-12 bg-black text-white hover-scale-103 transition-all duration-300"
                             style={{ fontFamily: 'Inter, sans-serif' }}
-                            onclick="startTourFromLanding()"
+                            onClick={() => window.startTourFromLanding()}
                         >
                             Join
                         </button>
@@ -397,6 +308,8 @@
 
         // === GLOBAL FUNCTIONS FOR LANDING PAGE INTEGRATION ===
         window.startTourFromLanding = function() {
+            console.log('Starting tour from landing page...');
+            
             // Fade out landing page
             const landingPage = document.getElementById('landing-page');
             landingPage.classList.add('hidden');
@@ -692,6 +605,8 @@
 
         // === INIT AND START TOUR ===
         window.initAndStartTour = function() {
+            console.log('Initializing tour...');
+            
             // Setup scene
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xffffff); 
@@ -843,7 +758,7 @@
                 });
                 scene.add(model);
                 
-                // Set initial camera position
+                // Set initial camera position to Intro station
                 const STATIONS = [
                     { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
                     { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
@@ -855,6 +770,8 @@
                 const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
                 camera.position.copy(STATIONS[0].pos);
                 camera.lookAt(POINT_CENTER);
+                
+                console.log('Tour initialized at Intro station');
             }, undefined, function (error) { console.error(error); });
         }
 
