@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Real Glass Effect</title>
+    <title>Cinematic Orbit -dseal Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
@@ -22,7 +22,8 @@
             height: 100%;
             pointer-events: none;
             z-index: 50;
-            background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.15) 80%, rgba(0,0,0,0.3) 100%);
+            background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);
+            transition: backdrop-filter 0.5s ease;
         }
         
         /* Control Panel */
@@ -203,6 +204,13 @@
             margin-top: 5px;
             text-align: center;
         }
+        
+        #blur-status {
+            color: #0f0;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -268,32 +276,33 @@
         <div class="control-group">
             <h4>🎨 VIGNETTE EFFECT</h4>
             <div class="slider-control">
-                <label>Center Clear Area: <span id="vignette-center-val">40%</span></label>
-                <input type="range" id="vignette-center" min="20" max="60" value="40" step="1">
+                <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
+                <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
             </div>
             <div class="slider-control">
-                <label>Edge Darkness: <span id="vignette-darkness-val">30%</span></label>
-                <input type="range" id="vignette-darkness" min="0" max="50" value="30" step="1">
+                <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
+                <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
             </div>
             <div class="slider-control">
-                <label>Mid Darkness: <span id="vignette-mid-val">15%</span></label>
-                <input type="range" id="vignette-mid" min="0" max="30" value="15" step="1">
+                <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
+                <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
             </div>
             <div class="slider-control">
                 <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
-                <input type="range" id="vignette-blur" min="0" max="10" value="0" step="1">
+                <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
             </div>
+            <div id="blur-status">Blur: INACTIVE</div>
         </div>
         
         <div class="control-group">
             <h4>✨ GLOW EFFECT</h4>
             <div class="slider-control">
-                <label>Min Strength: <span id="glow-min-val">10%</span></label>
-                <input type="range" id="glow-min" min="0" max="30" value="10" step="1">
+                <label>Min Strength: <span id="glow-min-val">23%</span></label>
+                <input type="range" id="glow-min" min="0" max="30" value="23" step="1">
             </div>
             <div class="slider-control">
-                <label>Max Strength: <span id="glow-max-val">40%</span></label>
-                <input type="range" id="glow-max" min="20" max="80" value="40" step="1">
+                <label>Max Strength: <span id="glow-max-val">39%</span></label>
+                <input type="range" id="glow-max" min="20" max="80" value="39" step="1">
             </div>
         </div>
         
@@ -326,14 +335,12 @@
             const stationNames = ['', 'C: First', 'D: 2', 'E: 3', 'F: 4', 'G: 5'];
             document.getElementById('selected-station').textContent = `Selected: Station ${stationNames[index]}`;
             
-            // Update input fields with current card position
             if (cards[index]) {
                 document.getElementById('pos-x').value = cards[index].position.x.toFixed(2);
                 document.getElementById('pos-y').value = cards[index].position.y.toFixed(2);
                 document.getElementById('pos-z').value = cards[index].position.z.toFixed(2);
             }
             
-            // Update active button
             document.querySelectorAll('.station-btn').forEach((btn, i) => {
                 if (i === index - 1) btn.classList.add('active');
                 else btn.classList.remove('active');
@@ -366,7 +373,7 @@
         };
         
         window.saveSettings = function() {
-            alert('Settings saved to console! Check with exportConfig()');
+            alert('Settings saved!');
         };
         
         window.exportConfig = function() {
@@ -375,8 +382,7 @@
                 vignette: {
                     center: document.getElementById('vignette-center').value,
                     darkness: document.getElementById('vignette-darkness').value,
-                    mid: document.getElementById('vignette-mid').value,
-                    blur: document.getElementById('vignette-blur').value
+                    mid: document.getElementById('vignette-mid').value
                 },
                 glow: {
                     min: MIN_STRENGTH,
@@ -401,7 +407,7 @@
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
-        bloomPass.strength = 0.2;
+        bloomPass.strength = 0.23;
         bloomPass.radius = 0.8;
         
         const composer = new EffectComposer(renderer);
@@ -423,20 +429,19 @@
         spotLight.target.position.set(-0.006, 1.041, -0.008);
         scene.add(spotLight.target);
         
-        const centerLight = new THREE.PointLight(0xff00ff, 0.4, 10); 
+        const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10); 
         centerLight.position.set(-0.006, 1.041, -0.008); 
         scene.add(centerLight);
 
-        // --- GLOW PULSE SYSTEM ---
+        // --- GLOW PULSE SYSTEM - 10-40% with random 10-30s timing ---
         let glowStartTime = Date.now();
-        let glowDurationUp = 7000 + Math.random() * 15000;
-        let glowDurationDown = 7000 + Math.random() * 15000;
+        let glowDurationUp = 10000 + Math.random() * 20000;
+        let glowDurationDown = 10000 + Math.random() * 20000;
         let isGlowingUp = true;
         
-        let MIN_STRENGTH = 0.1;
-        let MAX_STRENGTH = 0.4;
+        let MIN_STRENGTH = 0.10;
+        let MAX_STRENGTH = 0.40;
         
-        // Update glow settings from sliders
         document.getElementById('glow-min').addEventListener('input', (e) => {
             MIN_STRENGTH = e.target.value / 100;
             document.getElementById('glow-min-val').textContent = e.target.value + '%';
@@ -448,7 +453,7 @@
         });
         
         function getRandomDuration() {
-            return 7000 + Math.random() * 15000;
+            return 10000 + Math.random() * 20000; // 10s to 30s
         }
         
         function updateGlow() {
@@ -480,6 +485,38 @@
             }
         }
 
+        // --- DYNAMIC BLUR SYSTEM - pulses to 1px then back to 0 ---
+        let blurState = 'waiting'; // waiting, active, fading
+        let blurStartTime = Date.now();
+        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000; // 4-18s
+        
+        function updateBlur() {
+            const now = Date.now();
+            const vignette = document.getElementById('vignette');
+            const blurStatus = document.getElementById('blur-status');
+            
+            if (blurState === 'waiting' && now >= nextBlurTime) {
+                blurState = 'active';
+                blurStartTime = now;
+                blurStatus.textContent = 'Blur: ACTIVE';
+            }
+            
+            if (blurState === 'active') {
+                const elapsed = (now - blurStartTime) / 1000;
+                if (elapsed >= 1.0) {
+                    blurState = 'waiting';
+                    nextBlurTime = now + 4000 + Math.random() * 14000; // 4-18s
+                    vignette.style.backdropFilter = 'blur(0px)';
+                    blurStatus.textContent = 'Blur: INACTIVE';
+                } else {
+                    vignette.style.backdropFilter = `blur(1px)`;
+                }
+            }
+            
+            document.getElementById('vignette-blur-val').textContent = 
+                vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
+        }
+
         // --- VIGNETTE CONTROLS ---
         const vignette = document.getElementById('vignette');
         
@@ -501,25 +538,12 @@
             updateVignette();
         });
         
-        document.getElementById('vignette-blur').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-blur-val').textContent = val + 'px';
-            updateVignette();
-        });
-        
         function updateVignette() {
             const center = document.getElementById('vignette-center').value;
             const darkness = document.getElementById('vignette-darkness').value / 100;
             const mid = document.getElementById('vignette-mid').value / 100;
-            const blur = document.getElementById('vignette-blur').value;
             
             vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
-            
-            if (blur > 0) {
-                vignette.style.backdropFilter = `blur(${blur}px)`;
-            } else {
-                vignette.style.backdropFilter = 'none';
-            }
         }
 
         // --- STATIONS ---
@@ -533,13 +557,13 @@
             { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
-        // Store card positions
+        // EXACT CARD POSITIONS
         const cardPositions = {
-            1: { x: -3.61, y: 1.30, z: 1.17 },
-            2: { x: 1.20, y: 1.40, z: 4.50 },
-            3: { x: 4.00, y: 1.35, z: 1.00 },
-            4: { x: 2.50, y: 1.30, z: -3.20 },
-            5: { x: -2.80, y: 1.25, z: -3.00 }
+            1: { x: -3.61, y: 1.30, z: 1.17 },  // C
+            2: { x: 0.10, y: 1.20, z: 4.00 },   // D
+            3: { x: 3.60, y: 1.25, z: 1.20 },   // E
+            4: { x: 2.20, y: 1.20, z: -3.20 },  // F
+            5: { x: -2.20, y: 1.25, z: -2.70 }  // G
         };
 
         // --- CREATE CARDS ---
@@ -645,7 +669,6 @@
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
-            // Auto-select current station in control panel
             if (currentStationIndex > 0) {
                 selectStation(currentStationIndex);
             }
@@ -672,6 +695,7 @@
             requestAnimationFrame(animate);
             
             updateGlow();
+            updateBlur();
 
             for (let i = 1; i < cards.length; i++) {
                 if (cards[i]) {
@@ -706,8 +730,14 @@
         }
         animate();
         
-        // Initialize with station C selected
         setTimeout(() => selectStation(1), 100);
+        
+        // Set initial values
+        document.getElementById('glow-min').value = 23;
+        document.getElementById('glow-max').value = 39;
+        MIN_STRENGTH = 0.23;
+        MAX_STRENGTH = 0.39;
+        updateVignette();
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
