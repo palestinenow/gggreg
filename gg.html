@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Elegant Floating Text</title>
+    <title>Cinematic Orbit - Elegant White Glass</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
         
@@ -12,22 +12,23 @@
             display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer;
         }
         #instructions {
-            color: black; text-align: center; padding: 30px; border: 1px solid #eee;
+            color: black; text-align: center; padding: 30px; border: 1px solid #ddd;
             border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
         h1 { margin: 0 0 10px 0; color: #333; font-weight: 300; letter-spacing: 2px; }
-        p { margin: 0; color: #666; font-size: 14px; }
+        p { margin: 0; color: #666; font-weight: 300; }
 
         /* MAIN BUTTON */
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
         button.main-btn {
-            background: transparent; color: #333; border: 1px solid #333; padding: 15px 30px;
-            font-weight: 300; cursor: pointer; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;
-            transition: all 0.3s ease;
+            background: #000; color: #fff; border: none; padding: 15px 30px;
+            font-weight: 300; cursor: pointer; font-size: 16px; border-radius: 50px;
+            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            letter-spacing: 1px; text-transform: uppercase;
         }
-        button.main-btn:hover { background: #333; color: #fff; }
+        button.main-btn:hover { background: #333; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
 
-        #status { position: absolute; bottom: 40px; left: 40px; color: #999; font-size: 12px; z-index: 100; text-transform: uppercase; letter-spacing: 1px; }
+        #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 12px; z-index: 100; opacity: 0.5; letter-spacing: 1px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -36,13 +37,13 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to begin the journey.</p>
+            <p>Click to start.<br>Elegant floating labels.</p>
         </div>
     </div>
 
     <!-- MAIN ACTION -->
     <div id="actions">
-        <button class="main-btn" onclick="nextStation()">Next View ➡️</button>
+        <button class="main-btn" onclick="nextStation()">Next Station ➡️</button>
     </div>
 
     <div id="status">Ready...</div>
@@ -68,71 +69,82 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // --- HELPER TO CREATE ELEGANT WHITE TEXT ---
-        function createElegantText(textTitle, textSub) {
+        // --- HELPER TO CREATE ELEGANT WHITE TEXT CARDS ---
+        function createElegantCard(textTitle, textSub) {
             const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
             const context = canvas.getContext('2d');
             
-            // Transparent Background
+            // NO BACKGROUND - Transparent
             
-            // Fine White Text Title
-            context.font = '300 80px Helvetica, Arial, sans-serif'; // Thin font
-            context.fillStyle = '#FFFFFF'; 
+            // Elegant Thin Font
+            context.font = '300 80px "Helvetica Neue", Helvetica, Arial, sans-serif'; 
+            context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
             context.fillText(textTitle.toUpperCase(), 256, 200);
             
-            // Subtitle
-            context.font = '300 40px Helvetica, Arial, sans-serif';
-            context.fillStyle = '#CCCCCC'; // Light Grey
-            context.fillText(textSub, 256, 260);
+            context.font = '300 40px "Helvetica Neue", Helvetica, Arial, sans-serif'; 
+            context.fillStyle = '#cccccc';
+            context.fillText(textSub, 256, 280);
             
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.MeshBasicMaterial({ 
                 map: texture, transparent: true, opacity: 1.0, side: THREE.DoubleSide, depthWrite: false 
             });
-            const geometry = new THREE.PlaneGeometry(2.5, 2.5);
+            const geometry = new THREE.PlaneGeometry(2.5, 2.5); 
             const mesh = new THREE.Mesh(geometry, material);
             
-            // Store initial Y for floating animation
-            mesh.userData.initialY = mesh.position.y;
-            mesh.userData.floatOffset = Math.random() * 100; // Random start time
+            // Store original position for random movement
+            mesh.userData.originalPos = mesh.position.clone();
+            mesh.userData.randomOffset = Math.random() * 1000; // For sine wave timing
             
             return mesh;
         }
 
-        // --- CREATE CARDS (Raised to Y: 2.5 for Eye-Level) ---
+        // --- CREATE 5 CARDS (Intro, G, C, D, E, F) ---
         
-        // 1. Card C
-        const cardC = createElegantText("Viewpoint C", "First Stop");
-        cardC.position.set(-3.49, 2.5, 1.23); 
-        cardC.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
+        // 1. Intro Card
+        const cardIntro = createElegantCard("Welcome", "Start of Journey");
+        cardIntro.position.set(0.092, 9.5, -0.067); 
+        cardIntro.lookAt(new THREE.Vector3(-0.006, 9.5, -0.008)); 
+        const qIntro = cardIntro.quaternion.clone();
+
+        // 2. Card G (The Empty/Wide View Station)
+        const cardG = createElegantCard("Overview", "Wide Perspective");
+        cardG.position.set(-3.403, 2.5, -4.008); // Near G station but higher for visibility
+        cardG.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
+        const qG = cardG.quaternion.clone();
+
+        // 3. Card C
+        const cardC = createElegantCard("Viewpoint C", "Detail One");
+        cardC.position.set(-3.49, 1.30, 1.23); 
+        cardC.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qC = cardC.quaternion.clone();
 
-        // 2. Card D
-        const cardD = createElegantText("Viewpoint D", "Second Stop");
-        cardD.position.set(0.077, 2.5, 4.0); 
-        cardD.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
+        // 4. Card D
+        const cardD = createElegantCard("Viewpoint D", "Detail Two");
+        cardD.position.set(0.077, 1.30, 4.0); 
+        cardD.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qD = cardD.quaternion.clone();
 
-        // 3. Card E
-        const cardE = createElegantText("Viewpoint E", "Third Stop");
-        cardE.position.set(3.77, 2.5, 1.30); 
-        cardE.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
+        // 5. Card E
+        const cardE = createElegantCard("Viewpoint E", "Detail Three");
+        cardE.position.set(3.77, 1.30, 1.30); 
+        cardE.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qE = cardE.quaternion.clone();
 
-        // 4. Card F
-        const cardF = createElegantText("Viewpoint F", "Fourth Stop");
-        cardF.position.set(2.21, 2.5, -3.16); 
-        cardF.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
+        // 6. Card F
+        const cardF = createElegantCard("Viewpoint F", "Detail Four");
+        cardF.position.set(2.21, 1.30, -3.16); 
+        cardF.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const qF = cardF.quaternion.clone();
 
-        scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
+        scene.add(cardIntro); scene.add(cardG); scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
 
-        // --- STATIONS (Order: Intro -> G:5(Empty) -> C -> D -> E -> F) ---
+        // --- STATIONS (NEW ORDER: Intro -> G -> C -> D -> E -> F) ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
-            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: null }, 
-            { name: "G: Wide View", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: null }, 
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: cardIntro, quat: qIntro },
+            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: cardG, quat: qG }, // The Empty Station
             { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), card: cardC, quat: qC },
             { name: "D: Second", pos: new THREE.Vector3(0.077, 1.301, 5.964), card: cardD, quat: qD },
             { name: "E: Third", pos: new THREE.Vector3(5.276, 1.338, 1.737), card: cardE, quat: qE },
@@ -144,7 +156,7 @@
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 3.0; 
+        const ANIMATION_DURATION = 3.0; // Slightly slower for elegance
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -161,7 +173,10 @@
 
         window.nextStation = function() {
             if (isAnimating) return;
+            
+            // Cycle through the new order: Intro -> G -> C -> D -> E -> F -> Intro...
             currentStationIndex = (currentStationIndex + 1) % STATIONS.length;
+            
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
         };
@@ -181,25 +196,29 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // VERY SLOW TIME FACTOR FOR GENTLE FLOAT
-            const time = Date.now() * 0.0005; 
+            const time = Date.now() * 0.001;
 
-            // TEXT CARD LOGIC
+            // ELEGANT GLASS & RANDOM SHINE LOGIC
             STATIONS.forEach(station => {
-                if (station.card) {
+                if(station.card) {
                     const dist = camera.position.distanceTo(station.pos);
                     
-                    // VERY SUBTLE FLOATING (±0.03 units)
-                    station.card.position.y = station.card.userData.initialY + Math.sin(time + station.card.userData.floatOffset) * 0.03;
-
                     if (dist < 2.5) {
-                        // AT STATION: Face Camera & 100% Opacity
+                        // AT STATION: Face Camera & 100% Opacity & Sharp
                         station.card.lookAt(camera.position);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
+                        
+                        // Reset to original position (stop floating)
+                        station.card.position.lerp(station.userData.originalPos, 0.1);
                     } else {
-                        // AWAY: Return to Original Rotation & 10% Opacity (Ghostly)
+                        // AWAY: Return to Original Rotation & 5% Opacity & Blur Effect
                         station.card.quaternion.slerp(station.quat, 0.1);
-                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.1, 0.1);
+                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
+                        
+                        // Random "Shine/Float" Movement when inactive
+                        const offset = station.userData.randomOffset;
+                        station.card.position.y = station.userData.originalPos.y + Math.sin(time + offset) * 0.1;
+                        station.card.position.x = station.userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
                     }
                 }
             });
