@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Real Glass Effect</title>
+    <title>Cinefdssdmatic Orbit - Real Glass Effect</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400&display=swap');
         
@@ -28,10 +28,10 @@
             transition: backdrop-filter 0.5s ease;
         }
         
-        /* Glass Navigation Bar - Positioned lower */
+        /* Glass Navigation Bar - Positioned LOWER */
         .glass-nav {
             position: fixed;
-            top: 58%;
+            top: 68%; /* MOVED LOWER from 58% to 68% */
             left: 50%;
             transform: translate(-50%, -50%);
             width: 92%;
@@ -391,7 +391,7 @@
     
     <div id="vignette"></div>
     
-    <!-- Glass Navigation Bar - Shows only once at Station C -->
+    <!-- Glass Navigation Bar - Shows only when ARRIVED at Station C -->
     <nav class="glass-nav" id="glassNav">
         <div class="dot"></div>
         <div class="input-wrap" id="inputWrap"></div>
@@ -504,6 +504,7 @@
         let step = 1;
         let wishText = '';
         let navShown = false; // Track if nav has been shown
+        let navVisible = false; // Track current visibility state
 
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -562,6 +563,7 @@
                     setTimeout(() => {
                         nav.classList.add('vanish');
                         nav.classList.remove('visible');
+                        navVisible = false;
                         step = 1;
                         btn.style.opacity = '1';
                         btn.style.pointerEvents = 'auto';
@@ -575,9 +577,10 @@
         initNav();
 
         function showNavBar() {
-            if (!navShown) {
+            if (!navVisible) {
                 nav.classList.remove('vanish');
                 nav.classList.add('visible');
+                navVisible = true;
                 navShown = true;
                 step = 1;
                 btn.style.opacity = '1';
@@ -587,8 +590,11 @@
         }
 
         function hideNavBar() {
-            nav.classList.remove('visible');
-            nav.classList.add('vanish');
+            if (navVisible) {
+                nav.classList.remove('visible');
+                nav.classList.add('vanish');
+                navVisible = false;
+            }
         }
 
         // Make functions globally available
@@ -951,13 +957,13 @@
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
-            if (currentStationIndex === 1) {
-                showNavBar();
-            } else {
+            // Hide nav when leaving - will show again when arrived at C
+            if (currentStationIndex !== 1) {
                 hideNavBar();
-                if (currentStationIndex >= 2) {
-                    selectStation(currentStationIndex);
-                }
+            }
+            
+            if (currentStationIndex >= 2) {
+                selectStation(currentStationIndex);
             }
         };
 
@@ -973,13 +979,13 @@
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
-            if (currentStationIndex === 1) {
-                showNavBar();
-            } else {
+            // Hide nav when leaving - will show again when arrived at C
+            if (currentStationIndex !== 1) {
                 hideNavBar();
-                if (currentStationIndex >= 2) {
-                    selectStation(currentStationIndex);
-                }
+            }
+            
+            if (currentStationIndex >= 2) {
+                selectStation(currentStationIndex);
             }
         };
 
@@ -1006,6 +1012,11 @@
             updateGlow();
             updateBlur();
 
+            // Show nav ONLY when we've ARRIVED at Station C (not during animation)
+            if (currentStationIndex === 1 && !isAnimating && animationProgress >= 1) {
+                showNavBar();
+            }
+
             for (let i = 2; i < cards.length; i++) {
                 if (cards[i]) {
                     if (i === currentStationIndex) {
@@ -1023,6 +1034,11 @@
                     animationProgress = 1; 
                     isAnimating = false; 
                     document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
+                    
+                    // Show nav when arrived at C
+                    if (currentStationIndex === 1) {
+                        showNavBar();
+                    }
                 }
                 const t = easeInOutCubic(animationProgress);
                 const p0 = window.animControlPoints.start; 
