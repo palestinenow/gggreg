@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Pinyon Script & Controls</title>
+    <title>Cinematic Orbit - Bodoni Moda SC</title>
     
-    <!-- IMPORT PINYON SCRIPT FONT -->
+    <!-- IMPORT BODONI MODA SC FONT -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,400&display=swap" rel="stylesheet">
 
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Pinyon Script', cursive; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Bodoni Moda SC', serif; }
         
         /* START SCREEN */
         #blocker {
@@ -21,22 +21,22 @@
             color: black; text-align: center; padding: 30px; border: 1px solid #ddd;
             border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        h1 { margin: 0 0 10px 0; color: #333; font-size: 64px; font-weight: 400; }
-        p { margin: 0; color: #666; font-size: 32px; }
+        h1 { margin: 0 0 10px 0; color: #333; font-size: 64px; font-weight: 700; letter-spacing: 2px; }
+        p { margin: 0; color: #666; font-size: 24px; font-weight: 500; }
 
         /* MAIN BUTTON */
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
         button.main-btn {
             background: #000; color: #fff; border: none; padding: 15px 40px;
-            font-family: 'Pinyon Script', cursive; font-size: 36px; cursor: pointer;
+            font-family: 'Bodoni Moda SC', serif; font-size: 24px; font-weight: 600; cursor: pointer;
             border-radius: 50px; transition: all 0.3s ease; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); letter-spacing: 1px;
         }
         button.main-btn:hover { background: #333; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
 
         #status { 
             position: absolute; bottom: 40px; left: 40px; 
-            color: #333; font-size: 32px; z-index: 100; opacity: 0.6; 
+            color: #333; font-size: 24px; font-weight: 500; z-index: 100; opacity: 0.6; letter-spacing: 1px;
         }
 
         /* CONTROL PANEL STYLES */
@@ -45,28 +45,17 @@
             background: rgba(255, 255, 255, 0.95); padding: 20px;
             border: 1px solid #ddd; border-radius: 10px; z-index: 100;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 220px;
-            font-family: sans-serif; /* Keep controls readable */
+            font-family: sans-serif;
         }
         #control-panel h3 { margin: 0 0 15px 0; font-size: 14px; color: #333; text-transform: uppercase; letter-spacing: 1px; }
-        
         .selector { width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        
-        .coord-box {
-            background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 15px;
-            font-size: 12px; color: #555; line-height: 1.5;
-        }
-        
+        .coord-box { background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 12px; color: #555; line-height: 1.5; }
         .control-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .control-label { font-size: 12px; color: #666; font-weight: bold; }
-        
         .btn-group { display: flex; gap: 5px; }
-        .ctrl-btn {
-            width: 30px; height: 30px; border: 1px solid #ccc; background: #eee;
-            border-radius: 4px; cursor: pointer; font-weight: bold; color: #333;
-        }
+        .ctrl-btn { width: 30px; height: 30px; border: 1px solid #ccc; background: #eee; border-radius: 4px; cursor: pointer; font-weight: bold; color: #333; }
         .ctrl-btn:hover { background: #ddd; }
         .ctrl-btn:active { background: #333; color: white; }
-
         input[type=range] { width: 100px; }
     </style>
 </head>
@@ -76,14 +65,13 @@
     <div id="blocker">
         <div id="instructions">
             <h1>Cinematic Tour</h1>
-            <p>Click to start<br>Pinyon Script Edition</p>
+            <p>Click to start<br>Bodoni Moda SC Edition</p>
         </div>
     </div>
 
     <!-- CONTROL PANEL -->
     <div id="control-panel">
         <h3>Edit Card Position & Size</h3>
-        
         <select class="selector" id="card-selector" onchange="updateSelectedCard()">
             <option value="C">Card C</option>
             <option value="D">Card D</option>
@@ -91,11 +79,7 @@
             <option value="F">Card F</option>
             <option value="G">Card G (Overview)</option>
         </select>
-
-        <div class="coord-box" id="coord-display">
-            Select a card to edit...
-        </div>
-
+        <div class="coord-box" id="coord-display">Select a card...</div>
         <div class="control-row">
             <span class="control-label">Vertical Pos (Y)</span>
             <div class="btn-group">
@@ -103,7 +87,6 @@
                 <button class="ctrl-btn" onclick="moveSelected('down')">▼ Down</button>
             </div>
         </div>
-
         <div class="control-row">
             <span class="control-label">Text Size</span>
             <input type="range" min="0.5" max="2.0" step="0.1" value="1.0" id="size-slider" oninput="resizeSelected(this.value)">
@@ -142,17 +125,28 @@
         let selectedCardKey = 'C';
         let cards = {};
 
-        // --- HELPER TO CREATE PINYON SCRIPT CARDS ---
+        // --- HELPER TO CREATE BODONI MODA SC CARDS WITH GLASS BACKGROUND ---
         function createCard(textTitle, textSub, x, y, z) {
             const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
             const context = canvas.getContext('2d');
             
-            context.font = '140px "Pinyon Script"'; 
-            context.fillStyle = '#ffffff'; context.textAlign = 'center';
+            // 5% White Background for Glass Effect
+            context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
+            context.fillRect(0, 0, 1024, 1024);
+            
+            // Border for definition
+            context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            context.lineWidth = 10;
+            context.strokeRect(50, 50, 924, 924);
+
+            // Text Title
+            context.font = '140px "Bodoni Moda SC"'; 
+            context.fillStyle = '#000000'; context.textAlign = 'center';
             context.fillText(textTitle, 512, 400);
             
-            context.font = '90px "Pinyon Script"'; 
-            context.fillStyle = '#eeeeee';
+            // Text Subtitle
+            context.font = '90px "Bodoni Moda SC"'; 
+            context.fillStyle = '#333333';
             context.fillText(textSub, 512, 550);
             
             const texture = new THREE.CanvasTexture(canvas);
@@ -165,35 +159,37 @@
             mesh.position.set(x, y, z);
             mesh.lookAt(new THREE.Vector3(-0.006, y, -0.008)); 
             
-            // Store data for controls
+            // Store data for random animation
             mesh.userData.baseScale = 1.0;
+            mesh.userData.randomOffset = Math.random() * 1000;
+            mesh.userData.originalPos = mesh.position.clone();
             
             return mesh;
         }
 
-        // --- CREATE CARDS WITH YOUR COORDINATES ---
+        // --- CREATE CARDS WITH FIXED POSITIONS FROM SCREENSHOTS ---
         
-        // Intro (No control needed, static)
+        // Intro
         const cardIntro = createCard("Welcome", "Start", 0.092, 9.5, -0.067);
         const qIntro = cardIntro.quaternion.clone();
 
-        // Card C
+        // Card C (Logical Pos)
         const cardC = createCard("Viewpoint C", "Detail One", -3.49, 1.30, 1.23);
         const qC = cardC.quaternion.clone();
         cards['C'] = cardC;
 
-        // Card D
-        const cardD = createCard("Viewpoint D", "Detail Two", 0.077, 1.30, 4.0);
+        // Card D (From Screenshot: X: 0.08, Y: 1.10, Z: 4.00)
+        const cardD = createCard("Viewpoint D", "Detail Two", 0.08, 1.10, 4.00);
         const qD = cardD.quaternion.clone();
         cards['D'] = cardD;
 
-        // Card E
-        const cardE = createCard("Viewpoint E", "Detail Three", 3.77, 1.30, 1.30);
+        // Card E (From Screenshot: X: 3.77, Y: 1.10, Z: 1.30)
+        const cardE = createCard("Viewpoint E", "Detail Three", 3.77, 1.10, 1.30);
         const qE = cardE.quaternion.clone();
         cards['E'] = cardE;
 
-        // Card F
-        const cardF = createCard("Viewpoint F", "Detail Four", 2.21, 1.30, -3.16);
+        // Card F (From Screenshot: X: 2.21, Y: 0.90, Z: -3.16)
+        const cardF = createCard("Viewpoint F", "Detail Four", 2.21, 0.90, -3.16);
         const qF = cardF.quaternion.clone();
         cards['F'] = cardF;
 
@@ -205,7 +201,7 @@
         scene.add(cardIntro); 
         scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF); scene.add(cardG);
 
-        // --- STATIONS (NEW PATH: Intro -> G -> C -> D -> E -> F -> Loop G) ---
+        // --- STATIONS (Path: Intro -> G -> C -> D -> E -> F -> Loop G) ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: cardIntro, quat: qIntro },
@@ -245,20 +241,15 @@
         window.moveSelected = function(dir) {
             const card = cards[selectedCardKey];
             if(!card) return;
-            
             if(dir === 'up') card.position.y += 0.2;
             if(dir === 'down') card.position.y -= 0.2;
-            
-            // Update quaternion to keep looking at center roughly
             card.lookAt(new THREE.Vector3(-0.006, card.position.y, -0.008));
-            
             updateCoordDisplay();
         };
 
         window.resizeSelected = function(val) {
             const card = cards[selectedCardKey];
             if(!card) return;
-            
             const scale = parseFloat(val);
             card.scale.set(scale, scale, scale);
         };
@@ -266,36 +257,19 @@
         function updateCoordDisplay() {
             const card = cards[selectedCardKey];
             if(!card) return;
-            
             const p = card.position;
             const s = card.scale.x;
-            
             document.getElementById('coord-display').innerHTML = 
-                `<strong>Card ${selectedCardKey}:</strong><br>` +
-                `X: ${p.x.toFixed(2)}<br>` +
-                `Y: ${p.y.toFixed(2)}<br>` +
-                `Z: ${p.z.toFixed(2)}<br>` +
-                `Size: ${s.toFixed(1)}`;
-                
-            // Update slider to match current size
+                `<strong>Card ${selectedCardKey}:</strong><br>X: ${p.x.toFixed(2)}<br>Y: ${p.y.toFixed(2)}<br>Z: ${p.z.toFixed(2)}<br>Size: ${s.toFixed(1)}`;
             document.getElementById('size-slider').value = s;
         }
-        
-        // Initialize display
         updateSelectedCard();
 
         window.nextStation = function() {
             if (isAnimating) return;
-            
-            // Logic: Intro(0) -> G(1) -> C(2) -> D(3) -> E(4) -> F(5) -> G(1)...
-            if (currentStationIndex === 0) {
-                currentStationIndex = 1; // Go to G
-            } else if (currentStationIndex === 5) {
-                currentStationIndex = 1; // From F go back to G
-            } else {
-                currentStationIndex++; // Normal progression
-            }
-            
+            if (currentStationIndex === 0) currentStationIndex = 1;
+            else if (currentStationIndex === 5) currentStationIndex = 1;
+            else currentStationIndex++;
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
         };
@@ -314,17 +288,27 @@
         // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
+            const time = Date.now() * 0.001;
 
-            // Glass Effect Logic
+            // Glass Effect & Random Blur/Shine Logic
             STATIONS.forEach(station => {
                 if(station.card) {
                     const dist = camera.position.distanceTo(station.pos);
                     if (dist < 2.5) {
+                        // AT STATION: Face Camera & 100% Opacity (Glass Background Visible)
                         station.card.lookAt(camera.position);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
+                        // Stop random movement when focused
+                        station.card.position.lerp(station.userData.originalPos, 0.1);
                     } else {
+                        // AWAY: Return to Original Rotation & 5% Opacity (Ghostly)
                         station.card.quaternion.slerp(station.quat, 0.1);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
+                        
+                        // RANDOM SHINE/FLOAT EFFECT
+                        const offset = station.userData.randomOffset;
+                        station.card.position.y = station.userData.originalPos.y + Math.sin(time + offset) * 0.1;
+                        station.card.position.x = station.userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
                     }
                 }
             });
