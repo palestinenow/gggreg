@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Bodoni Moda SC</title>
+    <title>Cinematic Orbit - Old Standard TT</title>
     
-    <!-- IMPORT BODONI MODA SC FONT -->
+    <!-- IMPORT OLD STANDARD TT FONT -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Bodoni Moda SC', serif; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Old Standard TT', serif; }
         
         /* START SCREEN */
         #blocker {
@@ -22,13 +22,13 @@
             border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
         h1 { margin: 0 0 10px 0; color: #333; font-size: 64px; font-weight: 700; letter-spacing: 2px; }
-        p { margin: 0; color: #666; font-size: 24px; font-weight: 500; }
+        p { margin: 0; color: #666; font-size: 24px; font-weight: 400; }
 
         /* MAIN BUTTON */
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
         button.main-btn {
             background: #000; color: #fff; border: none; padding: 15px 40px;
-            font-family: 'Bodoni Moda SC', serif; font-size: 24px; font-weight: 600; cursor: pointer;
+            font-family: 'Old Standard TT', serif; font-size: 24px; font-weight: 700; cursor: pointer;
             border-radius: 50px; transition: all 0.3s ease; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); letter-spacing: 1px;
         }
@@ -36,7 +36,7 @@
 
         #status { 
             position: absolute; bottom: 40px; left: 40px; 
-            color: #333; font-size: 24px; font-weight: 500; z-index: 100; opacity: 0.6; letter-spacing: 1px;
+            color: #333; font-size: 24px; font-weight: 400; z-index: 100; opacity: 0.6; letter-spacing: 1px;
         }
 
         /* CONTROL PANEL STYLES */
@@ -65,7 +65,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1>Cinematic Tour</h1>
-            <p>Click to start<br>Bodoni Moda SC Edition</p>
+            <p>Click to start<br>Old Standard TT Edition</p>
         </div>
     </div>
 
@@ -125,28 +125,21 @@
         let selectedCardKey = 'C';
         let cards = {};
 
-        // --- HELPER TO CREATE BODONI MODA SC CARDS WITH GLASS BACKGROUND ---
+        // --- HELPER TO CREATE OLD STANDARD TT TEXT CARDS (NO BACKGROUND) ---
         function createCard(textTitle, textSub, x, y, z) {
             const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
             const context = canvas.getContext('2d');
             
-            // 5% White Background for Glass Effect
-            context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
-            context.fillRect(0, 0, 1024, 1024);
-            
-            // Border for definition
-            context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-            context.lineWidth = 10;
-            context.strokeRect(50, 50, 924, 924);
+            // NO BACKGROUND - Transparent
 
-            // Text Title
-            context.font = '140px "Bodoni Moda SC"'; 
-            context.fillStyle = '#000000'; context.textAlign = 'center';
+            // Text Title - WHITE
+            context.font = 'bold 140px "Old Standard TT"'; 
+            context.fillStyle = '#ffffff'; context.textAlign = 'center';
             context.fillText(textTitle, 512, 400);
             
-            // Text Subtitle
-            context.font = '90px "Bodoni Moda SC"'; 
-            context.fillStyle = '#333333';
+            // Text Subtitle - WHITE (slightly softer)
+            context.font = 'italic 90px "Old Standard TT"'; 
+            context.fillStyle = '#eeeeee';
             context.fillText(textSub, 512, 550);
             
             const texture = new THREE.CanvasTexture(canvas);
@@ -167,37 +160,38 @@
             return mesh;
         }
 
-        // --- CREATE CARDS WITH FIXED POSITIONS FROM SCREENSHOTS ---
+        // --- CREATE CARDS WITH FIXED POSITIONS ---
         
         // Intro
         const cardIntro = createCard("Welcome", "Start", 0.092, 9.5, -0.067);
         const qIntro = cardIntro.quaternion.clone();
 
-        // Card C (Logical Pos)
+        // Card C
         const cardC = createCard("Viewpoint C", "Detail One", -3.49, 1.30, 1.23);
         const qC = cardC.quaternion.clone();
         cards['C'] = cardC;
 
-        // Card D (From Screenshot: X: 0.08, Y: 1.10, Z: 4.00)
+        // Card D
         const cardD = createCard("Viewpoint D", "Detail Two", 0.08, 1.10, 4.00);
         const qD = cardD.quaternion.clone();
         cards['D'] = cardD;
 
-        // Card E (From Screenshot: X: 3.77, Y: 1.10, Z: 1.30)
+        // Card E
         const cardE = createCard("Viewpoint E", "Detail Three", 3.77, 1.10, 1.30);
         const qE = cardE.quaternion.clone();
         cards['E'] = cardE;
 
-        // Card F (From Screenshot: X: 2.21, Y: 0.90, Z: -3.16)
+        // Card F
         const cardF = createCard("Viewpoint F", "Detail Four", 2.21, 0.90, -3.16);
         const qF = cardF.quaternion.clone();
         cards['F'] = cardF;
 
-        // Card G (Overview)
+        // Card G (Overview) - ENSURED IT IS ADDED
         const cardG = createCard("Overview", "Wide View", -3.403, 2.5, -4.008);
         const qG = cardG.quaternion.clone();
         cards['G'] = cardG;
 
+        // ADD ALL CARDS TO SCENE
         scene.add(cardIntro); 
         scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF); scene.add(cardG);
 
@@ -290,13 +284,12 @@
             requestAnimationFrame(animate);
             const time = Date.now() * 0.001;
 
-            // Glass Effect & Random Blur/Shine Logic
+            // Pure Text Logic with Random Float
             STATIONS.forEach(station => {
-                // FIX: Only animate if the station has a card AND userData exists
                 if(station.card && station.card.userData) {
                     const dist = camera.position.distanceTo(station.pos);
                     if (dist < 2.5) {
-                        // AT STATION: Face Camera & 100% Opacity (Glass Background Visible)
+                        // AT STATION: Face Camera & 100% Opacity
                         station.card.lookAt(camera.position);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
                         // Stop random movement when focused
@@ -310,7 +303,7 @@
                         }
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
                         
-                        // RANDOM SHINE/FLOAT EFFECT
+                        // RANDOM FLOAT EFFECT
                         if(station.card.userData.originalPos && station.card.userData.randomOffset !== undefined) {
                             const offset = station.card.userData.randomOffset;
                             station.card.position.y = station.card.userData.originalPos.y + Math.sin(time + offset) * 0.1;
