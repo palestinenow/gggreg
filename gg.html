@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinefdssdmatic Orbit - Real Glass Effect</title>
+    <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400&display=swap');
         
@@ -10,10 +10,57 @@
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
         #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
-        #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; display: flex; gap: 15px; }
-        button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        button.main-btn:hover { background: #000; transform: translateY(-2px); }
-        #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
+        
+        /* Navigation Buttons - Positioned Left & Right, Vertically Centered */
+        #actions { 
+            position: fixed;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+            z-index: 100;
+            pointer-events: none; /* Let clicks pass through empty areas */
+        }
+        
+        .nav-btn {
+            background: rgba(51, 51, 51, 0.9);
+            color: #fff;
+            border: none;
+            padding: 18px 35px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            pointer-events: auto; /* Enable clicks on buttons */
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-btn:hover { 
+            background: rgba(0, 0, 0, 0.95); 
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        
+        .nav-btn:active { 
+            transform: translateY(0) scale(0.98);
+        }
+        
+        #status { 
+            position: fixed; 
+            bottom: 40px; 
+            left: 50%;
+            transform: translateX(-50%);
+            color: #333; 
+            font-size: 16px; 
+            z-index: 100; 
+            opacity: 0.7;
+            font-family: 'Inter', sans-serif;
+        }
         
         /* Vignette overlay */
         #vignette {
@@ -31,7 +78,7 @@
         /* Glass Navigation Bar - Positioned LOWER */
         .glass-nav {
             position: fixed;
-            top: 68%; /* MOVED LOWER from 58% to 68% */
+            top: 68%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 92%;
@@ -184,6 +231,8 @@
             .glass-input, .conf-msg { font-size: 0.85rem; }
             .send-btn { width: 34px; height: 34px; }
             .send-btn svg { width: 14px; height: 14px; }
+            #actions { padding: 0 20px; }
+            .nav-btn { padding: 15px 25px; font-size: 14px; }
         }
         
         /* Control Panel */
@@ -382,9 +431,10 @@
         </div>
     </div>
 
+    <!-- Navigation Buttons - Left & Right, Vertically Centered -->
     <div id="actions">
-        <button class="main-btn" onclick="prevStation()">⬅️ PREVIOUS</button>
-        <button class="main-btn" onclick="nextStation()">NEXT ➡️</button>
+        <button class="nav-btn" onclick="prevStation()">⬅️ Previous</button>
+        <button class="nav-btn" onclick="nextStation()">Next ➡️</button>
     </div>
 
     <div id="status">Ready...</div>
@@ -503,8 +553,8 @@
         
         let step = 1;
         let wishText = '';
-        let navShown = false; // Track if nav has been shown
-        let navVisible = false; // Track current visibility state
+        let navShown = false;
+        let navVisible = false;
 
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -957,7 +1007,6 @@
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
-            // Hide nav when leaving - will show again when arrived at C
             if (currentStationIndex !== 1) {
                 hideNavBar();
             }
@@ -979,7 +1028,6 @@
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
             
-            // Hide nav when leaving - will show again when arrived at C
             if (currentStationIndex !== 1) {
                 hideNavBar();
             }
@@ -1012,7 +1060,6 @@
             updateGlow();
             updateBlur();
 
-            // Show nav ONLY when we've ARRIVED at Station C (not during animation)
             if (currentStationIndex === 1 && !isAnimating && animationProgress >= 1) {
                 showNavBar();
             }
@@ -1035,7 +1082,6 @@
                     isAnimating = false; 
                     document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
                     
-                    // Show nav when arrived at C
                     if (currentStationIndex === 1) {
                         showNavBar();
                     }
