@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Elegant White Glass</title>
+    <title>Cinematic Orbit - Pinyon Script</title>
+    
+    <!-- IMPORT PINYON SCRIPT FONT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap" rel="stylesheet">
+
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: 'Pinyon Script', cursive; }
         
         /* START SCREEN */
         #blocker {
@@ -15,20 +21,23 @@
             color: black; text-align: center; padding: 30px; border: 1px solid #ddd;
             border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        h1 { margin: 0 0 10px 0; color: #333; font-weight: 300; letter-spacing: 2px; }
-        p { margin: 0; color: #666; font-weight: 300; }
+        h1 { margin: 0 0 10px 0; color: #333; font-size: 48px; font-weight: 400; }
+        p { margin: 0; color: #666; font-size: 24px; }
 
         /* MAIN BUTTON */
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
         button.main-btn {
-            background: #000; color: #fff; border: none; padding: 15px 30px;
-            font-weight: 300; cursor: pointer; font-size: 16px; border-radius: 50px;
-            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            letter-spacing: 1px; text-transform: uppercase;
+            background: #000; color: #fff; border: none; padding: 15px 40px;
+            font-family: 'Pinyon Script', cursive; font-size: 28px; cursor: pointer;
+            border-radius: 50px; transition: all 0.3s ease; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         button.main-btn:hover { background: #333; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
 
-        #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 12px; z-index: 100; opacity: 0.5; letter-spacing: 1px; text-transform: uppercase; }
+        #status { 
+            position: absolute; bottom: 40px; left: 40px; 
+            color: #333; font-size: 24px; z-index: 100; opacity: 0.6; 
+        }
     </style>
 </head>
 <body>
@@ -36,8 +45,8 @@
     <!-- START SCREEN -->
     <div id="blocker">
         <div id="instructions">
-            <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>Elegant floating labels.</p>
+            <h1>Cinematic Tour</h1>
+            <p>Click to start<br>Elegant floating labels</p>
         </div>
     </div>
 
@@ -69,38 +78,41 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // --- HELPER TO CREATE ELEGANT WHITE TEXT CARDS ---
+        // --- HELPER TO CREATE PINYON SCRIPT TEXT CARDS ---
         function createElegantCard(textTitle, textSub) {
-            const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+            const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024;
             const context = canvas.getContext('2d');
+            
+            // Load Font for Canvas
+            context.font = '120px "Pinyon Script"'; 
             
             // NO BACKGROUND - Transparent
             
-            // Elegant Thin Font
-            context.font = '300 80px "Helvetica Neue", Helvetica, Arial, sans-serif'; 
+            // Title
             context.fillStyle = '#ffffff'; 
             context.textAlign = 'center';
-            context.fillText(textTitle.toUpperCase(), 256, 200);
+            context.fillText(textTitle, 512, 400);
             
-            context.font = '300 40px "Helvetica Neue", Helvetica, Arial, sans-serif'; 
-            context.fillStyle = '#cccccc';
-            context.fillText(textSub, 256, 280);
+            // Subtitle
+            context.font = '80px "Pinyon Script"'; 
+            context.fillStyle = '#eeeeee';
+            context.fillText(textSub, 512, 550);
             
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.MeshBasicMaterial({ 
                 map: texture, transparent: true, opacity: 1.0, side: THREE.DoubleSide, depthWrite: false 
             });
-            const geometry = new THREE.PlaneGeometry(2.5, 2.5); 
+            const geometry = new THREE.PlaneGeometry(3, 3); 
             const mesh = new THREE.Mesh(geometry, material);
             
             // Store original position for random movement
             mesh.userData.originalPos = mesh.position.clone();
-            mesh.userData.randomOffset = Math.random() * 1000; // For sine wave timing
+            mesh.userData.randomOffset = Math.random() * 1000; 
             
             return mesh;
         }
 
-        // --- CREATE 5 CARDS (Intro, G, C, D, E, F) ---
+        // --- CREATE CARDS ---
         
         // 1. Intro Card
         const cardIntro = createElegantCard("Welcome", "Start of Journey");
@@ -108,9 +120,9 @@
         cardIntro.lookAt(new THREE.Vector3(-0.006, 9.5, -0.008)); 
         const qIntro = cardIntro.quaternion.clone();
 
-        // 2. Card G (The Empty/Wide View Station)
+        // 2. Card G (Overview)
         const cardG = createElegantCard("Overview", "Wide Perspective");
-        cardG.position.set(-3.403, 2.5, -4.008); // Near G station but higher for visibility
+        cardG.position.set(-3.403, 2.5, -4.008); 
         cardG.lookAt(new THREE.Vector3(-0.006, 2.5, -0.008)); 
         const qG = cardG.quaternion.clone();
 
@@ -140,11 +152,11 @@
 
         scene.add(cardIntro); scene.add(cardG); scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
 
-        // --- STATIONS (NEW ORDER: Intro -> G -> C -> D -> E -> F) ---
+        // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: cardIntro, quat: qIntro },
-            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: cardG, quat: qG }, // The Empty Station
+            { name: "G: Overview", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: cardG, quat: qG },
             { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), card: cardC, quat: qC },
             { name: "D: Second", pos: new THREE.Vector3(0.077, 1.301, 5.964), card: cardD, quat: qD },
             { name: "E: Third", pos: new THREE.Vector3(5.276, 1.338, 1.737), card: cardE, quat: qE },
@@ -156,7 +168,7 @@
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 3.0; // Slightly slower for elegance
+        const ANIMATION_DURATION = 3.0;
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -173,10 +185,7 @@
 
         window.nextStation = function() {
             if (isAnimating) return;
-            
-            // Cycle through the new order: Intro -> G -> C -> D -> E -> F -> Intro...
             currentStationIndex = (currentStationIndex + 1) % STATIONS.length;
-            
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
         };
@@ -198,24 +207,18 @@
 
             const time = Date.now() * 0.001;
 
-            // ELEGANT GLASS & RANDOM SHINE LOGIC
             STATIONS.forEach(station => {
                 if(station.card) {
                     const dist = camera.position.distanceTo(station.pos);
                     
                     if (dist < 2.5) {
-                        // AT STATION: Face Camera & 100% Opacity & Sharp
                         station.card.lookAt(camera.position);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 1.0, 0.1);
-                        
-                        // Reset to original position (stop floating)
                         station.card.position.lerp(station.userData.originalPos, 0.1);
                     } else {
-                        // AWAY: Return to Original Rotation & 5% Opacity & Blur Effect
                         station.card.quaternion.slerp(station.quat, 0.1);
                         station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
                         
-                        // Random "Shine/Float" Movement when inactive
                         const offset = station.userData.randomOffset;
                         station.card.position.y = station.userData.originalPos.y + Math.sin(time + offset) * 0.1;
                         station.card.position.x = station.userData.originalPos.x + Math.cos(time + offset * 0.5) * 0.05;
