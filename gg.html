@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Cinematic Orbit - Real Glass Effect</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; cursor: none; }
+        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
         #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
@@ -12,32 +12,6 @@
         button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         button.main-btn:hover { background: #000; transform: translateY(-2px); }
         #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
-        
-        /* Custom cursor */
-        #cursor {
-            position: fixed;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 1000;
-            transform: translate(-50%, -50%);
-            transition: width 0.2s, height 0.2s, border-color 0.2s;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        }
-        
-        #cursor-dot {
-            position: fixed;
-            width: 4px;
-            height: 4px;
-            background: #fff;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 1001;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-        }
         
         /* Vignette overlay */
         #vignette {
@@ -244,7 +218,7 @@
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>Move your mouse to look around</p>
+            <p>Click to start.<br>The card is now real frosted glass.</p>
         </div>
     </div>
 
@@ -256,8 +230,6 @@
     <div id="status">Ready...</div>
     
     <div id="vignette"></div>
-    <div id="cursor"></div>
-    <div id="cursor-dot"></div>
     
     <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
     
@@ -318,10 +290,6 @@
             <div class="slider-control">
                 <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
                 <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
-            </div>
-            <div class="slider-control">
-                <label>Parallax Strength: <span id="parallax-val">50%</span></label>
-                <input type="range" id="parallax-strength" min="0" max="100" value="50" step="5">
             </div>
             <div id="blur-status">Blur: INACTIVE</div>
         </div>
@@ -425,44 +393,20 @@
             alert('Config exported to console!');
         };
 
-        // --- MOUSE PARALLAX SYSTEM ---
+        // --- VERY SUBTLE MOUSE PARALLAX ---
         let mouseX = 0;
         let mouseY = 0;
         let targetMouseX = 0;
         let targetMouseY = 0;
-        let parallaxStrength = 0.5;
-        
-        // Custom cursor
-        const cursor = document.getElementById('cursor');
-        const cursorDot = document.getElementById('cursor-dot');
         
         document.addEventListener('mousemove', (e) => {
             targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
             targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-            
-            // Move custom cursor
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-            cursorDot.style.left = e.clientX + 'px';
-            cursorDot.style.top = e.clientY + 'px';
         });
         
         document.addEventListener('mouseleave', () => {
             targetMouseX = 0;
             targetMouseY = 0;
-            cursor.style.opacity = '0';
-            cursorDot.style.opacity = '0';
-        });
-        
-        document.addEventListener('mouseenter', () => {
-            cursor.style.opacity = '1';
-            cursorDot.style.opacity = '1';
-        });
-        
-        // Parallax strength slider
-        document.getElementById('parallax-strength').addEventListener('input', (e) => {
-            parallaxStrength = e.target.value / 100;
-            document.getElementById('parallax-val').textContent = e.target.value + '%';
         });
 
         // --- SCENE SETUP ---
@@ -475,10 +419,8 @@
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // Store base camera rotation and position for parallax
-        let baseCameraPosition = new THREE.Vector3();
-        let baseCameraQuaternion = new THREE.Quaternion();
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
+        let baseCameraPosition = new THREE.Vector3();
 
         // --- BLOOM EFFECT ---
         const renderScene = new RenderPass(scene, camera);
@@ -530,7 +472,7 @@
         });
         
         function getRandomDuration() {
-            return 10000 + Math.random() * 20000; // 10s to 30s
+            return 10000 + Math.random() * 20000;
         }
         
         function updateGlow() {
@@ -740,7 +682,6 @@
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
             baseCameraPosition.copy(camera.position);
-            baseCameraQuaternion.copy(camera.quaternion);
             positionCards();
         }, undefined, function (error) { console.error(error); });
 
@@ -800,43 +741,38 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
         
-        // Smooth mouse movement
+        // Very subtle mouse movement - just a tiny shift
         function updateMouseParallax() {
-            mouseX += (targetMouseX - mouseX) * 0.05;
-            mouseY += (targetMouseY - mouseY) * 0.05;
+            mouseX += (targetMouseX - mouseX) * 0.02;
+            mouseY += (targetMouseY - mouseY) * 0.02;
         }
         
         function applyParallax() {
             if (isAnimating) return;
             
-            // Calculate offset based on mouse position
-            const offsetX = mouseX * 0.5 * parallaxStrength;
-            const offsetY = mouseY * 0.3 * parallaxStrength;
+            // Tiny offset - maximum 0.15 units
+            const offsetX = mouseX * 0.15;
+            const offsetY = mouseY * 0.10;
             
-            // Create a quaternion for the parallax rotation
-            const parallaxQuat = new THREE.Quaternion();
-            const up = new THREE.Vector3(0, 1, 0);
-            const right = new THREE.Vector3(1, 0, 0);
-            
-            // Rotate around world Y and local X
-            const yRot = new THREE.Quaternion().setFromAxisAngle(up, offsetX * 0.3);
-            const xRot = new THREE.Quaternion().setFromAxisAngle(right, offsetY * 0.2);
-            
-            parallaxQuat.multiplyQuaternions(yRot, xRot);
-            
-            // Apply to camera while maintaining look at center
+            // Calculate direction from center
             const direction = new THREE.Vector3().subVectors(POINT_CENTER, baseCameraPosition).normalize();
             const distance = baseCameraPosition.distanceTo(POINT_CENTER);
             
-            // Apply rotation to direction
-            direction.applyQuaternion(parallaxQuat);
+            // Create rotation quaternions for tiny movement
+            const up = new THREE.Vector3(0, 1, 0);
+            const right = new THREE.Vector3(1, 0, 0);
+            
+            const yRot = new THREE.Quaternion().setFromAxisAngle(up, offsetX * 0.08);
+            const xRot = new THREE.Quaternion().setFromAxisAngle(right, offsetY * 0.05);
+            
+            const parallaxQuat = new THREE.Quaternion().multiplyQuaternions(yRot, xRot);
+            
+            // Apply to direction
+            const newDir = direction.clone().applyQuaternion(parallaxQuat);
             
             // Set new camera position
-            camera.position.copy(POINT_CENTER.clone().add(direction.multiplyScalar(-distance)));
+            camera.position.copy(POINT_CENTER.clone().add(newDir.multiplyScalar(-distance)));
             camera.lookAt(POINT_CENTER);
-            
-            // Update base quaternion
-            baseCameraQuaternion.copy(camera.quaternion);
         }
 
         // --- ANIMATION LOOP ---
@@ -870,7 +806,6 @@
                     isAnimating = false; 
                     document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
                     baseCameraPosition.copy(camera.position);
-                    baseCameraQuaternion.copy(camera.quaternion);
                 }
                 const t = easeInOutCubic(animationProgress);
                 const p0 = window.animControlPoints.start; 
