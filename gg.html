@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Real Glass Effect</title>
+    <title>Cinematic fzeezReal Glass Effect</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
@@ -393,11 +393,15 @@
             alert('Config exported to console!');
         };
 
-        // --- VERY SUBTLE MOUSE PARALLAX ---
+        // --- VERY SUBTLE MOUSE PARALLAX WITH STRICT LIMITS ---
         let mouseX = 0;
         let mouseY = 0;
         let targetMouseX = 0;
         let targetMouseY = 0;
+        
+        // Maximum movement limits (very small)
+        const MAX_OFFSET_X = 0.08;
+        const MAX_OFFSET_Y = 0.05;
         
         document.addEventListener('mousemove', (e) => {
             targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -741,7 +745,7 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
         }
         
-        // Very subtle mouse movement - just a tiny shift
+        // Very subtle mouse movement with strict limits
         function updateMouseParallax() {
             mouseX += (targetMouseX - mouseX) * 0.02;
             mouseY += (targetMouseY - mouseY) * 0.02;
@@ -750,9 +754,13 @@
         function applyParallax() {
             if (isAnimating) return;
             
-            // Tiny offset - maximum 0.15 units
-            const offsetX = mouseX * 0.15;
-            const offsetY = mouseY * 0.10;
+            // Clamp mouse values to limits
+            const clampedX = Math.max(-1, Math.min(1, mouseX));
+            const clampedY = Math.max(-1, Math.min(1, mouseY));
+            
+            // Tiny offset with strict limits
+            const offsetX = clampedX * MAX_OFFSET_X;
+            const offsetY = clampedY * MAX_OFFSET_Y;
             
             // Calculate direction from center
             const direction = new THREE.Vector3().subVectors(POINT_CENTER, baseCameraPosition).normalize();
@@ -762,8 +770,8 @@
             const up = new THREE.Vector3(0, 1, 0);
             const right = new THREE.Vector3(1, 0, 0);
             
-            const yRot = new THREE.Quaternion().setFromAxisAngle(up, offsetX * 0.08);
-            const xRot = new THREE.Quaternion().setFromAxisAngle(right, offsetY * 0.05);
+            const yRot = new THREE.Quaternion().setFromAxisAngle(up, offsetX);
+            const xRot = new THREE.Quaternion().setFromAxisAngle(right, offsetY);
             
             const parallaxQuat = new THREE.Quaternion().multiplyQuaternions(yRot, xRot);
             
