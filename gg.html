@@ -2,27 +2,124 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Real Glass Effect</title>
+    <title>Cinematic Orbit - Multi-Glass Cards</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
-        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
-        #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
+        
+        /* START SCREEN */
+        #blocker {
+            position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95);
+            display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer;
+        }
+        #instructions {
+            color: black; text-align: center; padding: 30px; border: 2px solid #333;
+            border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 { margin: 0 0 10px 0; color: #333; }
+        p { margin: 0; color: #666; }
+
+        /* MAIN BUTTON */
         #actions { position: absolute; bottom: 40px; right: 40px; z-index: 100; }
-        button.main-btn { background: #333; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        button.main-btn {
+            background: #333; color: #fff; border: none; padding: 15px 30px;
+            font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 50px;
+            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
         button.main-btn:hover { background: #000; transform: translateY(-2px); }
+
         #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
+
+        /* CARD CONTROLS PANEL */
+        #card-controls {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255, 255, 255, 0.95); padding: 15px;
+            border: 1px solid #ddd; border-radius: 8px; z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-family: monospace; width: 160px;
+        }
+        #card-controls h3 { margin: 0 0 10px 0; font-size: 14px; color: #333; text-transform: uppercase; }
+        
+        .selector {
+            width: 100%; padding: 5px; margin-bottom: 10px;
+            border: 1px solid #ccc; border-radius: 4px;
+        }
+
+        .coord-display {
+            background: #f0f0f0; padding: 8px; border-radius: 4px;
+            font-size: 11px; margin-bottom: 10px; color: #555; line-height: 1.4;
+        }
+        
+        .control-group { margin-bottom: 8px; text-align: center; }
+        .depth-btns { display: flex; justify-content: center; gap: 10px; margin-bottom: 5px; }
+        .xy-btns { display: grid; grid-template-columns: 30px 30px 30px; gap: 4px; justify-content: center; }
+        
+        .ctrl-btn {
+            width: 30px; height: 30px;
+            background: #eee; border: 1px solid #ccc;
+            border-radius: 4px; cursor: pointer;
+            font-weight: bold; color: #333;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+        }
+        .ctrl-btn:hover { background: #ddd; }
+        .ctrl-btn:active { background: #333; color: white; }
+        
+        .reset-btn {
+            width: 100%; padding: 8px;
+            background: #ffdddd; border: 1px solid #ffcccc;
+            color: #cc0000; cursor: pointer; border-radius: 4px;
+            font-size: 12px; font-weight: bold;
+        }
+        .reset-btn:hover { background: #ffcccc; }
     </style>
 </head>
 <body>
 
+    <!-- START SCREEN -->
     <div id="blocker">
         <div id="instructions">
             <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>The card is now real frosted glass.</p>
+            <p>Click to start.<br>Use controls to position cards for C, D, E, F.</p>
         </div>
     </div>
 
+    <!-- CARD CONTROLS -->
+    <div id="card-controls">
+        <h3>Edit Card</h3>
+        <select class="selector" id="card-selector" onchange="updateSelectedCard()">
+            <option value="C">Card C (First)</option>
+            <option value="D">Card D (2)</option>
+            <option value="E">Card E (3)</option>
+            <option value="F">Card F (4)</option>
+        </select>
+
+        <div class="coord-display" id="coord-text">X: 0.00<br>Y: 0.00<br>Z: 0.00</div>
+        
+        <!-- Depth Control -->
+        <div class="control-group">
+            <div style="font-size:10px; color:#999; margin-bottom:2px;">DEPTH</div>
+            <div class="depth-btns">
+                <button class="ctrl-btn" onclick="moveSelectedCard('fwd')">⬆️ Fwd</button>
+                <button class="ctrl-btn" onclick="moveSelectedCard('back')">⬇️ Back</button>
+            </div>
+        </div>
+
+        <!-- XY Control -->
+        <div class="control-group">
+            <div style="font-size:10px; color:#999; margin-bottom:2px;">POSITION</div>
+            <div class="xy-btns">
+                <div></div>
+                <button class="ctrl-btn" onclick="moveSelectedCard('up')">▲</button>
+                <div></div>
+                <button class="ctrl-btn" onclick="moveSelectedCard('left')">◀</button>
+                <button class="ctrl-btn" onclick="moveSelectedCard('down')">▼</button>
+                <button class="ctrl-btn" onclick="moveSelectedCard('right')">▶</button>
+            </div>
+        </div>
+        
+        <button class="reset-btn" onclick="resetSelectedCard()">RESET POS</button>
+    </div>
+
+    <!-- MAIN ACTION -->
     <div id="actions">
         <button class="main-btn" onclick="nextStation()">NEXT STATION ➡️</button>
     </div>
@@ -50,58 +147,70 @@
         const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
         const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
-        // --- REAL GLASS CARD ---
-        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
-        const context = canvas.getContext('2d');
-        
-        // Draw a semi-transparent white background for the "Frosted" look
-        context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
-        context.fillRect(0, 0, 512, 512);
-        
-        // Border
-        context.strokeStyle = '#ffffff'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
-        
-        // Text
-        context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
-        context.fillText("INFO", 256, 200);
-        context.font = '30px Arial'; context.fillStyle = '#555';
-        context.fillText("Viewpoint C", 256, 280);
-        
-        const pageTexture = new THREE.CanvasTexture(canvas);
-        
-        // USE STANDARD MATERIAL WITH HIGH TRANSPARENCY FOR GLASS
-        const pageMaterial = new THREE.MeshStandardMaterial({ 
-            map: pageTexture,
-            transparent: true,
-            opacity: 0.8, // Start high
-            roughness: 0.1, // Smooth like glass
-            metalness: 0.1,
-            side: THREE.DoubleSide,
-            depthWrite: false, // CRITICAL: Allows seeing through overlapping parts
-            blending: THREE.NormalBlending
-        });
-        
-        const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
-        const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
-        
-        // FIXED POSITION
-        floatingPage.position.set(-3.61, 1.30, 1.17);
-        
-        // Initial Rotation
-        floatingPage.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
-        const INITIAL_QUATERNION = floatingPage.quaternion.clone();
-        
-        scene.add(floatingPage);
+        // --- HELPER TO CREATE GLASS CARDS ---
+        function createGlassCard(textTitle, textSub) {
+            const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+            const context = canvas.getContext('2d');
+            
+            // Frosted Background
+            context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
+            context.fillRect(0, 0, 512, 512);
+            
+            // Border
+            context.strokeStyle = '#ffffff'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
+            
+            // Text
+            context.font = 'bold 60px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
+            context.fillText(textTitle, 256, 200);
+            context.font = '40px Arial'; context.fillStyle = '#555';
+            context.fillText(textSub, 256, 280);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.MeshStandardMaterial({ 
+                map: texture, transparent: true, opacity: 0.8, roughness: 0.1, metalness: 0.1, side: THREE.DoubleSide, depthWrite: false 
+            });
+            const geometry = new THREE.PlaneGeometry(1.5, 1.5);
+            const mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+
+        // --- CREATE 4 CARDS ---
+        const cardC = createGlassCard("INFO", "Viewpoint C");
+        const cardD = createGlassCard("INFO", "Viewpoint D");
+        const cardE = createGlassCard("INFO", "Viewpoint E");
+        const cardF = createGlassCard("INFO", "Viewpoint F");
+
+        // Initial Positions (Near their respective stations)
+        cardC.position.set(-3.61, 1.30, 1.727); // Near C
+        cardD.position.set(0.077, 1.30, 4.0);  // Near D
+        cardE.position.set(3.5, 1.30, 1.737);  // Near E
+        cardF.position.set(1.5, 1.30, -3.0);   // Near F
+
+        // Store Default Positions for Reset
+        const defaults = {
+            C: cardC.position.clone(),
+            D: cardD.position.clone(),
+            E: cardE.position.clone(),
+            F: cardF.position.clone()
+        };
+
+        // Store Quaternions for Rotation Reset
+        cardC.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); const qC = cardC.quaternion.clone();
+        cardD.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); const qD = cardD.quaternion.clone();
+        cardE.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); const qE = cardE.quaternion.clone();
+        cardF.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); const qF = cardF.quaternion.clone();
+
+        scene.add(cardC); scene.add(cardD); scene.add(cardE); scene.add(cardF);
 
         // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
-            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
+            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067), card: null },
+            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727), card: cardC, quat: qC },
+            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964), card: cardD, quat: qD },
+            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737), card: cardE, quat: qE },
+            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664), card: cardF, quat: qF },
+            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008), card: null }
         ];
 
         let currentStationIndex = 0;
@@ -123,6 +232,51 @@
 
         // --- UI LOGIC ---
         document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour Started"; });
+
+        // --- CARD CONTROL LOGIC ---
+        let selectedCardKey = 'C';
+        let selectedCardObj = cardC;
+
+        window.updateSelectedCard = function() {
+            selectedCardKey = document.getElementById('card-selector').value;
+            if(selectedCardKey === 'C') selectedCardObj = cardC;
+            if(selectedCardKey === 'D') selectedCardObj = cardD;
+            if(selectedCardKey === 'E') selectedCardObj = cardE;
+            if(selectedCardKey === 'F') selectedCardObj = cardF;
+            updateCoordDisplay();
+        };
+
+        const MOVE_STEP = 0.2;
+        window.moveSelectedCard = function(direction) {
+            const camDir = new THREE.Vector3();
+            camera.getWorldDirection(camDir);
+            camDir.y = 0; camDir.normalize();
+
+            if(direction === 'fwd') selectedCardObj.position.addScaledVector(camDir, MOVE_STEP);
+            else if(direction === 'back') selectedCardObj.position.addScaledVector(camDir, -MOVE_STEP);
+            else if(direction === 'up') selectedCardObj.position.y += MOVE_STEP;
+            else if(direction === 'down') selectedCardObj.position.y -= MOVE_STEP;
+            else if(direction === 'left') selectedCardObj.position.x -= MOVE_STEP;
+            else if(direction === 'right') selectedCardObj.position.x += MOVE_STEP;
+            
+            updateCoordDisplay();
+        };
+
+        window.resetSelectedCard = function() {
+            selectedCardObj.position.copy(defaults[selectedCardKey]);
+            if(selectedCardKey === 'C') selectedCardObj.quaternion.copy(qC);
+            if(selectedCardKey === 'D') selectedCardObj.quaternion.copy(qD);
+            if(selectedCardKey === 'E') selectedCardObj.quaternion.copy(qE);
+            if(selectedCardKey === 'F') selectedCardObj.quaternion.copy(qF);
+            updateCoordDisplay();
+        };
+
+        function updateCoordDisplay() {
+            const p = selectedCardObj.position;
+            document.getElementById('coord-text').innerHTML = 
+                `<strong>${selectedCardKey}:</strong><br>X: ${p.x.toFixed(2)}<br>Y: ${p.y.toFixed(2)}<br>Z: ${p.z.toFixed(2)}`;
+        }
+        updateCoordDisplay();
 
         window.nextStation = function() {
             if (isAnimating) return;
@@ -147,23 +301,21 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // GLASS LOGIC
-            const distToC = camera.position.distanceTo(STATIONS[1].pos);
-            
-            if (distToC < 2.5) {
-                // AT STATION C: FROSTED GLASS WINDOW
-                floatingPage.lookAt(camera.position);
-                
-                // Opacity 0.4 means 60% transparent. You see the tree clearly.
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.4, 0.1);
-                
-            } else {
-                // AWAY: GHOSTLY / INVISIBLE
-                floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1);
-                
-                // Opacity 0.05 means 95% transparent. Almost gone.
-                floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.05, 0.1);
-            }
+            // SMART GLASS LOGIC FOR ALL CARDS
+            STATIONS.forEach(station => {
+                if(station.card) {
+                    const dist = camera.position.distanceTo(station.pos);
+                    if (dist < 2.5) {
+                        // AT STATION: Face Camera & Frosted Glass
+                        station.card.lookAt(camera.position);
+                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.4, 0.1);
+                    } else {
+                        // AWAY: Return to Original Rotation & Ghostly
+                        station.card.quaternion.slerp(station.quat, 0.1);
+                        station.card.material.opacity = THREE.MathUtils.lerp(station.card.material.opacity, 0.05, 0.1);
+                    }
+                }
+            });
 
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
