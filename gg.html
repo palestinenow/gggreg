@@ -43,67 +43,51 @@
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
         // --- LIGHTS ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
-        scene.add(ambientLight);
-        
-        const spotLight = new THREE.SpotLight(0xffeeff, 2); 
-        spotLight.position.set(0, 10, 0); 
-        spotLight.angle = Math.PI / 4; 
-        spotLight.penumbra = 0.5; 
-        spotLight.decay = 1; 
-        spotLight.distance = 50; 
-        spotLight.castShadow = true; 
-        scene.add(spotLight); 
-        spotLight.target.position.set(-0.006, 1.041, -0.008);
-        scene.add(spotLight.target);
-        
-        const centerLight = new THREE.PointLight(0xff00ff, 1, 10); 
-        centerLight.position.set(-0.006, 1.041, -0.008); 
-        scene.add(centerLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
+        const spotLight = new THREE.SpotLight(0xffeeff, 2); spotLight.position.set(0, 10, 0); spotLight.angle = Math.PI / 4; spotLight.penumbra = 0.5; spotLight.decay = 1; spotLight.distance = 50; spotLight.castShadow = true; scene.add(spotLight); spotLight.target.position.set(-0.006, 1.041, -0.008);
+        const centerLight = new THREE.PointLight(0xff00ff, 1, 10); centerLight.position.set(-0.006, 1.041, -0.008); scene.add(centerLight);
 
         // --- REAL GLASS CARD ---
-        const canvas = document.createElement('canvas'); 
-        canvas.width = 512; 
-        canvas.height = 512;
+        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
         const context = canvas.getContext('2d');
         
+        // Draw a semi-transparent white background for the "Frosted" look
         context.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
         context.fillRect(0, 0, 512, 512);
         
-        context.strokeStyle = '#ffffff'; 
-        context.lineWidth = 20; 
-        context.strokeRect(20, 20, 472, 472);
+        // Border
+        context.strokeStyle = '#ffffff'; context.lineWidth = 20; context.strokeRect(20, 20, 472, 472);
         
-        context.font = 'bold 50px Arial'; 
-        context.fillStyle = '#333'; 
-        context.textAlign = 'center';
+        // Text
+        context.font = 'bold 50px Arial'; context.fillStyle = '#333'; context.textAlign = 'center';
         context.fillText("INFO", 256, 200);
-        context.font = '30px Arial'; 
-        context.fillStyle = '#555';
+        context.font = '30px Arial'; context.fillStyle = '#555';
         context.fillText("Viewpoint C", 256, 280);
         
         const pageTexture = new THREE.CanvasTexture(canvas);
         
+        // USE STANDARD MATERIAL WITH HIGH TRANSPARENCY FOR GLASS
         const pageMaterial = new THREE.MeshStandardMaterial({ 
             map: pageTexture,
             transparent: true,
-            opacity: 0.8,
-            roughness: 0.1,
+            opacity: 0.8, // Start high
+            roughness: 0.1, // Smooth like glass
             metalness: 0.1,
             side: THREE.DoubleSide,
-            depthWrite: false,
+            depthWrite: false, // CRITICAL: Allows seeing through overlapping parts
             blending: THREE.NormalBlending
         });
         
         const pageGeometry = new THREE.PlaneGeometry(1.5, 1.5);
         const floatingPage = new THREE.Mesh(pageGeometry, pageMaterial);
         
+        // FIXED POSITION
         floatingPage.position.set(-3.61, 1.30, 1.17);
         
+        // Initial Rotation
         floatingPage.lookAt(new THREE.Vector3(-0.006, 1.30, -0.008)); 
         const INITIAL_QUATERNION = floatingPage.quaternion.clone();
         
@@ -131,26 +115,14 @@
         const loader = new GLTFLoader();
         loader.load('./environment_vr_room_baked.glb', function (gltf) {
             const model = gltf.scene;
-            model.traverse((child) => { 
-                if (child.isMesh) { 
-                    child.castShadow = true; 
-                    child.receiveShadow = true; 
-                    if (child.name.toLowerCase().includes('tree')) { 
-                        child.material.emissive = new THREE.Color(0xaa00aa); 
-                        child.material.emissiveIntensity = 0.5; 
-                    } 
-                } 
-            });
+            model.traverse((child) => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; if (child.name.toLowerCase().includes('tree')) { child.material.emissive = new THREE.Color(0xaa00aa); child.material.emissiveIntensity = 0.5; } } });
             scene.add(model);
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
         }, undefined, function (error) { console.error(error); });
 
         // --- UI LOGIC ---
-        document.getElementById('blocker').addEventListener('click', function() { 
-            this.style.display = 'none'; 
-            document.getElementById('status').innerText = "Tour Started"; 
-        });
+        document.getElementById('blocker').addEventListener('click', function() { this.style.display = 'none'; document.getElementById('status').innerText = "Tour Started"; });
 
         window.nextStation = function() {
             if (isAnimating) return;
@@ -161,10 +133,7 @@
         };
 
         function startAnimation(targetPos) {
-            isAnimating = true; 
-            animationProgress = 0; 
-            startPos.copy(camera.position); 
-            endPos.copy(targetPos);
+            isAnimating = true; animationProgress = 0; startPos.copy(camera.position); endPos.copy(targetPos);
             const center = POINT_CENTER.clone();
             const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
             const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
@@ -172,9 +141,7 @@
             window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
         }
 
-        function easeInOutCubic(t) { 
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
-        }
+        function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
         // --- ANIMATION LOOP ---
         function animate() {
@@ -184,24 +151,25 @@
             const distToC = camera.position.distanceTo(STATIONS[1].pos);
             
             if (distToC < 2.5) {
+                // AT STATION C: FROSTED GLASS WINDOW
                 floatingPage.lookAt(camera.position);
+                
+                // Opacity 0.4 means 60% transparent. You see the tree clearly.
                 floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.4, 0.1);
+                
             } else {
+                // AWAY: GHOSTLY / INVISIBLE
                 floatingPage.quaternion.slerp(INITIAL_QUATERNION, 0.1);
+                
+                // Opacity 0.05 means 95% transparent. Almost gone.
                 floatingPage.material.opacity = THREE.MathUtils.lerp(floatingPage.material.opacity, 0.05, 0.1);
             }
 
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
-                if (animationProgress >= 1) { 
-                    animationProgress = 1; 
-                    isAnimating = false; 
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
-                }
+                if (animationProgress >= 1) { animationProgress = 1; isAnimating = false; document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; }
                 const t = easeInOutCubic(animationProgress);
-                const p0 = window.animControlPoints.start; 
-                const p1 = window.animControlPoints.mid; 
-                const p2 = window.animControlPoints.end;
+                const p0 = window.animControlPoints.start; const p1 = window.animControlPoints.mid; const p2 = window.animControlPoints.end;
                 const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
                 const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
                 const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
