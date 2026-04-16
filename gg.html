@@ -20,7 +20,6 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
-        /* Custom animations and styles */
         @keyframes fadeRise {
             0% { opacity: 0; transform: translateY(20px); }
             100% { opacity: 1; transform: translateY(0); }
@@ -33,157 +32,79 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; overflow-x: hidden; }
         
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-        
-        /* Transition for landing page fade */
         #landing-page { transition: opacity 0.8s ease-out, visibility 0.8s ease-out; }
         #landing-page.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         
-        /* Hide canvas initially */
-        #three-canvas-container { display: none; }
+        #three-canvas-container { 
+            display: none; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
         #three-canvas-container.visible { display: block; }
+        
+        #three-canvas-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Ensure UI elements are above canvas */
+        #actions, #status, #vignette, #glassNav, #toggle-panel, #control-panel {
+            position: fixed;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
-    <!-- LANDING PAGE (React App) -->
+    <!-- LANDING PAGE -->
     <div id="landing-page">
         <div id="root"></div>
     </div>
 
-    <!-- 3D TOUR CONTAINER (Hidden until Join is clicked) -->
+    <!-- 3D TOUR CONTAINER -->
     <div id="three-canvas-container">
         <!-- Three.js canvas will be appended here -->
-        
-        <!-- Navigation Buttons with Hydro Ripple Effect -->
-        <div id="actions">
-            <button class="hydro-btn" id="prevBtn" onclick="prevStation()">
-                <span class="hydro-btn-content">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    <span>Previous</span>
-                </span>
-                <span class="highlight"></span>
-            </button>
-            <button class="hydro-btn" id="nextBtn" onclick="nextStation()">
-                <span class="hydro-btn-content">
-                    <span>Next</span>
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                </span>
-                <span class="highlight"></span>
-            </button>
-        </div>
-
-        <div id="status">Ready...</div>
-        
-        <div id="vignette"></div>
-        
-        <!-- Glass Navigation Bar -->
-        <nav class="glass-nav" id="glassNav">
-            <div class="dot"></div>
-            <div class="input-wrap" id="inputWrap"></div>
-            <button class="send-btn" id="sendBtn" aria-label="Submit">
-                <svg viewBox="0 0 24 24">
-                    <line x1="22" y1="2" x2="11" y2="13"/>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </div>
+    
+    <!-- Navigation Buttons -->
+    <div id="actions" style="display: none;">
+        <button class="hydro-btn" id="prevBtn" onclick="prevStation()" style="position: fixed; left: 40px; top: 50%; transform: translateY(-50%);">
+            <span class="hydro-btn-content">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px;">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-            </button>
-            <div class="dot"></div>
-        </nav>
-        
-        <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
-        
-        <div id="control-panel" style="display: none;">
-            <h3>🎛️ DEBUG CONTROLS</h3>
-            
-            <div class="control-group">
-                <h4>📍 SELECT STATION CARD</h4>
-                <div class="station-selector">
-                    <button class="station-btn" onclick="selectStation(2)">D: 2</button>
-                    <button class="station-btn" onclick="selectStation(3)">E: 3</button>
-                    <button class="station-btn" onclick="selectStation(4)">F: 4</button>
-                    <button class="station-btn" onclick="selectStation(5)">G: 5</button>
-                </div>
-                <div id="selected-station" class="coord-display">Selected: Station D</div>
-            </div>
-            
-            <div class="control-group">
-                <h4>🎯 CARD POSITION</h4>
-                <div class="pos-control">
-                    <label>X:</label>
-                    <input type="number" id="pos-x" step="0.01" value="0.10">
-                    <button onclick="moveCard('x', -0.1)">-</button>
-                    <button onclick="moveCard('x', 0.1)">+</button>
-                </div>
-                <div class="pos-control">
-                    <label>Y:</label>
-                    <input type="number" id="pos-y" step="0.01" value="1.20">
-                    <button onclick="moveCard('y', -0.1)">-</button>
-                    <button onclick="moveCard('y', 0.1)">+</button>
-                </div>
-                <div class="pos-control">
-                    <label>Z:</label>
-                    <input type="number" id="pos-z" step="0.01" value="4.00">
-                    <button onclick="moveCard('z', -0.1)">-</button>
-                    <button onclick="moveCard('z', 0.1)">+</button>
-                </div>
-                <div style="margin-top: 10px;">
-                    <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
-                    <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
-                </div>
-            </div>
-            
-            <div class="control-group">
-                <h4>🎨 VIGNETTE EFFECT</h4>
-                <div class="slider-control">
-                    <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
-                    <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
-                </div>
-                <div class="slider-control">
-                    <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
-                    <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
-                </div>
-                <div class="slider-control">
-                    <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
-                    <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
-                </div>
-                <div class="slider-control">
-                    <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
-                    <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
-                </div>
-                <div id="blur-status">Blur: INACTIVE</div>
-            </div>
-            
-            <div class="control-group">
-                <h4>✨ GLOW EFFECT</h4>
-                <div class="slider-control">
-                    <label>Min Strength: <span id="glow-min-val">23%</span></label>
-                    <input type="range" id="glow-min" min="0" max="30" value="23" step="1">
-                </div>
-                <div class="slider-control">
-                    <label>Max Strength: <span id="glow-max-val">39%</span></label>
-                    <input type="range" id="glow-max" min="20" max="80" value="39" step="1">
-                </div>
-            </div>
-            
-            <div class="action-buttons">
-                <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
-                <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
-            </div>
-        </div>
+                <span>Previous</span>
+            </span>
+        </button>
+        <button class="hydro-btn" id="nextBtn" onclick="nextStation()" style="position: fixed; right: 40px; top: 50%; transform: translateY(-50%);">
+            <span class="hydro-btn-content">
+                <span>Next</span>
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px;">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+            </span>
+        </button>
+    </div>
+
+    <div id="status" style="display: none; position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); color: #333; font-size: 16px; z-index: 100; opacity: 0.7; font-family: 'Inter', sans-serif;">Ready...</div>
+    
+    <div id="vignette" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);"></div>
+    
+    <button id="toggle-panel" onclick="toggleControlPanel()" style="display: none; position: fixed; top: 20px; right: 20px; background: #003300; color: #0f0; border: 2px solid #0f0; padding: 10px 20px; cursor: pointer; font-family: monospace; font-weight: bold; border-radius: 5px; z-index: 201;">🎮 CONTROLS</button>
+    
+    <div id="control-panel" style="display: none; position: fixed; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.8); color: #0f0; padding: 20px; border-radius: 10px; font-family: monospace; z-index: 200; max-height: 90vh; overflow-y: auto; min-width: 300px; border: 2px solid #0f0;">
+        <h3 style="margin: 0 0 15px 0; text-align: center; color: #0f0; border-bottom: 1px solid #0f0; padding-bottom: 10px;">🎛️ DEBUG CONTROLS</h3>
+        <p style="color: #0f0; font-size: 12px;">Tour is active</p>
     </div>
 
     <!-- React Landing Page Code -->
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
 
-        // Navigation Component
         const Navigation = () => {
             const [isScrolled, setIsScrolled] = useState(false);
 
@@ -196,80 +117,49 @@
             }, []);
 
             return (
-                <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-                    isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'
-                }`}>
+                <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
                     <div className="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
-                        {/* Logo */}
                         <div className="text-3xl tracking-tight text-black" style={{ fontFamily: 'Instrument Serif, serif' }}>
                             Aethera<sup className="text-sm align-super">®</sup>
                         </div>
-
-                        {/* Desktop Menu */}
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#home" className="text-sm text-black transition-colors duration-200 hover:text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>Home</a>
-                            <a href="#studio" className="text-sm text-[#6F6F6F] transition-colors duration-200 hover:text-black" style={{ fontFamily: 'Inter, sans-serif' }}>Studio</a>
-                            <a href="#about" className="text-sm text-[#6F6F6F] transition-colors duration-200 hover:text-black" style={{ fontFamily: 'Inter, sans-serif' }}>About</a>
-                            <a href="#journal" className="text-sm text-[#6F6F6F] transition-colors duration-200 hover:text-black" style={{ fontFamily: 'Inter, sans-serif' }}>Journal</a>
-                            <a href="#reach-us" className="text-sm text-[#6F6F6F] transition-colors duration-200 hover:text-black" style={{ fontFamily: 'Inter, sans-serif' }}>Reach Us</a>
+                            <a href="#home" className="text-sm text-black">Home</a>
+                            <a href="#studio" className="text-sm text-[#6F6F6F]">Studio</a>
+                            <a href="#about" className="text-sm text-[#6F6F6F]">About</a>
                         </div>
-
-                        {/* CTA Button - NOW TRIGGERS TOUR START */}
                         <button 
-                            className="rounded-full px-6 py-2.5 text-sm bg-black text-white hover-scale-103 transition-all duration-300" 
-                            style={{ fontFamily: 'Inter, sans-serif' }}
+                            className="rounded-full px-6 py-2.5 text-sm bg-black text-white hover:scale-105 transition-all duration-300"
                             onClick={() => window.startTourFromLanding()}
                         >
                             Join
-                        </button>
-
-                        {/* Mobile Menu Button */}
-                        <button className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                            <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
                         </button>
                     </div>
                 </nav>
             );
         };
 
-        // Hero Section Component
         const HeroSection = () => {
             return (
                 <div className="relative min-h-screen w-full overflow-hidden bg-white">
-                    {/* White Background Only - Video Removed */}
                     <div className="absolute inset-0 z-0 bg-white" />
-
-                    {/* Gradient Overlay - Subtle */}
                     <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white via-white/95 to-white pointer-events-none" />
-
-                    {/* Navigation Bar */}
                     <div className="relative z-10">
                         <Navigation />
                     </div>
-
-                    {/* Hero Content */}
                     <div className="relative z-10 flex flex-col items-center justify-center text-center px-6"
                          style={{ paddingTop: 'calc(8rem - 75px)', paddingBottom: '10rem' }}>
-                        {/* Headline */}
                         <h1 className="animate-fade-rise text-5xl sm:text-7xl md:text-8xl max-w-7xl font-normal leading-[0.95] tracking-[-2.46px]"
                             style={{ fontFamily: 'Instrument Serif, serif' }}>
                             Beyond <span className="text-[#6F6F6F]">silence,</span> we build
                             <br />
                             the <span className="text-[#6F6F6F]">eternal.</span>
                         </h1>
-
-                        {/* Description */}
                         <p className="animate-fade-rise-delay text-base sm:text-lg max-w-2xl mt-8 leading-relaxed text-[#6F6F6F]"
                            style={{ fontFamily: 'Inter, sans-serif' }}>
                             Building platforms for brilliant minds, fearless makers, and thoughtful souls.
-                            Through the noise, we craft digital havens for deep work and pure flows.
                         </p>
-
-                        {/* Hero CTA Button - NOW TRIGGERS TOUR START */}
                         <button
-                            className="animate-fade-rise-delay-2 rounded-full px-14 py-5 text-base mt-12 bg-black text-white hover-scale-103 transition-all duration-300"
+                            className="animate-fade-rise-delay-2 rounded-full px-14 py-5 text-base mt-12 bg-black text-white hover:scale-105 transition-all duration-300"
                             style={{ fontFamily: 'Inter, sans-serif' }}
                             onClick={() => window.startTourFromLanding()}
                         >
@@ -280,7 +170,6 @@
             );
         };
 
-        // App Component
         const App = () => {
             return (
                 <div className="App">
@@ -289,7 +178,6 @@
             );
         };
 
-        // Render the app
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 
@@ -298,7 +186,6 @@
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
     </script>
 
-    <!-- Three.js Tour Code (Module) -->
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -306,271 +193,6 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-        // === GLOBAL FUNCTIONS FOR LANDING PAGE INTEGRATION ===
-        window.startTourFromLanding = function() {
-            console.log('Starting tour from landing page...');
-            
-            // Fade out landing page
-            const landingPage = document.getElementById('landing-page');
-            landingPage.classList.add('hidden');
-            
-            // Show Three.js container
-            const canvasContainer = document.getElementById('three-canvas-container');
-            canvasContainer.classList.add('visible');
-            
-            // Initialize and start the tour
-            initAndStartTour();
-        };
-
-        // === HYDRO RIPPLE BUTTON LOGIC ===
-        const hydroButtons = document.querySelectorAll('.hydro-btn');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        
-        // Zone-based proximity (each button covers half the screen)
-        document.addEventListener('mousemove', (e) => {
-            const screenWidth = window.innerWidth;
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-            
-            const isInLeftHalf = mouseX < screenWidth / 2;
-            const isInRightHalf = mouseX >= screenWidth / 2;
-            
-            // Calculate distance to center of each button
-            if (prevBtn) {
-                const prevRect = prevBtn.getBoundingClientRect();
-                const prevCenterX = prevRect.left + prevRect.width / 2;
-                const prevCenterY = prevRect.top + prevRect.height / 2;
-                const prevDistance = Math.sqrt(
-                    Math.pow(mouseX - prevCenterX, 2) + 
-                    Math.pow(mouseY - prevCenterY, 2)
-                );
-                
-                let prevProximity = 0;
-                if (isInLeftHalf) {
-                    const normalizedDist = Math.min(prevDistance / 800, 1);
-                    prevProximity = 1 - normalizedDist;
-                    prevProximity = Math.max(prevProximity, 0.3 - (mouseX / screenWidth) * 0.3);
-                } else {
-                    const normalizedDist = Math.min(prevDistance / 1200, 1);
-                    prevProximity = (1 - normalizedDist) * 0.2;
-                }
-                
-                prevBtn.style.setProperty('--proximity', Math.max(0, prevProximity));
-            }
-            
-            if (nextBtn) {
-                const nextRect = nextBtn.getBoundingClientRect();
-                const nextCenterX = nextRect.left + nextRect.width / 2;
-                const nextCenterY = nextRect.top + nextRect.height / 2;
-                const nextDistance = Math.sqrt(
-                    Math.pow(mouseX - nextCenterX, 2) + 
-                    Math.pow(mouseY - nextCenterY, 2)
-                );
-                
-                let nextProximity = 0;
-                if (isInRightHalf) {
-                    const normalizedDist = Math.min(nextDistance / 800, 1);
-                    nextProximity = 1 - normalizedDist;
-                    nextProximity = Math.max(nextProximity, 0.3 - ((screenWidth - mouseX) / screenWidth) * 0.3);
-                } else {
-                    const normalizedDist = Math.min(nextDistance / 1200, 1);
-                    nextProximity = (1 - normalizedDist) * 0.2;
-                }
-                
-                nextBtn.style.setProperty('--proximity', Math.max(0, nextProximity));
-            }
-        });
-        
-        // Auto-bloom every 2 seconds
-        function triggerAutoBloom() {
-            hydroButtons.forEach(btn => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
-        }
-        setInterval(triggerAutoBloom, 2000);
-        
-        // Hover bloom
-        hydroButtons.forEach(btn => {
-            btn.addEventListener('mouseenter', () => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
-        });
-
-        // === GLASS NAV FUNCTIONALITY ===
-        const nav = document.getElementById('glassNav');
-        const inputWrap = document.getElementById('inputWrap');
-        const sendBtn = document.getElementById('sendBtn');
-        
-        let step = 1;
-        let wishText = '';
-        let navShown = false;
-        let navVisible = false;
-
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString + 'T00:00:00').toLocaleDateString('en-US', options);
-        }
-
-        function initNav() {
-            inputWrap.innerHTML = `<input type="text" class="glass-input" id="mainInput" placeholder="You are in front of the tree of life. Make a wish..." autocomplete="off">`;
-            const inp = document.getElementById('mainInput');
-            if (inp) {
-                inp.focus();
-                inp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
-            }
-        }
-
-        function handleSend() {
-            const inp = document.querySelector('.glass-input');
-            const val = inp?.value.trim();
-            
-            if (step === 1) {
-                if (!val) return;
-                wishText = val;
-                step = 2;
-                
-                inputWrap.style.opacity = '0';
-                setTimeout(() => {
-                    inputWrap.innerHTML = `<input type="date" class="glass-input" id="dateInput" required>`;
-                    inputWrap.style.opacity = '1';
-                    const dateInp = document.getElementById('dateInput');
-                    if (dateInp) {
-                        dateInp.focus();
-                        dateInp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
-                    }
-                }, 250);
-
-            } else if (step === 2) {
-                if (!val) return;
-                step = 3;
-                
-                const displayDate = formatDate(val);
-                
-                sendBtn.style.opacity = '0';
-                sendBtn.style.pointerEvents = 'none';
-                inputWrap.style.opacity = '0';
-                
-                setTimeout(() => {
-                    inputWrap.innerHTML = `
-                        <p class="conf-msg" id="confMsg">
-                            Come back on <em>${displayDate}</em>.<br>
-                            Your wish will become true.
-                        </p>
-                    `;
-                    inputWrap.style.opacity = '1';
-                    requestAnimationFrame(() => document.getElementById('confMsg')?.classList.add('show'));
-                    
-                    setTimeout(() => {
-                        nav.classList.add('vanish');
-                        nav.classList.remove('visible');
-                        navVisible = false;
-                        step = 1;
-                        sendBtn.style.opacity = '1';
-                        sendBtn.style.pointerEvents = 'auto';
-                    }, 3500);
-                    
-                }, 300);
-            }
-        }
-
-        sendBtn.addEventListener('click', handleSend);
-        initNav();
-
-        function showNavBar() {
-            if (!navVisible) {
-                nav.classList.remove('vanish');
-                nav.classList.add('visible');
-                navVisible = true;
-                navShown = true;
-                step = 1;
-                sendBtn.style.opacity = '1';
-                sendBtn.style.pointerEvents = 'auto';
-                initNav();
-            }
-        }
-
-        function hideNavBar() {
-            if (navVisible) {
-                nav.classList.remove('visible');
-                nav.classList.add('vanish');
-                navVisible = false;
-            }
-        }
-
-        // === GLOBAL FUNCTIONS ===
-        window.toggleControlPanel = function() {
-            const panel = document.getElementById('control-panel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        };
-        
-        let selectedStation = 2;
-        window.selectStation = function(index) {
-            selectedStation = index;
-            const stationNames = ['', 'C: First', 'D: 2', 'E: 3', 'F: 4', 'G: 5'];
-            document.getElementById('selected-station').textContent = `Selected: Station ${stationNames[index]}`;
-            
-            if (cards[index]) {
-                document.getElementById('pos-x').value = cards[index].position.x.toFixed(2);
-                document.getElementById('pos-y').value = cards[index].position.y.toFixed(2);
-                document.getElementById('pos-z').value = cards[index].position.z.toFixed(2);
-            }
-            
-            document.querySelectorAll('.station-btn').forEach((btn, i) => {
-                if (i === index - 2) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-        };
-        
-        window.moveCard = function(axis, delta) {
-            const input = document.getElementById(`pos-${axis}`);
-            input.value = (parseFloat(input.value) + delta).toFixed(2);
-            applyPosition();
-        };
-        
-        window.applyPosition = function() {
-            if (cards[selectedStation]) {
-                const x = parseFloat(document.getElementById('pos-x').value);
-                const y = parseFloat(document.getElementById('pos-y').value);
-                const z = parseFloat(document.getElementById('pos-z').value);
-                cards[selectedStation].position.set(x, y, z);
-                cardPositions[selectedStation] = { x, y, z };
-            }
-        };
-        
-        window.copyPosition = function() {
-            if (cards[selectedStation]) {
-                const pos = cards[selectedStation].position;
-                const text = `Station ${selectedStation}: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`;
-                navigator.clipboard?.writeText(text);
-                alert('Position copied: ' + text);
-            }
-        };
-        
-        window.saveSettings = function() {
-            alert('Settings saved!');
-        };
-        
-        window.exportConfig = function() {
-            const config = {
-                cards: cardPositions,
-                vignette: {
-                    center: document.getElementById('vignette-center').value,
-                    darkness: document.getElementById('vignette-darkness').value,
-                    mid: document.getElementById('vignette-mid').value
-                },
-                glow: {
-                    min: MIN_STRENGTH,
-                    max: MAX_STRENGTH
-                }
-            };
-            console.log('CONFIG:', JSON.stringify(config, null, 2));
-            alert('Config exported to console!');
-        };
-
-        // === THREE.JS SCENE SETUP ===
         let scene, camera, renderer, composer, bloomPass;
         let cards = [];
         let currentStationIndex = 0;
@@ -580,7 +202,6 @@
         let endPos = new THREE.Vector3();
         const ANIMATION_DURATION = 2.5;
         
-        // Card positions
         const cardPositions = {
             2: { x: 0.10, y: 1.20, z: 4.00 },
             3: { x: 3.60, y: 1.25, z: 1.20 },
@@ -588,337 +209,6 @@
             5: { x: -2.20, y: 1.25, z: -2.70 }
         };
 
-        // === POST-PROCESSING: BLOOM EFFECT ===
-        function setupPostProcessing() {
-            const renderScene = new RenderPass(scene, camera);
-            
-            // Bloom pass - Cinematic glow configuration
-            bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-            bloomPass.threshold = 0.1;   // Low threshold = more things glow
-            bloomPass.strength = 0.23;   // Soft, elegant bloom strength
-            bloomPass.radius = 0.8;      // Wide, dreamy halo effect
-            
-            composer = new EffectComposer(renderer);
-            composer.addPass(renderScene);
-            composer.addPass(bloomPass);
-        }
-
-        // === INIT AND START TOUR ===
-        window.initAndStartTour = function() {
-            console.log('Initializing tour...');
-            
-            // Setup scene
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xffffff); 
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            
-            // Append canvas to container
-            const container = document.getElementById('three-canvas-container');
-            container.appendChild(renderer.domElement);
-            
-            // Setup post-processing
-            setupPostProcessing();
-            
-            // Setup lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
-            scene.add(ambientLight);
-            
-            const spotLight = new THREE.SpotLight(0xffeeff, 2); 
-            spotLight.position.set(0, 10, 0); 
-            spotLight.angle = Math.PI / 4; 
-            spotLight.penumbra = 0.5; 
-            spotLight.decay = 1; 
-            spotLight.distance = 50; 
-            spotLight.castShadow = true; 
-            scene.add(spotLight); 
-            spotLight.target.position.set(-0.006, 1.041, -0.008);
-            scene.add(spotLight.target);
-            
-            const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10); 
-            centerLight.position.set(-0.006, 1.041, -0.008); 
-            scene.add(centerLight);
-            
-            // Create cards
-            createCards();
-            
-            // Load model
-            loadModel();
-            
-            // Start animation loop
-            animate();
-            
-            // Setup resize listener
-            window.addEventListener('resize', onWindowResize);
-        };
-
-        // === CREATE CARDS ===
-        function createCards() {
-            const STATIONS = [
-                { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-                { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-                { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-                { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-                { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-                { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
-            ];
-            
-            for (let i = 2; i < STATIONS.length; i++) {
-                const card = createCard(STATIONS[i].name, i);
-                cards[i] = card;
-                scene.add(card);
-            }
-            
-            positionCards();
-        }
-        
-        function createCard(stationName, stationIndex) {
-            const canvas = document.createElement('canvas'); 
-            canvas.width = 512; 
-            canvas.height = 512;
-            const context = canvas.getContext('2d');
-            
-            context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
-            context.fillRect(0, 0, 512, 512);
-            
-            context.shadowColor = 'rgba(0, 0, 0, 1.0)';
-            context.shadowBlur = 20;
-            context.shadowOffsetX = 4;
-            context.shadowOffsetY = 4;
-            
-            context.font = 'bold 70px Arial'; 
-            context.fillStyle = '#ffffff'; 
-            context.textAlign = 'center';
-            context.fillText(stationName, 256, 200);
-            context.fillText(stationName, 256, 200);
-            
-            context.font = 'bold 45px Arial'; 
-            context.fillStyle = '#ffffff';
-            context.fillText(`Station ${stationIndex}`, 256, 300);
-            context.fillText(`Station ${stationIndex}`, 256, 300);
-            
-            context.font = 'bold 32px Arial';
-            context.fillStyle = '#ffffff';
-            context.fillText('Viewpoint', 256, 370);
-            context.fillText('Viewpoint', 256, 370);
-            
-            context.shadowColor = 'transparent';
-            context.shadowBlur = 0;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-            
-            const pageTexture = new THREE.CanvasTexture(canvas);
-            
-            const pageMaterial = new THREE.MeshStandardMaterial({ 
-                map: pageTexture,
-                transparent: true,
-                opacity: 0.0,
-                roughness: 0.05,
-                metalness: 0.0,
-                side: THREE.DoubleSide,
-                depthWrite: false,
-                blending: THREE.NormalBlending,
-                emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 0.5
-            });
-            
-            const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
-            const card = new THREE.Mesh(pageGeometry, pageMaterial);
-            
-            return card;
-        }
-        
-        function positionCards() {
-            const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
-            for (let i = 2; i <= 5; i++) {
-                if (cards[i] && cardPositions[i]) {
-                    cards[i].position.set(cardPositions[i].x, cardPositions[i].y, cardPositions[i].z);
-                    cards[i].lookAt(POINT_CENTER);
-                }
-            }
-        }
-
-        // === LOAD MODEL ===
-        function loadModel() {
-            const loader = new GLTFLoader();
-            loader.load('./environment_vr_room_baked.glb', function (gltf) {
-                const model = gltf.scene;
-                model.traverse((child) => { 
-                    if (child.isMesh) { 
-                        child.castShadow = true; 
-                        child.receiveShadow = true; 
-                        if (child.name.toLowerCase().includes('tree')) { 
-                            child.material.emissive = new THREE.Color(0xaa00aa); 
-                            child.material.emissiveIntensity = 0.5; 
-                        } 
-                    } 
-                });
-                scene.add(model);
-                
-                // Set initial camera position to Intro station
-                const STATIONS = [
-                    { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-                    { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-                    { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-                    { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-                    { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-                    { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
-                ];
-                const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
-                camera.position.copy(STATIONS[0].pos);
-                camera.lookAt(POINT_CENTER);
-                
-                console.log('Tour initialized at Intro station');
-            }, undefined, function (error) { console.error(error); });
-        }
-
-        // === GLOW PULSE SYSTEM ===
-        let glowStartTime = Date.now();
-        let glowDurationUp = 10000 + Math.random() * 20000;
-        let glowDurationDown = 10000 + Math.random() * 20000;
-        let isGlowingUp = true;
-        
-        let MIN_STRENGTH = 0.10;
-        let MAX_STRENGTH = 0.40;
-        
-        // Setup glow controls
-        const glowMinInput = document.getElementById('glow-min');
-        const glowMaxInput = document.getElementById('glow-max');
-        if (glowMinInput) {
-            glowMinInput.value = 23;
-            glowMinInput.addEventListener('input', (e) => {
-                MIN_STRENGTH = e.target.value / 100;
-                document.getElementById('glow-min-val').textContent = e.target.value + '%';
-            });
-        }
-        if (glowMaxInput) {
-            glowMaxInput.value = 39;
-            glowMaxInput.addEventListener('input', (e) => {
-                MAX_STRENGTH = e.target.value / 100;
-                document.getElementById('glow-max-val').textContent = e.target.value + '%';
-            });
-        }
-        
-        function getRandomDuration() {
-            return 10000 + Math.random() * 20000;
-        }
-        
-        function updateGlow() {
-            if (!bloomPass) return;
-            
-            const now = Date.now();
-            const elapsed = now - glowStartTime;
-            
-            if (isGlowingUp) {
-                const progress = Math.min(elapsed / glowDurationUp, 1);
-                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength;
-                
-                if (progress >= 1) {
-                    isGlowingUp = false;
-                    glowStartTime = now;
-                    glowDurationDown = getRandomDuration();
-                }
-            } else {
-                const progress = Math.min(elapsed / glowDurationDown, 1);
-                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength;
-                
-                if (progress >= 1) {
-                    isGlowingUp = true;
-                    glowStartTime = now;
-                    glowDurationUp = getRandomDuration();
-                }
-            }
-        }
-
-        // === DYNAMIC BLUR SYSTEM ===
-        let blurState = 'waiting';
-        let blurStartTime = Date.now();
-        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
-        
-        function updateBlur() {
-            const now = Date.now();
-            const vignette = document.getElementById('vignette');
-            const blurStatus = document.getElementById('blur-status');
-            
-            if (blurState === 'waiting' && now >= nextBlurTime) {
-                blurState = 'active';
-                blurStartTime = now;
-                blurStatus.textContent = 'Blur: ACTIVE';
-            }
-            
-            if (blurState === 'active') {
-                const elapsed = (now - blurStartTime) / 1000;
-                if (elapsed >= 1.0) {
-                    blurState = 'waiting';
-                    nextBlurTime = now + 4000 + Math.random() * 14000;
-                    vignette.style.backdropFilter = 'blur(0px)';
-                    blurStatus.textContent = 'Blur: INACTIVE';
-                } else {
-                    vignette.style.backdropFilter = `blur(1px)`;
-                }
-            }
-            
-            if (document.getElementById('vignette-blur-val')) {
-                document.getElementById('vignette-blur-val').textContent = 
-                    vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
-            }
-        }
-
-        // === VIGNETTE CONTROLS ===
-        const vignette = document.getElementById('vignette');
-        
-        function updateVignette() {
-            if (!vignette) return;
-            
-            const centerInput = document.getElementById('vignette-center');
-            const darknessInput = document.getElementById('vignette-darkness');
-            const midInput = document.getElementById('vignette-mid');
-            
-            if (!centerInput || !darknessInput || !midInput) return;
-            
-            const center = centerInput.value;
-            const darkness = darknessInput.value / 100;
-            const mid = midInput.value / 100;
-            
-            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
-        }
-        
-        // Setup vignette controls
-        const vignetteCenter = document.getElementById('vignette-center');
-        const vignetteDarkness = document.getElementById('vignette-darkness');
-        const vignetteMid = document.getElementById('vignette-mid');
-        
-        if (vignetteCenter) {
-            vignetteCenter.value = 51;
-            vignetteCenter.addEventListener('input', (e) => {
-                document.getElementById('vignette-center-val').textContent = e.target.value + '%';
-                updateVignette();
-            });
-        }
-        if (vignetteDarkness) {
-            vignetteDarkness.value = 50;
-            vignetteDarkness.addEventListener('input', (e) => {
-                document.getElementById('vignette-darkness-val').textContent = e.target.value + '%';
-                updateVignette();
-            });
-        }
-        if (vignetteMid) {
-            vignetteMid.value = 30;
-            vignetteMid.addEventListener('input', (e) => {
-                document.getElementById('vignette-mid-val').textContent = e.target.value + '%';
-                updateVignette();
-            });
-        }
-        
-        // Initial vignette update
-        updateVignette();
-
-        // === STATION NAVIGATION ===
         const STATIONS = [
             { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
             { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
@@ -928,6 +218,154 @@
             { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
+
+        window.startTourFromLanding = function() {
+            console.log('🚀 Starting tour...');
+            
+            const landingPage = document.getElementById('landing-page');
+            landingPage.classList.add('hidden');
+            
+            const canvasContainer = document.getElementById('three-canvas-container');
+            canvasContainer.classList.add('visible');
+            
+            document.getElementById('actions').style.display = 'flex';
+            document.getElementById('status').style.display = 'block';
+            document.getElementById('vignette').style.display = 'block';
+            document.getElementById('toggle-panel').style.display = 'block';
+            
+            initAndStartTour();
+        };
+
+        window.initAndStartTour = function() {
+            console.log('🎨 Initializing Three.js scene...');
+            
+            try {
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0xffffff);
+                
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.shadowMap.enabled = true;
+                
+                const container = document.getElementById('three-canvas-container');
+                container.appendChild(renderer.domElement);
+                console.log('✅ Canvas appended to DOM');
+                
+                const renderScene = new RenderPass(scene, camera);
+                bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+                bloomPass.threshold = 0.1;
+                bloomPass.strength = 0.23;
+                bloomPass.radius = 0.8;
+                
+                composer = new EffectComposer(renderer);
+                composer.addPass(renderScene);
+                composer.addPass(bloomPass);
+                
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+                scene.add(ambientLight);
+                
+                const spotLight = new THREE.SpotLight(0xffeeff, 2);
+                spotLight.position.set(0, 10, 0);
+                spotLight.angle = Math.PI / 4;
+                spotLight.penumbra = 0.5;
+                spotLight.decay = 1;
+                spotLight.distance = 50;
+                spotLight.castShadow = true;
+                scene.add(spotLight);
+                
+                const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10);
+                centerLight.position.set(-0.006, 1.041, -0.008);
+                scene.add(centerLight);
+                
+                createCards();
+                loadModel();
+                
+                camera.position.copy(STATIONS[0].pos);
+                camera.lookAt(POINT_CENTER);
+                
+                animate();
+                
+                window.addEventListener('resize', onWindowResize);
+                
+                console.log('✅ Tour initialized successfully!');
+                document.getElementById('status').innerText = 'Welcome to the tour';
+                
+            } catch (error) {
+                console.error('❌ Error initializing tour:', error);
+                document.getElementById('status').innerText = 'Error loading tour';
+            }
+        };
+
+        function createCards() {
+            for (let i = 2; i < STATIONS.length; i++) {
+                const card = createCard(STATIONS[i].name, i);
+                cards[i] = card;
+                scene.add(card);
+            }
+            positionCards();
+        }
+        
+        function createCard(stationName, stationIndex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const context = canvas.getContext('2d');
+            
+            context.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            context.fillRect(0, 0, 512, 512);
+            
+            context.font = 'bold 70px Arial';
+            context.fillStyle = '#ffffff';
+            context.textAlign = 'center';
+            context.fillText(stationName, 256, 256);
+            
+            const pageTexture = new THREE.CanvasTexture(canvas);
+            
+            const pageMaterial = new THREE.MeshBasicMaterial({
+                map: pageTexture,
+                transparent: true,
+                opacity: 0.0,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            
+            const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
+            return new THREE.Mesh(pageGeometry, pageMaterial);
+        }
+        
+        function positionCards() {
+            for (let i = 2; i <= 5; i++) {
+                if (cards[i] && cardPositions[i]) {
+                    cards[i].position.set(cardPositions[i].x, cardPositions[i].y, cardPositions[i].z);
+                    cards[i].lookAt(POINT_CENTER);
+                }
+            }
+        }
+
+        function loadModel() {
+            const loader = new GLTFLoader();
+            loader.load('./environment_vr_room_baked.glb', function (gltf) {
+                const model = gltf.scene;
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        if (child.name.toLowerCase().includes('tree')) {
+                            child.material.emissive = new THREE.Color(0xaa00aa);
+                            child.material.emissiveIntensity = 0.5;
+                        }
+                    }
+                });
+                scene.add(model);
+                console.log('✅ 3D Model loaded successfully');
+            }, undefined, function (error) {
+                console.error('❌ Error loading model:', error);
+                document.getElementById('status').innerText = 'Model loading error - check console';
+            });
+        }
 
         window.nextStation = function() {
             if (isAnimating || !scene) return;
@@ -940,14 +378,6 @@
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            
-            if (currentStationIndex !== 1) {
-                hideNavBar();
-            }
-            
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
         };
 
         window.prevStation = function() {
@@ -961,45 +391,29 @@
             }
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            
-            if (currentStationIndex !== 1) {
-                hideNavBar();
-            }
-            
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
         };
 
         function startAnimation(targetPos) {
-            isAnimating = true; 
-            animationProgress = 0; 
-            startPos.copy(camera.position); 
+            isAnimating = true;
+            animationProgress = 0;
+            startPos.copy(camera.position);
             endPos.copy(targetPos);
             const center = POINT_CENTER.clone();
             const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
             const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-            midPoint.add(direction.multiplyScalar(2)); 
+            midPoint.add(direction.multiplyScalar(2));
             window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
         }
 
-        function easeInOutCubic(t) { 
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
 
-        // === ANIMATION LOOP ===
         function animate() {
             requestAnimationFrame(animate);
             
             if (!scene) return;
             
-            updateGlow();
-            updateBlur();
-
-            if (currentStationIndex === 1 && !isAnimating && animationProgress >= 1) {
-                showNavBar();
-            }
-
             for (let i = 2; i < cards.length; i++) {
                 if (cards[i]) {
                     if (i === currentStationIndex) {
@@ -1013,18 +427,14 @@
 
             if (isAnimating) {
                 animationProgress += 0.016 / ANIMATION_DURATION;
-                if (animationProgress >= 1) { 
-                    animationProgress = 1; 
-                    isAnimating = false; 
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
-                    
-                    if (currentStationIndex === 1) {
-                        showNavBar();
-                    }
+                if (animationProgress >= 1) {
+                    animationProgress = 1;
+                    isAnimating = false;
+                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`;
                 }
                 const t = easeInOutCubic(animationProgress);
-                const p0 = window.animControlPoints.start; 
-                const p1 = window.animControlPoints.mid; 
+                const p0 = window.animControlPoints.start;
+                const p1 = window.animControlPoints.mid;
                 const p2 = window.animControlPoints.end;
                 const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
                 const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
@@ -1036,10 +446,8 @@
             composer.render();
         }
 
-        // === RESIZE HANDLER ===
         function onWindowResize() {
             if (!camera || !renderer) return;
-            
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1047,6 +455,11 @@
                 composer.setSize(window.innerWidth, window.innerHeight);
             }
         }
+
+        window.toggleControlPanel = function() {
+            const panel = document.getElementById('control-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        };
     </script>
 </body>
 </html>
