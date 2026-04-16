@@ -150,7 +150,7 @@
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 3.0; // Slightly slower for elegance
+        const ANIMATION_DURATION = 3.0; 
 
         // --- LOAD MODEL ---
         const loader = new GLTFLoader();
@@ -194,11 +194,12 @@
 
             // TEXT CARD LOGIC
             STATIONS.forEach(station => {
-                if(station.card) {
+                // FIX: Only animate if the station actually has a card
+                if (station.card) {
                     const dist = camera.position.distanceTo(station.pos);
                     
                     // FLOATING ANIMATION (Small Bobbing)
-                    station.card.position.y = station.userData.initialY + Math.sin(time + station.userData.floatOffset) * 0.1;
+                    station.card.position.y = station.card.userData.initialY + Math.sin(time + station.card.userData.floatOffset) * 0.1;
 
                     if (dist < 2.5) {
                         // AT STATION: Face Camera & 100% Opacity
