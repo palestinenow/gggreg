@@ -13,7 +13,7 @@
         button.main-btn:hover { background: #000; transform: translateY(-2px); }
         #status { position: absolute; bottom: 40px; left: 40px; color: #333; font-size: 14px; z-index: 100; opacity: 0.7; }
         
-        /* Vignette overlay for extra depth */
+        /* Vignette overlay */
         #vignette {
             position: fixed;
             top: 0;
@@ -23,6 +23,185 @@
             pointer-events: none;
             z-index: 50;
             background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.15) 80%, rgba(0,0,0,0.3) 100%);
+        }
+        
+        /* Control Panel */
+        #control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            z-index: 200;
+            max-height: 90vh;
+            overflow-y: auto;
+            min-width: 300px;
+            border: 2px solid #0f0;
+            box-shadow: 0 0 20px rgba(0,255,0,0.3);
+            pointer-events: auto;
+        }
+        
+        #control-panel h3 {
+            margin: 0 0 15px 0;
+            text-align: center;
+            color: #0f0;
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 10px;
+        }
+        
+        #control-panel h4 {
+            margin: 15px 0 10px 0;
+            color: #0f0;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 5px;
+        }
+        
+        .station-selector {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .station-btn {
+            background: #003300;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 12px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            flex: 1;
+        }
+        
+        .station-btn:hover {
+            background: #0f0;
+            color: black;
+        }
+        
+        .station-btn.active {
+            background: #0f0;
+            color: black;
+            font-weight: bold;
+        }
+        
+        .pos-control {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .pos-control label {
+            width: 20px;
+            color: #0f0;
+            font-weight: bold;
+        }
+        
+        .pos-control input {
+            flex: 1;
+            margin: 0 10px;
+            background: #111;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .pos-control button {
+            background: #003300;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: monospace;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        
+        .pos-control button:hover {
+            background: #0f0;
+            color: black;
+        }
+        
+        .slider-control {
+            margin-bottom: 15px;
+        }
+        
+        .slider-control label {
+            display: block;
+            margin-bottom: 5px;
+            color: #0f0;
+        }
+        
+        .slider-control input {
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        .slider-control span {
+            color: #0f0;
+            float: right;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .action-btn {
+            background: #003300;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 10px;
+            cursor: pointer;
+            font-family: monospace;
+            border-radius: 5px;
+            flex: 1;
+            font-weight: bold;
+        }
+        
+        .action-btn:hover {
+            background: #0f0;
+            color: black;
+        }
+        
+        #toggle-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #003300;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+            border-radius: 5px;
+            z-index: 201;
+        }
+        
+        #toggle-panel:hover {
+            background: #0f0;
+            color: black;
+        }
+        
+        .coord-display {
+            color: #0f0;
+            font-size: 11px;
+            margin-top: 5px;
+            text-align: center;
         }
     </style>
 </head>
@@ -41,8 +220,88 @@
 
     <div id="status">Ready...</div>
     
-    <!-- Vignette overlay for depth effect -->
     <div id="vignette"></div>
+    
+    <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
+    
+    <div id="control-panel" style="display: none;">
+        <h3>🎛️ DEBUG CONTROLS</h3>
+        
+        <div class="control-group">
+            <h4>📍 SELECT STATION CARD</h4>
+            <div class="station-selector">
+                <button class="station-btn" onclick="selectStation(1)">C: First</button>
+                <button class="station-btn" onclick="selectStation(2)">D: 2</button>
+                <button class="station-btn" onclick="selectStation(3)">E: 3</button>
+                <button class="station-btn" onclick="selectStation(4)">F: 4</button>
+                <button class="station-btn" onclick="selectStation(5)">G: 5</button>
+            </div>
+            <div id="selected-station" class="coord-display">Selected: Station C</div>
+        </div>
+        
+        <div class="control-group">
+            <h4>🎯 CARD POSITION</h4>
+            <div class="pos-control">
+                <label>X:</label>
+                <input type="number" id="pos-x" step="0.01" value="-3.61">
+                <button onclick="moveCard('x', -0.1)">-</button>
+                <button onclick="moveCard('x', 0.1)">+</button>
+            </div>
+            <div class="pos-control">
+                <label>Y:</label>
+                <input type="number" id="pos-y" step="0.01" value="1.30">
+                <button onclick="moveCard('y', -0.1)">-</button>
+                <button onclick="moveCard('y', 0.1)">+</button>
+            </div>
+            <div class="pos-control">
+                <label>Z:</label>
+                <input type="number" id="pos-z" step="0.01" value="1.17">
+                <button onclick="moveCard('z', -0.1)">-</button>
+                <button onclick="moveCard('z', 0.1)">+</button>
+            </div>
+            <div style="margin-top: 10px;">
+                <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
+                <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h4>🎨 VIGNETTE EFFECT</h4>
+            <div class="slider-control">
+                <label>Center Clear Area: <span id="vignette-center-val">40%</span></label>
+                <input type="range" id="vignette-center" min="20" max="60" value="40" step="1">
+            </div>
+            <div class="slider-control">
+                <label>Edge Darkness: <span id="vignette-darkness-val">30%</span></label>
+                <input type="range" id="vignette-darkness" min="0" max="50" value="30" step="1">
+            </div>
+            <div class="slider-control">
+                <label>Mid Darkness: <span id="vignette-mid-val">15%</span></label>
+                <input type="range" id="vignette-mid" min="0" max="30" value="15" step="1">
+            </div>
+            <div class="slider-control">
+                <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
+                <input type="range" id="vignette-blur" min="0" max="10" value="0" step="1">
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h4>✨ GLOW EFFECT</h4>
+            <div class="slider-control">
+                <label>Min Strength: <span id="glow-min-val">10%</span></label>
+                <input type="range" id="glow-min" min="0" max="30" value="10" step="1">
+            </div>
+            <div class="slider-control">
+                <label>Max Strength: <span id="glow-max-val">40%</span></label>
+                <input type="range" id="glow-max" min="20" max="80" value="40" step="1">
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
+            <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
+        </div>
+    </div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
@@ -55,6 +314,79 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
+        // Make functions globally available
+        window.toggleControlPanel = function() {
+            const panel = document.getElementById('control-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        };
+        
+        let selectedStation = 1;
+        window.selectStation = function(index) {
+            selectedStation = index;
+            const stationNames = ['', 'C: First', 'D: 2', 'E: 3', 'F: 4', 'G: 5'];
+            document.getElementById('selected-station').textContent = `Selected: Station ${stationNames[index]}`;
+            
+            // Update input fields with current card position
+            if (cards[index]) {
+                document.getElementById('pos-x').value = cards[index].position.x.toFixed(2);
+                document.getElementById('pos-y').value = cards[index].position.y.toFixed(2);
+                document.getElementById('pos-z').value = cards[index].position.z.toFixed(2);
+            }
+            
+            // Update active button
+            document.querySelectorAll('.station-btn').forEach((btn, i) => {
+                if (i === index - 1) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        };
+        
+        window.moveCard = function(axis, delta) {
+            const input = document.getElementById(`pos-${axis}`);
+            input.value = (parseFloat(input.value) + delta).toFixed(2);
+            applyPosition();
+        };
+        
+        window.applyPosition = function() {
+            if (cards[selectedStation]) {
+                const x = parseFloat(document.getElementById('pos-x').value);
+                const y = parseFloat(document.getElementById('pos-y').value);
+                const z = parseFloat(document.getElementById('pos-z').value);
+                cards[selectedStation].position.set(x, y, z);
+                cardPositions[selectedStation] = { x, y, z };
+            }
+        };
+        
+        window.copyPosition = function() {
+            if (cards[selectedStation]) {
+                const pos = cards[selectedStation].position;
+                const text = `Station ${selectedStation}: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`;
+                navigator.clipboard?.writeText(text);
+                alert('Position copied: ' + text);
+            }
+        };
+        
+        window.saveSettings = function() {
+            alert('Settings saved to console! Check with exportConfig()');
+        };
+        
+        window.exportConfig = function() {
+            const config = {
+                cards: cardPositions,
+                vignette: {
+                    center: document.getElementById('vignette-center').value,
+                    darkness: document.getElementById('vignette-darkness').value,
+                    mid: document.getElementById('vignette-mid').value,
+                    blur: document.getElementById('vignette-blur').value
+                },
+                glow: {
+                    min: MIN_STRENGTH,
+                    max: MAX_STRENGTH
+                }
+            };
+            console.log('CONFIG:', JSON.stringify(config, null, 2));
+            alert('Config exported to console!');
+        };
+
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff); 
@@ -65,7 +397,7 @@
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // --- BLOOM EFFECT (THE SHINE) ---
+        // --- BLOOM EFFECT ---
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
@@ -95,14 +427,25 @@
         centerLight.position.set(-0.006, 1.041, -0.008); 
         scene.add(centerLight);
 
-        // --- GLOW PULSE SYSTEM (RANDOM TIMING) - 10% to 40% ---
+        // --- GLOW PULSE SYSTEM ---
         let glowStartTime = Date.now();
         let glowDurationUp = 7000 + Math.random() * 15000;
         let glowDurationDown = 7000 + Math.random() * 15000;
         let isGlowingUp = true;
         
-        const MIN_STRENGTH = 0.1;
-        const MAX_STRENGTH = 0.4;
+        let MIN_STRENGTH = 0.1;
+        let MAX_STRENGTH = 0.4;
+        
+        // Update glow settings from sliders
+        document.getElementById('glow-min').addEventListener('input', (e) => {
+            MIN_STRENGTH = e.target.value / 100;
+            document.getElementById('glow-min-val').textContent = e.target.value + '%';
+        });
+        
+        document.getElementById('glow-max').addEventListener('input', (e) => {
+            MAX_STRENGTH = e.target.value / 100;
+            document.getElementById('glow-max-val').textContent = e.target.value + '%';
+        });
         
         function getRandomDuration() {
             return 7000 + Math.random() * 15000;
@@ -137,6 +480,48 @@
             }
         }
 
+        // --- VIGNETTE CONTROLS ---
+        const vignette = document.getElementById('vignette');
+        
+        document.getElementById('vignette-center').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('vignette-center-val').textContent = val + '%';
+            updateVignette();
+        });
+        
+        document.getElementById('vignette-darkness').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('vignette-darkness-val').textContent = val + '%';
+            updateVignette();
+        });
+        
+        document.getElementById('vignette-mid').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('vignette-mid-val').textContent = val + '%';
+            updateVignette();
+        });
+        
+        document.getElementById('vignette-blur').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('vignette-blur-val').textContent = val + 'px';
+            updateVignette();
+        });
+        
+        function updateVignette() {
+            const center = document.getElementById('vignette-center').value;
+            const darkness = document.getElementById('vignette-darkness').value / 100;
+            const mid = document.getElementById('vignette-mid').value / 100;
+            const blur = document.getElementById('vignette-blur').value;
+            
+            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
+            
+            if (blur > 0) {
+                vignette.style.backdropFilter = `blur(${blur}px)`;
+            } else {
+                vignette.style.backdropFilter = 'none';
+            }
+        }
+
         // --- STATIONS ---
         const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
         const STATIONS = [
@@ -148,7 +533,16 @@
             { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
         ];
 
-        // --- CREATE CARDS FOR EACH STATION (EXCEPT INTRO) ---
+        // Store card positions
+        const cardPositions = {
+            1: { x: -3.61, y: 1.30, z: 1.17 },
+            2: { x: 1.20, y: 1.40, z: 4.50 },
+            3: { x: 4.00, y: 1.35, z: 1.00 },
+            4: { x: 2.50, y: 1.30, z: -3.20 },
+            5: { x: -2.80, y: 1.25, z: -3.00 }
+        };
+
+        // --- CREATE CARDS ---
         const cards = [];
         
         function createCard(stationName, stationIndex) {
@@ -197,20 +591,12 @@
         }
 
         function positionCards() {
-            cards[1].position.set(-3.61, 1.30, 1.17);
-            cards[1].lookAt(POINT_CENTER);
-            
-            cards[2].position.set(1.2, 1.40, 4.5);
-            cards[2].lookAt(POINT_CENTER);
-            
-            cards[3].position.set(4.0, 1.35, 1.0);
-            cards[3].lookAt(POINT_CENTER);
-            
-            cards[4].position.set(2.5, 1.30, -3.2);
-            cards[4].lookAt(POINT_CENTER);
-            
-            cards[5].position.set(-2.8, 1.25, -3.0);
-            cards[5].lookAt(POINT_CENTER);
+            for (let i = 1; i <= 5; i++) {
+                if (cards[i] && cardPositions[i]) {
+                    cards[i].position.set(cardPositions[i].x, cardPositions[i].y, cardPositions[i].z);
+                    cards[i].lookAt(POINT_CENTER);
+                }
+            }
         }
 
         for (let i = 1; i < STATIONS.length; i++) {
@@ -258,6 +644,11 @@
             else currentStationIndex = (currentStationIndex % (STATIONS.length - 1)) + 1;
             startAnimation(STATIONS[currentStationIndex].pos);
             document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
+            
+            // Auto-select current station in control panel
+            if (currentStationIndex > 0) {
+                selectStation(currentStationIndex);
+            }
         };
 
         function startAnimation(targetPos) {
@@ -314,6 +705,9 @@
             composer.render();
         }
         animate();
+        
+        // Initialize with station C selected
+        setTimeout(() => selectStation(1), 100);
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
