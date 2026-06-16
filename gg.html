@@ -297,6 +297,52 @@
             100% { transform: translateX(10%); opacity: 0.3; }
         }
 
+        @keyframes wishFloat {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0.95);
+                filter: blur(0px);
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(-10px) scale(1);
+                filter: blur(0px);
+            }
+            90% {
+                opacity: 0.8;
+                transform: translateY(-30px) scale(1.02);
+                filter: blur(2px);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(1.05);
+                filter: blur(8px);
+            }
+        }
+
+        @keyframes cloudDissolve {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+                filter: blur(0px);
+            }
+            20% {
+                opacity: 1;
+                transform: scale(1);
+                filter: blur(0px);
+            }
+            80% {
+                opacity: 0.6;
+                transform: scale(1.2);
+                filter: blur(4px);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.5);
+                filter: blur(12px);
+            }
+        }
+
         /* ============================================
            LANDING PAGE STYLES
            ============================================ */
@@ -871,6 +917,33 @@
         }
 
         /* ============================================
+           WISH FLOATING TEXT
+           ============================================ */
+        
+        .wish-text-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .wish-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 300;
+            font-style: italic;
+            color: rgba(255, 200, 150, 0.9);
+            text-shadow: 0 0 30px rgba(255, 150, 100, 0.5);
+            animation: wishFloat 6s ease-out forwards;
+            max-width: 800px;
+            line-height: 1.4;
+            letter-spacing: 0.05em;
+        }
+
+        /* ============================================
            LOADING SCREEN
            ============================================ */
         
@@ -1122,106 +1195,27 @@
             margin: 0 auto;
         }
 
-        /* Controls toggle */
-        #toggle-panel {
+        /* Footer credit */
+        .footer-credit {
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
-            background: rgba(10, 5, 5, 0.6);
-            color: rgba(255, 200, 150, 0.7);
-            border: 1px solid rgba(255, 200, 150, 0.2);
-            padding: 10px 20px;
-            cursor: pointer;
-            font-family: 'Cinzel', serif;
-            font-size: 0.7rem;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            z-index: 201;
-            transition: all 0.3s ease;
-            pointer-events: auto;
-        }
-
-        #toggle-panel:hover {
-            background: rgba(255, 200, 150, 0.1);
-            border-color: rgba(255, 200, 150, 0.5);
-            color: rgba(255, 200, 150, 1);
-        }
-
-        /* Control panel */
-        #control-panel {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(10, 5, 5, 0.95);
-            color: rgba(255, 200, 150, 0.9);
-            padding: 25px;
-            border-radius: 2px;
+            z-index: 100;
             font-family: 'Cormorant Garamond', serif;
-            z-index: 200;
-            max-height: 90vh;
-            overflow-y: auto;
-            min-width: 320px;
-            border: 1px solid rgba(255, 200, 150, 0.2);
-            display: none;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            color: rgba(255, 200, 150, 0.4);
             pointer-events: auto;
         }
 
-        #control-panel.visible { display: block; }
-
-        #control-panel h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 0.9rem;
-            letter-spacing: 0.4em;
-            text-transform: uppercase;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 200, 150, 0.2);
+        .footer-credit a {
+            color: rgba(255, 200, 150, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
         }
 
-        .control-group {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 200, 150, 0.03);
-            border: 1px solid rgba(255, 200, 150, 0.1);
-        }
-
-        .control-group h4 {
-            font-family: 'Cinzel', serif;
-            font-size: 0.75rem;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            color: rgba(255, 200, 150, 0.7);
-        }
-
-        .slider-control {
-            margin-bottom: 15px;
-        }
-
-        .slider-control label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            letter-spacing: 0.1em;
-        }
-
-        .slider-control input[type="range"] {
-            width: 100%;
-            -webkit-appearance: none;
-            height: 2px;
-            background: rgba(255, 200, 150, 0.2);
-            outline: none;
-        }
-
-        .slider-control input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: rgba(255, 200, 150, 0.8);
-            cursor: pointer;
-            border-radius: 50%;
+        .footer-credit a:hover {
+            color: rgba(255, 200, 150, 1);
         }
 
         /* ============================================
@@ -1238,12 +1232,14 @@
             .fulfilled-symbol { font-size: 3rem; }
             #actions { padding: 0 20px; }
             .hydro-btn { padding: 15px 25px; font-size: 12px; }
+            .wish-text { font-size: 1.8rem; }
         }
 
         @media (max-width: 480px) {
             .arcane-title { font-size: 2rem; letter-spacing: 0.2em; }
             .intro-text-large { font-size: 1.5rem; }
             .ritual-title { font-size: 1.4rem; letter-spacing: 0.2em; }
+            .wish-text { font-size: 1.4rem; }
         }
     </style>
 </head>
@@ -1401,6 +1397,13 @@
     </div>
 
     <!-- ============================================
+         WISH FLOATING TEXT
+         ============================================ -->
+    <div class="wish-text-container" id="wishTextContainer" style="display: none;">
+        <div class="wish-text" id="wishTextDisplay"></div>
+    </div>
+
+    <!-- ============================================
          3D TOUR CONTAINER
          ============================================ -->
     <div id="three-canvas-container"></div>
@@ -1438,48 +1441,17 @@
         <div id="status">The tree awaits...</div>
         <div id="vignette"></div>
         
-        <button id="toggle-panel" onclick="toggleControlPanel()">Ritual Controls</button>
-        
-        <div id="control-panel">
-            <h3>Ritual Controls</h3>
-            
-            <div class="control-group">
-                <h4>✦ Atmosphere</h4>
-                <div class="slider-control">
-                    <label><span>Bloom Intensity</span><span id="bloom-val">23%</span></label>
-                    <input type="range" id="bloom-slider" min="0" max="100" value="23">
-                </div>
-                <div class="slider-control">
-                    <label><span>Bloom Radius</span><span id="radius-val">80%</span></label>
-                    <input type="range" id="radius-slider" min="0" max="100" value="80">
-                </div>
-                <div class="slider-control">
-                    <label><span>Vignette Darkness</span><span id="vignette-val">60%</span></label>
-                    <input type="range" id="vignette-slider" min="0" max="100" value="60">
-                </div>
-            </div>
-            
-            <div class="control-group">
-                <h4> The Tree's Heart</h4>
-                <div class="slider-control">
-                    <label><span>Glow Minimum</span><span id="glow-min-val">10%</span></label>
-                    <input type="range" id="glow-min" min="0" max="50" value="10">
-                </div>
-                <div class="slider-control">
-                    <label><span>Glow Maximum</span><span id="glow-max-val">80%</span></label>
-                    <input type="range" id="glow-max" min="20" max="100" value="80">
-                </div>
-            </div>
-            
-            <div class="control-group">
-                <h4>✦ Journey</h4>
-                <div class="slider-control">
-                    <label><span>Transition Speed</span><span id="speed-val">Normal</span></label>
-                    <input type="range" id="speed-slider" min="1" max="5" value="3">
-                </div>
-            </div>
+        <div class="footer-credit">
+            Developed by <a href="https://wyrmstudios.com" target="_blank">wyrm.studios</a>
         </div>
     </div>
+
+    <!-- ============================================
+         AUDIO ELEMENT
+         ============================================ -->
+    <audio id="ambientMusic" loop>
+        <source src="0616 (1).MP3" type="audio/mpeg">
+    </audio>
 
     <!-- ============================================
          THREE.JS IMPORTS
@@ -1566,7 +1538,7 @@
         // INITIALIZATION
         // ============================================
         window.initTour = function() {
-            console.log(' Initializing the Arcane grove...');
+            console.log('✦ Initializing the Arcane grove...');
             
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xffffff);
@@ -1873,64 +1845,6 @@
         // CONTROLS
         // ============================================
         function setupControls() {
-            // Bloom
-            const bloomSlider = document.getElementById('bloom-slider');
-            if (bloomSlider) {
-                bloomSlider.addEventListener('input', (e) => {
-                    const val = e.target.value / 100;
-                    bloomPass.strength = val;
-                    document.getElementById('bloom-val').textContent = e.target.value + '%';
-                });
-            }
-            
-            // Radius
-            const radiusSlider = document.getElementById('radius-slider');
-            if (radiusSlider) {
-                radiusSlider.addEventListener('input', (e) => {
-                    const val = e.target.value / 100;
-                    bloomPass.radius = val;
-                    document.getElementById('radius-val').textContent = e.target.value + '%';
-                });
-            }
-            
-            // Vignette
-            const vignetteSlider = document.getElementById('vignette-slider');
-            if (vignetteSlider) {
-                vignetteSlider.addEventListener('input', (e) => {
-                    const val = e.target.value / 100;
-                    const vignette = document.getElementById('vignette');
-                    vignette.style.background = `radial-gradient(circle at center, transparent 40%, rgba(0,0,0,${val * 0.6}) 75%, rgba(0,0,0,${val}) 100%)`;
-                    document.getElementById('vignette-val').textContent = e.target.value + '%';
-                });
-            }
-            
-            // Glow min/max
-            const glowMin = document.getElementById('glow-min');
-            const glowMax = document.getElementById('glow-max');
-            if (glowMin) {
-                glowMin.addEventListener('input', (e) => {
-                    MIN_GLOW = e.target.value / 100;
-                    document.getElementById('glow-min-val').textContent = e.target.value + '%';
-                });
-            }
-            if (glowMax) {
-                glowMax.addEventListener('input', (e) => {
-                    MAX_GLOW = e.target.value / 100;
-                    document.getElementById('glow-max-val').textContent = e.target.value + '%';
-                });
-            }
-            
-            // Speed
-            const speedSlider = document.getElementById('speed-slider');
-            if (speedSlider) {
-                speedSlider.addEventListener('input', (e) => {
-                    const val = parseInt(e.target.value);
-                    const speeds = ['Very Slow', 'Slow', 'Normal', 'Fast', 'Very Fast'];
-                    transitionSpeed = 5.5 - (val * 0.8);
-                    document.getElementById('speed-val').textContent = speeds[val - 1];
-                });
-            }
-            
             // Hydro ripple buttons
             setupHydroButtons();
         }
@@ -1985,11 +1899,6 @@
                 });
             });
         }
-
-        window.toggleControlPanel = function() {
-            const panel = document.getElementById('control-panel');
-            panel.classList.toggle('visible');
-        };
 
         // ============================================
         // ANIMATION LOOP
@@ -2046,15 +1955,21 @@
          ============================================ -->
     <script>
         // ============================================
-        // WISH STORAGE
+        // WISH STORAGE - ONE WISH FOREVER
         // ============================================
         const WISH_STORAGE_KEY = 'arcane_wish';
+        const MUSIC_STORAGE_KEY = 'arcane_music_playing';
+        
+        function hasExistingWish() {
+            return localStorage.getItem(WISH_STORAGE_KEY) !== null;
+        }
         
         function saveWish(wish, returnDate) {
             const data = {
                 wish: wish,
                 returnDate: returnDate,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                hasReturned: false
             };
             localStorage.setItem(WISH_STORAGE_KEY, JSON.stringify(data));
         }
@@ -2090,6 +2005,48 @@
             const diff = returnD - today;
             return Math.ceil(diff / (1000 * 60 * 60 * 24));
         }
+        
+        function markWishAsReturned() {
+            const wish = getWish();
+            if (wish) {
+                wish.hasReturned = true;
+                localStorage.setItem(WISH_STORAGE_KEY, JSON.stringify(wish));
+            }
+        }
+
+        // ============================================
+        // MUSIC CONTROL
+        // ============================================
+        let audioPlaying = false;
+        
+        function playMusic() {
+            const audio = document.getElementById('ambientMusic');
+            if (audio) {
+                audio.volume = 0.4;
+                audio.play().then(() => {
+                    audioPlaying = true;
+                    localStorage.setItem(MUSIC_STORAGE_KEY, 'true');
+                }).catch(e => {
+                    console.log('✦ Music autoplay blocked - user interaction required');
+                });
+            }
+        }
+        
+        function stopMusic() {
+            const audio = document.getElementById('ambientMusic');
+            if (audio) {
+                audio.pause();
+                audioPlaying = false;
+                localStorage.setItem(MUSIC_STORAGE_KEY, 'false');
+            }
+        }
+        
+        function restoreMusic() {
+            const shouldPlay = localStorage.getItem(MUSIC_STORAGE_KEY) === 'true';
+            if (shouldPlay && !audioPlaying) {
+                playMusic();
+            }
+        }
 
         // ============================================
         // PARTICLE GENERATORS
@@ -2097,6 +2054,9 @@
         function createParticles(containerId, count = 30) {
             const container = document.getElementById(containerId);
             if (!container) return;
+            
+            // Clear existing particles
+            container.innerHTML = '';
             
             for (let i = 0; i < count; i++) {
                 const particle = document.createElement('div');
@@ -2111,19 +2071,45 @@
         }
 
         // ============================================
+        // SHOW WISH FLOATING TEXT
+        // ============================================
+        function showWishFloating(wishText) {
+            const container = document.getElementById('wishTextContainer');
+            const display = document.getElementById('wishTextDisplay');
+            
+            display.textContent = '"' + wishText + '"';
+            container.style.display = 'block';
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                container.style.display = 'none';
+            }, 6000);
+        }
+
+        // ============================================
         // INTRO SEQUENCE
         // ============================================
         let currentIntroScreen = 1;
         
         function beginJourney() {
-            // Check if there's an existing wish
-            const existingWish = getWish();
-            
-            if (existingWish && isReturnDateToday(existingWish.returnDate)) {
-                // Wish fulfilled - show special screen
-                showFulfilled(existingWish);
+            // Check if user already has a wish
+            if (hasExistingWish()) {
+                const existingWish = getWish();
+                
+                if (existingWish && isReturnDateToday(existingWish.returnDate) && !existingWish.hasReturned) {
+                    // Return date has come - show fulfilled screen
+                    showFulfilled(existingWish);
+                    markWishAsReturned();
+                } else if (existingWish && existingWish.hasReturned) {
+                    // Already returned - go straight to tour
+                    enterTour();
+                } else {
+                    // Wish exists but return date hasn't come yet
+                    // Show message that wish is already sealed
+                    alert('✦ You have already made your wish to the tree. Return on ' + new Date(existingWish.returnDate).toLocaleDateString() + '.');
+                }
             } else {
-                // Normal journey - show intro
+                // No wish yet - show intro
                 showIntro();
             }
         }
@@ -2195,7 +2181,14 @@
             
             if (!wish || !date) return;
             
+            // Save wish
             saveWish(wish, date);
+            
+            // Show wish floating like cloud
+            showWishFloating(wish);
+            
+            // Start music
+            playMusic();
             
             const ritual = document.getElementById('ritualContainer');
             const loading = document.getElementById('loadingContainer');
@@ -2210,7 +2203,7 @@
                 if (window.initTour) {
                     window.initTour();
                 }
-            }, 1500);
+            }, 6500); // Wait for wish animation to complete
         }
         
         function showFulfilled(wish) {
@@ -2228,6 +2221,9 @@
             setTimeout(() => {
                 fulfilled.classList.add('active');
                 createParticles('fulfilledParticles', 60);
+                
+                // Start music
+                playMusic();
             }, 1500);
         }
         
@@ -2246,6 +2242,24 @@
                 }
             }, 1500);
         }
+        
+        function enterTour() {
+            const landing = document.getElementById('landingPage');
+            const loading = document.getElementById('loadingContainer');
+            
+            landing.classList.add('hidden');
+            
+            setTimeout(() => {
+                loading.classList.add('active');
+                
+                if (window.initTour) {
+                    window.initTour();
+                }
+                
+                // Start music
+                playMusic();
+            }, 1500);
+        }
 
         // ============================================
         // INITIALIZATION ON LOAD
@@ -2258,13 +2272,14 @@
                 const daysUntil = getDaysUntilReturn(existingWish.returnDate);
                 
                 if (daysUntil !== null && daysUntil <= 0) {
-                    // Return date has passed - show fulfilled screen immediately
-                    // But still show landing first for dramatic effect
                     console.log('✦ The tree remembers. Your return day has come.');
                 } else if (daysUntil !== null && daysUntil > 0) {
                     console.log('✦ ' + daysUntil + ' days until your return to the Arcane.');
                 }
             }
+            
+            // Restore music state
+            restoreMusic();
         });
 
         // Expose functions globally
@@ -2273,10 +2288,7 @@
         window.showRitual = showRitual;
         window.submitWish = submitWish;
         window.enterTourFromFulfilled = enterTourFromFulfilled;
-        window.toggleControlPanel = function() {
-            const panel = document.getElementById('control-panel');
-            panel.classList.toggle('visible');
-        };
+        window.enterTour = enterTour;
     </script>
 </body>
 </html>
