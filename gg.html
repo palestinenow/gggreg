@@ -2,81 +2,145 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cinematic Orbit - Hydro Ripple & Bloom</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcane — The Tree That Remembers</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@100;200;300;400;500;600&family=Cinzel:wght@400;500;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400&display=swap');
+        /* ============================================
+           ARCANE — THE TREE THAT REMEMBERS
+           A Cinematic Experience
+           ============================================ */
         
-        body { margin: 0; overflow: hidden; background: #fff; font-family: sans-serif; }
-        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; cursor: pointer; }
-        #instructions { color: black; text-align: center; padding: 30px; border: 2px solid #333; border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h1 { margin: 0 0 10px 0; color: #333; } p { margin: 0; color: #666; }
-        
-        /* Navigation Buttons - Hydro Ripple Effect */
-        #actions { 
-            position: fixed;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            z-index: 100;
-            pointer-events: none;
         }
-        
-        .hydro-btn {
-            position: relative;
-            padding: 18px 35px;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-            background: rgba(30, 41, 59, 0.2);
-            backdrop-filter: blur(8px);
-            color: white;
-            cursor: pointer;
-            overflow: visible;
-            transition: transform 0.1s ease-out;
-            pointer-events: auto;
-            
-            /* Hydro Ripple Base State */
-            --proximity: 0;
-            --opacity: calc(0.05 + (0.95 * var(--proximity)));
-            --blur: calc(8px * (1 - var(--proximity)));
-            --scale: calc(0.98 + (0.02 * var(--proximity)));
-            --border: calc(0.05 + (0.45 * var(--proximity)));
-            
-            opacity: var(--opacity);
-            filter: blur(var(--blur));
-            transform: scale(var(--scale));
-            border-color: rgba(255,255,255,var(--border));
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Cormorant Garamond', serif;
+            color: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+
+        /* ============================================
+           GLOBAL ANIMATIONS
+           ============================================ */
         
-        /* Ripple Bloom Animation */
-        .hydro-btn::before,
-        .hydro-btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.4);
-            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
-            pointer-events: none;
-            opacity: 0;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        
-        .hydro-btn::after {
-            animation-delay: 0.1s;
-            border-color: rgba(255,255,255,0.2);
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
-        
-        .hydro-btn.bloom::before,
-        .hydro-btn.bloom::after {
-            opacity: 1;
-            animation-name: ripple-bloom;
+
+        @keyframes fadeRise {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px);
+                letter-spacing: 0.3em;
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+                letter-spacing: 0.2em;
+            }
         }
-        
+
+        @keyframes fadeRiseSlow {
+            0% {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate(100px, -100vh) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes lineExpand {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes lineExpandCenter {
+            from { width: 0; }
+            to { width: 80px; }
+        }
+
+        @keyframes rotateSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes grain {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -10%); }
+            20% { transform: translate(-15%, 5%); }
+            30% { transform: translate(7%, -25%); }
+            40% { transform: translate(-5%, 25%); }
+            50% { transform: translate(-15%, 10%); }
+            60% { transform: translate(15%, 0%); }
+            70% { transform: translate(0%, 15%); }
+            80% { transform: translate(3%, 35%); }
+            90% { transform: translate(-10%, 10%); }
+        }
+
+        @keyframes vignettePulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.9; }
+        }
+
         @keyframes ripple-bloom {
             0% { 
                 transform: scale(0.9); 
@@ -89,55 +153,936 @@
                 border-width: 0px; 
             }
         }
+
+        @keyframes textReveal {
+            0% {
+                clip-path: inset(0 100% 0 0);
+            }
+            100% {
+                clip-path: inset(0 0 0 0);
+            }
+        }
+
+        @keyframes letterReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) rotateX(-90deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
+        }
+
+        @keyframes symbolGlow {
+            0%, 100% { 
+                text-shadow: 0 0 10px rgba(255, 200, 150, 0.5), 0 0 20px rgba(255, 150, 100, 0.3);
+            }
+            50% { 
+                text-shadow: 0 0 20px rgba(255, 200, 150, 0.8), 0 0 40px rgba(255, 150, 100, 0.5), 0 0 60px rgba(255, 100, 50, 0.3);
+            }
+        }
+
+        @keyframes scrollIndicator {
+            0%, 100% { transform: translateY(0); opacity: 0.3; }
+            50% { transform: translateY(10px); opacity: 1; }
+        }
+
+        @keyframes progressFill {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        @keyframes dustFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes orbFloat {
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+            25% {
+                transform: translate(10px, -15px);
+            }
+            50% {
+                transform: translate(-5px, -25px);
+            }
+            75% {
+                transform: translate(-15px, -10px);
+            }
+        }
+
+        @keyframes runeRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            10% { transform: scale(1.05); opacity: 0.8; }
+            20% { transform: scale(1); opacity: 0.6; }
+            30% { transform: scale(1.08); opacity: 0.9; }
+            40% { transform: scale(1); opacity: 0.6; }
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes borderGlow {
+            0%, 100% {
+                border-color: rgba(255, 200, 150, 0.3);
+                box-shadow: 0 0 20px rgba(255, 150, 100, 0.2);
+            }
+            50% {
+                border-color: rgba(255, 200, 150, 0.6);
+                box-shadow: 0 0 40px rgba(255, 150, 100, 0.4);
+            }
+        }
+
+        @keyframes fogDrift {
+            0% { transform: translateX(-10%); opacity: 0.3; }
+            50% { opacity: 0.6; }
+            100% { transform: translateX(10%); opacity: 0.3; }
+        }
+
+        /* ============================================
+           LANDING PAGE STYLES
+           ============================================ */
         
-        /* Inner Glass Highlight */
+        .landing-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            background: #000;
+            transition: opacity 1.5s ease-out, visibility 1.5s ease-out;
+        }
+
+        .landing-container.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .landing-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 70%);
+        }
+
+        .landing-grain {
+            position: absolute;
+            inset: -50%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E");
+            opacity: 0.08;
+            animation: grain 8s steps(10) infinite;
+            pointer-events: none;
+        }
+
+        .landing-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+        }
+
+        .landing-content {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .arcane-symbol {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 4rem;
+            color: rgba(255, 200, 150, 0.9);
+            animation: symbolGlow 4s ease-in-out infinite;
+            margin-bottom: 2rem;
+            letter-spacing: 0.5em;
+        }
+
+        .arcane-title {
+            font-family: 'Cinzel', serif;
+            font-size: 5rem;
+            font-weight: 300;
+            letter-spacing: 0.4em;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            animation: fadeRise 2s ease-out forwards;
+            opacity: 0;
+        }
+
+        .arcane-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            font-weight: 300;
+            font-style: italic;
+            letter-spacing: 0.3em;
+            color: rgba(255, 200, 150, 0.7);
+            margin-bottom: 3rem;
+            animation: fadeRise 2s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+
+        .arcane-divider {
+            width: 80px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 200, 150, 0.6), transparent);
+            margin: 2rem auto;
+            animation: lineExpandCenter 2s ease-out 1s forwards;
+            width: 0;
+        }
+
+        .arcane-tagline {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.4em;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-bottom: 4rem;
+            animation: fadeRise 2s ease-out 1.5s forwards;
+            opacity: 0;
+        }
+
+        .enter-button {
+            position: relative;
+            padding: 1.2rem 3rem;
+            background: transparent;
+            border: 1px solid rgba(255, 200, 150, 0.4);
+            color: rgba(255, 200, 150, 0.9);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.6s ease;
+            animation: fadeRise 2s ease-out 2s forwards, borderGlow 3s ease-in-out infinite;
+            opacity: 0;
+        }
+
+        .enter-button:hover {
+            background: rgba(255, 200, 150, 0.1);
+            border-color: rgba(255, 200, 150, 0.8);
+            letter-spacing: 0.5em;
+            box-shadow: 0 0 30px rgba(255, 150, 100, 0.3);
+        }
+
+        .enter-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 200, 150, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .enter-button:hover::before {
+            left: 100%;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.3em;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            animation: scrollIndicator 2s ease-in-out infinite;
+        }
+
+        /* ============================================
+           INTRO CINEMATIC SEQUENCE
+           ============================================ */
+        
+        .intro-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 900;
+            background: #000;
+            display: none;
+            opacity: 0;
+            transition: opacity 1.5s ease-out;
+        }
+
+        .intro-container.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .intro-container.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #0a0505 0%, #000000 80%);
+        }
+
+        .intro-particles {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 200, 150, 0.6);
+            border-radius: 50%;
+            animation: dustFloat var(--duration) linear infinite;
+            animation-delay: var(--delay);
+            left: var(--x);
+            bottom: -10px;
+        }
+
+        .intro-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .intro-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            pointer-events: none;
+        }
+
+        .intro-screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .intro-screen.fade-out {
+            opacity: 0;
+        }
+
+        .intro-text-large {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            color: #fff;
+            text-align: center;
+            line-height: 1.3;
+            max-width: 900px;
+            margin-bottom: 2rem;
+        }
+
+        .intro-text-medium {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 300;
+            font-style: italic;
+            letter-spacing: 0.1em;
+            color: rgba(255, 200, 150, 0.8);
+            text-align: center;
+            line-height: 1.6;
+            max-width: 700px;
+            margin-bottom: 2rem;
+        }
+
+        .intro-text-small {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            line-height: 1.8;
+            max-width: 600px;
+            text-transform: uppercase;
+        }
+
+        .intro-divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 200, 150, 0.6), transparent);
+            margin: 2rem auto;
+        }
+
+        .intro-symbol {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 3rem;
+            color: rgba(255, 200, 150, 0.8);
+            margin-bottom: 2rem;
+            animation: symbolGlow 3s ease-in-out infinite;
+        }
+
+        .intro-continue {
+            margin-top: 3rem;
+            padding: 1rem 2.5rem;
+            background: transparent;
+            border: 1px solid rgba(255, 200, 150, 0.4);
+            color: rgba(255, 200, 150, 0.9);
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .intro-continue:hover {
+            background: rgba(255, 200, 150, 0.1);
+            border-color: rgba(255, 200, 150, 0.8);
+            letter-spacing: 0.4em;
+        }
+
+        /* ============================================
+           WISH RITUAL SCREEN
+           ============================================ */
+        
+        .ritual-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 850;
+            background: #000;
+            display: none;
+            opacity: 0;
+            transition: opacity 1.5s ease-out;
+        }
+
+        .ritual-container.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .ritual-container.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .ritual-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #0a0505 0%, #000000 80%);
+        }
+
+        .ritual-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .ritual-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .ritual-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            font-weight: 300;
+            font-style: italic;
+            color: rgba(255, 200, 150, 0.7);
+            margin-bottom: 3rem;
+            text-align: center;
+            letter-spacing: 0.1em;
+        }
+
+        .ritual-form {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .ritual-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .ritual-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.4em;
+            color: rgba(255, 200, 150, 0.6);
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .ritual-input {
+            width: 100%;
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 200, 150, 0.2);
+            color: #fff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-style: italic;
+            text-align: center;
+            letter-spacing: 0.05em;
+            outline: none;
+            transition: all 0.4s ease;
+        }
+
+        .ritual-input:focus {
+            border-color: rgba(255, 200, 150, 0.6);
+            background: rgba(255, 200, 150, 0.05);
+            box-shadow: 0 0 30px rgba(255, 150, 100, 0.2);
+        }
+
+        .ritual-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+            font-style: italic;
+        }
+
+        .ritual-date {
+            color-scheme: dark;
+            cursor: pointer;
+        }
+
+        .ritual-date::-webkit-calendar-picker-indicator {
+            filter: invert(0.7) sepia(1) hue-rotate(320deg) saturate(0.5);
+            cursor: pointer;
+        }
+
+        .ritual-submit {
+            margin-top: 2rem;
+            padding: 1.2rem 3rem;
+            background: transparent;
+            border: 1px solid rgba(255, 200, 150, 0.4);
+            color: rgba(255, 200, 150, 0.9);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.6s ease;
+            align-self: center;
+        }
+
+        .ritual-submit:hover {
+            background: rgba(255, 200, 150, 0.1);
+            border-color: rgba(255, 200, 150, 0.8);
+            letter-spacing: 0.5em;
+            box-shadow: 0 0 30px rgba(255, 150, 100, 0.3);
+        }
+
+        .ritual-submit:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* ============================================
+           WISH FULFILLED SCREEN
+           ============================================ */
+        
+        .fulfilled-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 950;
+            background: #000;
+            display: none;
+            opacity: 0;
+            transition: opacity 2s ease-out;
+        }
+
+        .fulfilled-container.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .fulfilled-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #1a0f05 0%, #000000 80%);
+        }
+
+        .fulfilled-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .fulfilled-symbol {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 5rem;
+            color: rgba(255, 200, 150, 0.9);
+            animation: symbolGlow 2s ease-in-out infinite;
+            margin-bottom: 2rem;
+        }
+
+        .fulfilled-title {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .fulfilled-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-weight: 300;
+            font-style: italic;
+            color: rgba(255, 200, 150, 0.8);
+            line-height: 1.8;
+            max-width: 600px;
+            margin-bottom: 1rem;
+        }
+
+        .fulfilled-wish {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.9);
+            font-style: italic;
+            margin: 2rem 0;
+            padding: 1.5rem 2rem;
+            border-left: 1px solid rgba(255, 200, 150, 0.4);
+            border-right: 1px solid rgba(255, 200, 150, 0.4);
+            max-width: 500px;
+        }
+
+        .fulfilled-enter {
+            margin-top: 3rem;
+            padding: 1.2rem 3rem;
+            background: transparent;
+            border: 1px solid rgba(255, 200, 150, 0.4);
+            color: rgba(255, 200, 150, 0.9);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.6s ease;
+        }
+
+        .fulfilled-enter:hover {
+            background: rgba(255, 200, 150, 0.1);
+            border-color: rgba(255, 200, 150, 0.8);
+            letter-spacing: 0.5em;
+        }
+
+        /* ============================================
+           LOADING SCREEN
+           ============================================ */
+        
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 800;
+            background: #000;
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease-out;
+        }
+
+        .loading-container.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .loading-container.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .loading-symbol {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 3rem;
+            color: rgba(255, 200, 150, 0.8);
+            animation: symbolGlow 2s ease-in-out infinite;
+        }
+
+        .loading-text {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.4em;
+            color: rgba(255, 200, 150, 0.6);
+            text-transform: uppercase;
+        }
+
+        .loading-bar-container {
+            width: 300px;
+            height: 1px;
+            background: rgba(255, 200, 150, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 200, 150, 0.8), transparent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .loading-percent {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.3em;
+            color: rgba(255, 200, 150, 0.5);
+        }
+
+        /* ============================================
+           3D TOUR CONTAINER
+           ============================================ */
+        
+        #three-canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: none;
+            opacity: 0;
+            transition: opacity 2s ease-out;
+        }
+
+        #three-canvas-container.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        #three-canvas-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ============================================
+           TOUR UI OVERLAY
+           ============================================ */
+        
+        #tour-ui {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            pointer-events: none;
+            display: none;
+            opacity: 0;
+            transition: opacity 2s ease-out;
+        }
+
+        #tour-ui.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Hydro Ripple Buttons */
+        #actions {
+            position: fixed;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .hydro-btn {
+            position: relative;
+            padding: 18px 35px;
+            font-weight: 400;
+            font-size: 14px;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 200, 150, 0.2);
+            background: rgba(10, 5, 5, 0.3);
+            backdrop-filter: blur(8px);
+            color: rgba(255, 200, 150, 0.9);
+            cursor: pointer;
+            overflow: visible;
+            transition: transform 0.1s ease-out;
+            pointer-events: auto;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            --proximity: 0;
+            --opacity: calc(0.15 + (0.85 * var(--proximity)));
+            --blur: calc(6px * (1 - var(--proximity)));
+            --scale: calc(0.98 + (0.02 * var(--proximity)));
+            --border: calc(0.2 + (0.6 * var(--proximity)));
+            opacity: var(--opacity);
+            filter: blur(var(--blur));
+            transform: scale(var(--scale));
+            border-color: rgba(255, 200, 150, var(--border));
+        }
+
+        .hydro-btn::before, .hydro-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 200, 150, 0.4);
+            animation: ripple-bloom 1.2s cubic-bezier(0, 0.5, 0.5, 1) forwards;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .hydro-btn::after { animation-delay: 0.15s; border-color: rgba(255, 200, 150, 0.2); }
+        .hydro-btn.bloom::before, .hydro-btn.bloom::after { opacity: 1; animation-name: ripple-bloom; }
+
         .hydro-btn .highlight {
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
-            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255, 200, 150, 0.05) 0%, transparent 50%);
             opacity: 0;
             transition: opacity 0.5s ease;
             pointer-events: none;
         }
-        
-        .hydro-btn:hover .highlight {
-            opacity: 1;
-        }
-        
-        /* Button Text & Icon */
-        .hydro-btn-content {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .hydro-btn svg {
-            width: 18px;
-            height: 18px;
-            transition: transform 0.3s ease;
-        }
-        
-        .hydro-btn:hover svg {
-            transform: translateX(4px);
-        }
-        
-        #status { 
-            position: fixed; 
-            bottom: 40px; 
+        .hydro-btn:hover .highlight { opacity: 1; }
+        .hydro-btn-content { position: relative; z-index: 10; display: flex; align-items: center; gap: 12px; }
+        .hydro-btn svg { width: 16px; height: 16px; transition: transform 0.3s ease; stroke: currentColor; fill: none; stroke-width: 1.5; }
+        .hydro-btn:hover svg { transform: translateX(4px); }
+        .hydro-btn#prevBtn:hover svg { transform: translateX(-4px); }
+
+        /* Status */
+        #status {
+            position: fixed;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            color: #333; 
-            font-size: 16px; 
-            z-index: 100; 
-            opacity: 0.7;
-            font-family: 'Inter', sans-serif;
+            color: rgba(255, 200, 150, 0.6);
+            font-size: 14px;
+            z-index: 100;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            letter-spacing: 0.2em;
+            text-align: center;
         }
-        
-        /* Vignette overlay */
+
+        /* Vignette */
         #vignette {
             position: fixed;
             top: 0;
@@ -146,490 +1091,411 @@
             height: 100%;
             pointer-events: none;
             z-index: 50;
-            background: radial-gradient(circle at center, transparent 51%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.50) 100%);
+            background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.4) 75%, rgba(0,0,0,0.8) 100%);
             transition: backdrop-filter 0.5s ease;
         }
-        
-        /* Glass Navigation Bar */
-        .glass-nav {
+
+        /* Station indicator */
+        #station-indicator {
             position: fixed;
-            top: 68%;
+            top: 40px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 92%;
-            max-width: 680px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 0 24px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-            backdrop-filter: blur(24px) saturate(1.2);
-            -webkit-backdrop-filter: blur(24px) saturate(1.2);
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 50px;
-            box-shadow: 
-                0 12px 40px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.15),
-                inset 0 -1px 0 rgba(255,255,255,0.04);
-            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 150;
-        }
-
-        .glass-nav.visible {
-            opacity: 1;
-            pointer-events: auto;
-            animation: fadeEnter 1.2s 0.2s forwards;
-        }
-
-        @keyframes fadeEnter { 
-            to { opacity: 1; transform: translate(-50%, -50%); } 
-        }
-
-        .glass-nav.vanish {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.94) translateY(-20px);
-            filter: blur(12px);
-            pointer-events: none;
-        }
-
-        .dot { 
-            width: 4px; height: 4px; 
-            border-radius: 50%; 
-            background: rgba(255,255,255,0.25); 
-            flex-shrink: 0; 
-            transition: all 0.4s ease; 
-        }
-        .glass-nav:hover .dot { 
-            background: rgba(255,255,255,0.6); 
-            box-shadow: 0 0 8px rgba(255,255,255,0.4); 
-        }
-
-        .input-wrap { 
-            flex: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: opacity 0.3s ease;
-        }
-
-        .glass-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: rgba(255,255,255,0.9);
-            font-family: 'Inter', sans-serif;
-            font-weight: 300;
-            font-size: 0.95rem;
-            letter-spacing: 0.3px;
-            padding: 6px 0;
+            transform: translateX(-50%);
+            z-index: 100;
             text-align: center;
+            pointer-events: none;
         }
 
-        .glass-input::placeholder {
-            color: rgba(255,255,255,0.35);
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-        }
-
-        input[type="date"] { 
-            color-scheme: dark; 
-            cursor: pointer; 
+        .station-name {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.5em;
+            color: rgba(255, 200, 150, 0.7);
             text-transform: uppercase;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1) opacity(0.4);
-            cursor: pointer;
-            margin-right: -4px;
+            margin-bottom: 0.5rem;
         }
 
-        .conf-msg {
-            font-family: 'Playfair Display', serif;
-            color: rgba(255,255,255,0.95);
-            font-size: 0.95rem;
-            text-align: center;
-            line-height: 1.4;
-            width: 100%;
-            opacity: 0;
-            transform: translateY(5px);
-            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .conf-msg.show { opacity: 1; transform: translateY(0); }
-        .conf-msg em { font-style: normal; color: #a5b4fc; font-weight: 500; }
-
-        .send-btn {
-            width: 38px; height: 38px; 
-            border-radius: 50%; 
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.06); 
-            color: rgba(255,255,255,0.85);
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: all 0.3s ease; 
-            flex-shrink: 0;
-        }
-        .send-btn:hover { 
-            background: rgba(255,255,255,0.14); 
-            border-color: rgba(255,255,255,0.3); 
-            transform: scale(1.08); 
-            box-shadow: 0 4px 16px rgba(165, 180, 252, 0.15);
-        }
-        .send-btn:active { transform: scale(0.95); }
-        .send-btn svg { 
-            width: 16px; height: 16px; 
-            stroke: currentColor; 
-            fill: none; 
-            stroke-width: 2; 
-            stroke-linecap: round; 
-            stroke-linejoin: round; 
+        .station-line {
+            width: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 200, 150, 0.5), transparent);
+            margin: 0 auto;
         }
 
-        .glass-nav::before {
-            content: ''; 
-            position: absolute; 
-            top: 0; left: -75%; 
-            width: 50%; height: 100%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 46%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 54%, transparent 60%);
-            transition: left 0.8s ease; 
-            pointer-events: none;
-            border-radius: 50px;
-        }
-        .glass-nav:hover::before { left: 130%; }
-
-        @media (max-width: 500px) {
-            .glass-nav { height: 56px; padding: 0 18px; gap: 12px; }
-            .glass-input, .conf-msg { font-size: 0.85rem; }
-            .send-btn { width: 34px; height: 34px; }
-            .send-btn svg { width: 14px; height: 14px; }
-            #actions { padding: 0 20px; }
-            .hydro-btn { padding: 15px 25px; font-size: 14px; }
-        }
-        
-        /* Control Panel */
-        #control-panel {
-            position: absolute;
+        /* Controls toggle */
+        #toggle-panel {
+            position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #0f0;
-            padding: 20px;
-            border-radius: 10px;
-            font-family: monospace;
+            background: rgba(10, 5, 5, 0.6);
+            color: rgba(255, 200, 150, 0.7);
+            border: 1px solid rgba(255, 200, 150, 0.2);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            z-index: 201;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        #toggle-panel:hover {
+            background: rgba(255, 200, 150, 0.1);
+            border-color: rgba(255, 200, 150, 0.5);
+            color: rgba(255, 200, 150, 1);
+        }
+
+        /* Control panel */
+        #control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(10, 5, 5, 0.95);
+            color: rgba(255, 200, 150, 0.9);
+            padding: 25px;
+            border-radius: 2px;
+            font-family: 'Cormorant Garamond', serif;
             z-index: 200;
             max-height: 90vh;
             overflow-y: auto;
-            min-width: 300px;
-            border: 2px solid #0f0;
-            box-shadow: 0 0 20px rgba(0,255,0,0.3);
+            min-width: 320px;
+            border: 1px solid rgba(255, 200, 150, 0.2);
+            display: none;
             pointer-events: auto;
         }
-        
+
+        #control-panel.visible { display: block; }
+
         #control-panel h3 {
-            margin: 0 0 15px 0;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
             text-align: center;
-            color: #0f0;
-            border-bottom: 1px solid #0f0;
-            padding-bottom: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 200, 150, 0.2);
         }
-        
-        #control-panel h4 {
-            margin: 15px 0 10px 0;
-            color: #0f0;
-        }
-        
+
         .control-group {
             margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(0, 255, 0, 0.1);
-            border-radius: 5px;
+            padding: 15px;
+            background: rgba(255, 200, 150, 0.03);
+            border: 1px solid rgba(255, 200, 150, 0.1);
         }
-        
-        .station-selector {
-            display: flex;
-            gap: 5px;
+
+        .control-group h4 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
             margin-bottom: 15px;
-            flex-wrap: wrap;
+            color: rgba(255, 200, 150, 0.7);
         }
-        
-        .station-btn {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 12px;
-            border-radius: 5px;
-            transition: all 0.2s;
-            flex: 1;
-        }
-        
-        .station-btn:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .station-btn.active {
-            background: #0f0;
-            color: black;
-            font-weight: bold;
-        }
-        
-        .pos-control {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .pos-control label {
-            width: 20px;
-            color: #0f0;
-            font-weight: bold;
-        }
-        
-        .pos-control input {
-            flex: 1;
-            margin: 0 10px;
-            background: #111;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        
-        .pos-control button {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: monospace;
-            border-radius: 3px;
-            margin-left: 5px;
-        }
-        
-        .pos-control button:hover {
-            background: #0f0;
-            color: black;
-        }
-        
+
         .slider-control {
             margin-bottom: 15px;
         }
-        
+
         .slider-control label {
-            display: block;
-            margin-bottom: 5px;
-            color: #0f0;
-        }
-        
-        .slider-control input {
-            width: 100%;
-            margin: 5px 0;
-        }
-        
-        .slider-control span {
-            color: #0f0;
-            float: right;
-        }
-        
-        .action-buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
         }
-        
-        .action-btn {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 10px;
+
+        .slider-control input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 2px;
+            background: rgba(255, 200, 150, 0.2);
+            outline: none;
+        }
+
+        .slider-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 200, 150, 0.8);
             cursor: pointer;
-            font-family: monospace;
-            border-radius: 5px;
-            flex: 1;
-            font-weight: bold;
+            border-radius: 50%;
         }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
         
-        .action-btn:hover {
-            background: #0f0;
-            color: black;
+        @media (max-width: 768px) {
+            .arcane-title { font-size: 3rem; letter-spacing: 0.3em; }
+            .arcane-subtitle { font-size: 1rem; }
+            .intro-text-large { font-size: 2rem; }
+            .intro-text-medium { font-size: 1.2rem; }
+            .ritual-title { font-size: 1.8rem; }
+            .fulfilled-title { font-size: 2rem; }
+            .fulfilled-symbol { font-size: 3rem; }
+            #actions { padding: 0 20px; }
+            .hydro-btn { padding: 15px 25px; font-size: 12px; }
         }
-        
-        #toggle-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #003300;
-            color: #0f0;
-            border: 2px solid #0f0;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-family: monospace;
-            font-weight: bold;
-            border-radius: 5px;
-            z-index: 201;
-        }
-        
-        #toggle-panel:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        .coord-display {
-            color: #0f0;
-            font-size: 11px;
-            margin-top: 5px;
-            text-align: center;
-        }
-        
-        #blur-status {
-            color: #0f0;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 5px;
+
+        @media (max-width: 480px) {
+            .arcane-title { font-size: 2rem; letter-spacing: 0.2em; }
+            .intro-text-large { font-size: 1.5rem; }
+            .ritual-title { font-size: 1.4rem; letter-spacing: 0.2em; }
         }
     </style>
 </head>
 <body>
 
-    <div id="blocker">
-        <div id="instructions">
-            <h1>CINEMATIC TOUR</h1>
-            <p>Click to start.<br>Hydro Ripple Buttons & Bloom Effect active.</p>
+    <!-- ============================================
+         LANDING PAGE
+         ============================================ -->
+    <div class="landing-container" id="landingPage">
+        <div class="landing-bg"></div>
+        <div class="landing-grain"></div>
+        <div class="landing-vignette"></div>
+        <div class="landing-content">
+            <div class="arcane-symbol">✦</div>
+            <h1 class="arcane-title">Arcane</h1>
+            <p class="arcane-subtitle">The Tree That Remembers</p>
+            <div class="arcane-divider"></div>
+            <p class="arcane-tagline">A Cinematic Experience</p>
+            <button class="enter-button" onclick="beginJourney()">Enter the Grove</button>
+            <div class="scroll-hint">Scroll to begin</div>
         </div>
     </div>
 
-    <!-- Navigation Buttons with Hydro Ripple Effect -->
-    <div id="actions">
-        <button class="hydro-btn" id="prevBtn" onclick="prevStation()">
-            <span class="hydro-btn-content">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span>Previous</span>
-            </span>
-            <span class="highlight"></span>
-        </button>
-        <button class="hydro-btn" id="nextBtn" onclick="nextStation()">
-            <span class="hydro-btn-content">
-                <span>Next</span>
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-            </span>
-            <span class="highlight"></span>
-        </button>
-    </div>
+    <!-- ============================================
+         INTRO CINEMATIC SEQUENCE
+         ============================================ -->
+    <div class="intro-container" id="introContainer">
+        <div class="intro-bg"></div>
+        <div class="intro-particles" id="introParticles"></div>
+        <div class="intro-content">
+            
+            <!-- Screen 1: Opening -->
+            <div class="intro-screen" id="introScreen1">
+                <div class="intro-symbol">✦</div>
+                <p class="intro-text-large">In the silence between worlds,<br>there stands a tree.</p>
+                <p class="intro-text-small">Older than memory. Deeper than dream.</p>
+                <button class="intro-continue" onclick="nextIntroScreen(2)">Continue</button>
+            </div>
 
-    <div id="status">Ready...</div>
-    
-    <div id="vignette"></div>
-    
-    <!-- Glass Navigation Bar -->
-    <nav class="glass-nav" id="glassNav">
-        <div class="dot"></div>
-        <div class="input-wrap" id="inputWrap"></div>
-        <button class="send-btn" id="sendBtn" aria-label="Submit">
-            <svg viewBox="0 0 24 24">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-        </button>
-        <div class="dot"></div>
-    </nav>
-    
-    <button id="toggle-panel" onclick="toggleControlPanel()">🎮 CONTROLS</button>
-    
-    <div id="control-panel" style="display: none;">
-        <h3>🎛️ DEBUG CONTROLS</h3>
-        
-        <div class="control-group">
-            <h4>📍 SELECT STATION CARD</h4>
-            <div class="station-selector">
-                <button class="station-btn" onclick="selectStation(2)">D: 2</button>
-                <button class="station-btn" onclick="selectStation(3)">E: 3</button>
-                <button class="station-btn" onclick="selectStation(4)">F: 4</button>
-                <button class="station-btn" onclick="selectStation(5)">G: 5</button>
+            <!-- Screen 2: The Name -->
+            <div class="intro-screen" id="introScreen2">
+                <p class="intro-text-large">They call it <span style="color: rgba(255, 200, 150, 0.9); font-style: italic;">Arcane</span>.</p>
+                <div class="intro-divider"></div>
+                <p class="intro-text-medium">It does not grant wishes.<br>It remembers them.</p>
+                <button class="intro-continue" onclick="nextIntroScreen(3)">Continue</button>
             </div>
-            <div id="selected-station" class="coord-display">Selected: Station D</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎯 CARD POSITION</h4>
-            <div class="pos-control">
-                <label>X:</label>
-                <input type="number" id="pos-x" step="0.01" value="0.10">
-                <button onclick="moveCard('x', -0.1)">-</button>
-                <button onclick="moveCard('x', 0.1)">+</button>
+
+            <!-- Screen 3: The Calling -->
+            <div class="intro-screen" id="introScreen3">
+                <p class="intro-text-large">You have been called here<br>for a reason.</p>
+                <div class="intro-divider"></div>
+                <p class="intro-text-small">Perhaps you heard it in your sleep.<br>Perhaps you have always known.</p>
+                <button class="intro-continue" onclick="nextIntroScreen(4)">Continue</button>
             </div>
-            <div class="pos-control">
-                <label>Y:</label>
-                <input type="number" id="pos-y" step="0.01" value="1.20">
-                <button onclick="moveCard('y', -0.1)">-</button>
-                <button onclick="moveCard('y', 0.1)">+</button>
+
+            <!-- Screen 4: The Ritual -->
+            <div class="intro-screen" id="introScreen4">
+                <p class="intro-text-large">The ritual is simple.</p>
+                <div class="intro-divider"></div>
+                <p class="intro-text-medium">Speak your wish to the tree.<br>Choose the day you will return.</p>
+                <p class="intro-text-small" style="margin-top: 2rem;">On that day, you will find it done.</p>
+                <button class="intro-continue" onclick="nextIntroScreen(5)">Continue</button>
             </div>
-            <div class="pos-control">
-                <label>Z:</label>
-                <input type="number" id="pos-z" step="0.01" value="4.00">
-                <button onclick="moveCard('z', -0.1)">-</button>
-                <button onclick="moveCard('z', 0.1)">+</button>
+
+            <!-- Screen 5: The Warning -->
+            <div class="intro-screen" id="introScreen5">
+                <p class="intro-text-large">But be warned.</p>
+                <div class="intro-divider"></div>
+                <p class="intro-text-medium">The tree does not forget.<br>And it does not forgive<br>those who do not return.</p>
+                <button class="intro-continue" onclick="nextIntroScreen(6)">Continue</button>
             </div>
-            <div style="margin-top: 10px;">
-                <button class="action-btn" onclick="applyPosition()">✅ Apply Position</button>
-                <button class="action-btn" onclick="copyPosition()">📋 Copy Coordinates</button>
+
+            <!-- Screen 6: The Invitation -->
+            <div class="intro-screen" id="introScreen6">
+                <div class="intro-symbol">✦</div>
+                <p class="intro-text-large">Are you ready<br>to make your wish?</p>
+                <button class="intro-continue" onclick="showRitual()">I Am Ready</button>
             </div>
-        </div>
-        
-        <div class="control-group">
-            <h4>🎨 VIGNETTE EFFECT</h4>
-            <div class="slider-control">
-                <label>Center Clear Area: <span id="vignette-center-val">51%</span></label>
-                <input type="range" id="vignette-center" min="20" max="60" value="51" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Edge Darkness: <span id="vignette-darkness-val">50%</span></label>
-                <input type="range" id="vignette-darkness" min="0" max="50" value="50" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Mid Darkness: <span id="vignette-mid-val">30%</span></label>
-                <input type="range" id="vignette-mid" min="0" max="30" value="30" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Blur Amount: <span id="vignette-blur-val">0px</span></label>
-                <input type="range" id="vignette-blur" min="0" max="5" value="0" step="0.5">
-            </div>
-            <div id="blur-status">Blur: INACTIVE</div>
-        </div>
-        
-        <div class="control-group">
-            <h4>✨ GLOW EFFECT</h4>
-            <div class="slider-control">
-                <label>Min Strength: <span id="glow-min-val">23%</span></label>
-                <input type="range" id="glow-min" min="0" max="30" value="23" step="1">
-            </div>
-            <div class="slider-control">
-                <label>Max Strength: <span id="glow-max-val">39%</span></label>
-                <input type="range" id="glow-max" min="20" max="80" value="39" step="1">
-            </div>
-        </div>
-        
-        <div class="action-buttons">
-            <button class="action-btn" onclick="saveSettings()">💾 SAVE SETTINGS</button>
-            <button class="action-btn" onclick="exportConfig()">📤 EXPORT CONFIG</button>
+
         </div>
     </div>
 
+    <!-- ============================================
+         WISH FULFILLED SCREEN
+         ============================================ -->
+    <div class="fulfilled-container" id="fulfilledContainer">
+        <div class="fulfilled-bg"></div>
+        <div class="intro-particles" id="fulfilledParticles"></div>
+        <div class="fulfilled-content">
+            <div class="fulfilled-symbol">✦</div>
+            <h1 class="fulfilled-title">You Have Returned</h1>
+            <div class="intro-divider"></div>
+            <p class="fulfilled-text">The tree remembers your voice.<br>It has been waiting for this day.</p>
+            <div class="fulfilled-wish" id="fulfilledWishText">
+                "Your wish has been heard."
+            </div>
+            <p class="fulfilled-text" style="font-size: 1.1rem; color: rgba(255, 200, 150, 0.6);">
+                Walk the grove once more.<br>The tree has something to show you.
+            </p>
+            <button class="fulfilled-enter" onclick="enterTourFromFulfilled()">Enter the Grove</button>
+        </div>
+    </div>
+
+    <!-- ============================================
+         WISH RITUAL SCREEN
+         ============================================ -->
+    <div class="ritual-container" id="ritualContainer">
+        <div class="ritual-bg"></div>
+        <div class="intro-particles" id="ritualParticles"></div>
+        <div class="ritual-content">
+            <div class="intro-symbol">✦</div>
+            <h2 class="ritual-title">The Ritual</h2>
+            <p class="ritual-subtitle">Speak your wish. Choose your return.</p>
+            
+            <form class="ritual-form" onsubmit="submitWish(event)">
+                <div class="ritual-field">
+                    <label class="ritual-label">Your Wish</label>
+                    <input 
+                        type="text" 
+                        class="ritual-input" 
+                        id="wishInput" 
+                        placeholder="Whisper it to the tree..." 
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+                
+                <div class="ritual-field">
+                    <label class="ritual-label">The Day You Return</label>
+                    <input 
+                        type="date" 
+                        class="ritual-input ritual-date" 
+                        id="dateInput" 
+                        required
+                    >
+                </div>
+                
+                <button type="submit" class="ritual-submit">Seal the Wish</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================
+         LOADING SCREEN
+         ============================================ -->
+    <div class="loading-container" id="loadingContainer">
+        <div class="loading-content">
+            <div class="loading-symbol">✦</div>
+            <p class="loading-text">Entering the Grove</p>
+            <div class="loading-bar-container">
+                <div class="loading-bar" id="loadingBar"></div>
+            </div>
+            <p class="loading-percent" id="loadingPercent">0%</p>
+        </div>
+    </div>
+
+    <!-- ============================================
+         3D TOUR CONTAINER
+         ============================================ -->
+    <div id="three-canvas-container"></div>
+
+    <!-- ============================================
+         TOUR UI OVERLAY
+         ============================================ -->
+    <div id="tour-ui">
+        <div id="station-indicator">
+            <div class="station-name" id="stationName">The Approach</div>
+            <div class="station-line"></div>
+        </div>
+
+        <div id="actions">
+            <button class="hydro-btn" id="prevBtn" onclick="prevStation()">
+                <span class="hydro-btn-content">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                    <span>Previous</span>
+                </span>
+                <span class="highlight"></span>
+            </button>
+            <button class="hydro-btn" id="nextBtn" onclick="nextStation()">
+                <span class="hydro-btn-content">
+                    <span>Next</span>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
+                </span>
+                <span class="highlight"></span>
+            </button>
+        </div>
+
+        <div id="status">The tree awaits...</div>
+        <div id="vignette"></div>
+        
+        <button id="toggle-panel" onclick="toggleControlPanel()">Ritual Controls</button>
+        
+        <div id="control-panel">
+            <h3>Ritual Controls</h3>
+            
+            <div class="control-group">
+                <h4>✦ Atmosphere</h4>
+                <div class="slider-control">
+                    <label><span>Bloom Intensity</span><span id="bloom-val">23%</span></label>
+                    <input type="range" id="bloom-slider" min="0" max="100" value="23">
+                </div>
+                <div class="slider-control">
+                    <label><span>Bloom Radius</span><span id="radius-val">80%</span></label>
+                    <input type="range" id="radius-slider" min="0" max="100" value="80">
+                </div>
+                <div class="slider-control">
+                    <label><span>Vignette Darkness</span><span id="vignette-val">60%</span></label>
+                    <input type="range" id="vignette-slider" min="0" max="100" value="60">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h4> The Tree's Heart</h4>
+                <div class="slider-control">
+                    <label><span>Glow Minimum</span><span id="glow-min-val">10%</span></label>
+                    <input type="range" id="glow-min" min="0" max="50" value="10">
+                </div>
+                <div class="slider-control">
+                    <label><span>Glow Maximum</span><span id="glow-max-val">80%</span></label>
+                    <input type="range" id="glow-max" min="20" max="100" value="80">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h4>✦ Journey</h4>
+                <div class="slider-control">
+                    <label><span>Transition Speed</span><span id="speed-val">Normal</span></label>
+                    <input type="range" id="speed-slider" min="1" max="5" value="3">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         THREE.JS IMPORTS
+         ============================================ -->
     <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+        { 
+            "imports": { 
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js", 
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" 
+            } 
+        }
     </script>
 
+    <!-- ============================================
+         THREE.JS TOUR CODE
+         ============================================ -->
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -637,654 +1503,780 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-        // === HYDRO RIPPLE BUTTON LOGIC ===
-        const hydroButtons = document.querySelectorAll('.hydro-btn');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        
-        // Zone-based proximity (each button covers half the screen)
-        document.addEventListener('mousemove', (e) => {
-            const screenWidth = window.innerWidth;
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-            
-            const isInLeftHalf = mouseX < screenWidth / 2;
-            const isInRightHalf = mouseX >= screenWidth / 2;
-            
-            // Calculate distance to center of each button
-            if (prevBtn) {
-                const prevRect = prevBtn.getBoundingClientRect();
-                const prevCenterX = prevRect.left + prevRect.width / 2;
-                const prevCenterY = prevRect.top + prevRect.height / 2;
-                const prevDistance = Math.sqrt(
-                    Math.pow(mouseX - prevCenterX, 2) + 
-                    Math.pow(mouseY - prevCenterY, 2)
-                );
-                
-                let prevProximity = 0;
-                if (isInLeftHalf) {
-                    const normalizedDist = Math.min(prevDistance / 800, 1);
-                    prevProximity = 1 - normalizedDist;
-                    prevProximity = Math.max(prevProximity, 0.3 - (mouseX / screenWidth) * 0.3);
-                } else {
-                    const normalizedDist = Math.min(prevDistance / 1200, 1);
-                    prevProximity = (1 - normalizedDist) * 0.2;
-                }
-                
-                prevBtn.style.setProperty('--proximity', Math.max(0, prevProximity));
-            }
-            
-            if (nextBtn) {
-                const nextRect = nextBtn.getBoundingClientRect();
-                const nextCenterX = nextRect.left + nextRect.width / 2;
-                const nextCenterY = nextRect.top + nextRect.height / 2;
-                const nextDistance = Math.sqrt(
-                    Math.pow(mouseX - nextCenterX, 2) + 
-                    Math.pow(mouseY - nextCenterY, 2)
-                );
-                
-                let nextProximity = 0;
-                if (isInRightHalf) {
-                    const normalizedDist = Math.min(nextDistance / 800, 1);
-                    nextProximity = 1 - normalizedDist;
-                    nextProximity = Math.max(nextProximity, 0.3 - ((screenWidth - mouseX) / screenWidth) * 0.3);
-                } else {
-                    const normalizedDist = Math.min(nextDistance / 1200, 1);
-                    nextProximity = (1 - normalizedDist) * 0.2;
-                }
-                
-                nextBtn.style.setProperty('--proximity', Math.max(0, nextProximity));
-            }
-        });
-        
-        // Auto-bloom every 2 seconds
-        function triggerAutoBloom() {
-            hydroButtons.forEach(btn => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
-        }
-        setInterval(triggerAutoBloom, 2000);
-        
-        // Hover bloom
-        hydroButtons.forEach(btn => {
-            btn.addEventListener('mouseenter', () => {
-                btn.classList.add('bloom');
-                setTimeout(() => btn.classList.remove('bloom'), 1200);
-            });
-        });
-
-        // === GLASS NAV FUNCTIONALITY ===
-        const nav = document.getElementById('glassNav');
-        const inputWrap = document.getElementById('inputWrap');
-        const sendBtn = document.getElementById('sendBtn');
-        
-        let step = 1;
-        let wishText = '';
-        let navShown = false;
-        let navVisible = false;
-
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString + 'T00:00:00').toLocaleDateString('en-US', options);
-        }
-
-        function initNav() {
-            inputWrap.innerHTML = `<input type="text" class="glass-input" id="mainInput" placeholder="You are in front of the tree of life. Make a wish..." autocomplete="off">`;
-            const inp = document.getElementById('mainInput');
-            if (inp) {
-                inp.focus();
-                inp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
-            }
-        }
-
-        function handleSend() {
-            const inp = document.querySelector('.glass-input');
-            const val = inp?.value.trim();
-            
-            if (step === 1) {
-                if (!val) return;
-                wishText = val;
-                step = 2;
-                
-                inputWrap.style.opacity = '0';
-                setTimeout(() => {
-                    inputWrap.innerHTML = `<input type="date" class="glass-input" id="dateInput" required>`;
-                    inputWrap.style.opacity = '1';
-                    const dateInp = document.getElementById('dateInput');
-                    if (dateInp) {
-                        dateInp.focus();
-                        dateInp.addEventListener('keydown', (e) => e.key === 'Enter' && handleSend());
-                    }
-                }, 250);
-
-            } else if (step === 2) {
-                if (!val) return;
-                step = 3;
-                
-                const displayDate = formatDate(val);
-                
-                sendBtn.style.opacity = '0';
-                sendBtn.style.pointerEvents = 'none';
-                inputWrap.style.opacity = '0';
-                
-                setTimeout(() => {
-                    inputWrap.innerHTML = `
-                        <p class="conf-msg" id="confMsg">
-                            Come back on <em>${displayDate}</em>.<br>
-                            Your wish will become true.
-                        </p>
-                    `;
-                    inputWrap.style.opacity = '1';
-                    requestAnimationFrame(() => document.getElementById('confMsg')?.classList.add('show'));
-                    
-                    setTimeout(() => {
-                        nav.classList.add('vanish');
-                        nav.classList.remove('visible');
-                        navVisible = false;
-                        step = 1;
-                        sendBtn.style.opacity = '1';
-                        sendBtn.style.pointerEvents = 'auto';
-                    }, 3500);
-                    
-                }, 300);
-            }
-        }
-
-        sendBtn.addEventListener('click', handleSend);
-        initNav();
-
-        function showNavBar() {
-            if (!navVisible) {
-                nav.classList.remove('vanish');
-                nav.classList.add('visible');
-                navVisible = true;
-                navShown = true;
-                step = 1;
-                sendBtn.style.opacity = '1';
-                sendBtn.style.pointerEvents = 'auto';
-                initNav();
-            }
-        }
-
-        function hideNavBar() {
-            if (navVisible) {
-                nav.classList.remove('visible');
-                nav.classList.add('vanish');
-                navVisible = false;
-            }
-        }
-
-        // === GLOBAL FUNCTIONS ===
-        window.toggleControlPanel = function() {
-            const panel = document.getElementById('control-panel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        };
-        
-        let selectedStation = 2;
-        window.selectStation = function(index) {
-            selectedStation = index;
-            const stationNames = ['', 'C: First', 'D: 2', 'E: 3', 'F: 4', 'G: 5'];
-            document.getElementById('selected-station').textContent = `Selected: Station ${stationNames[index]}`;
-            
-            if (cards[index]) {
-                document.getElementById('pos-x').value = cards[index].position.x.toFixed(2);
-                document.getElementById('pos-y').value = cards[index].position.y.toFixed(2);
-                document.getElementById('pos-z').value = cards[index].position.z.toFixed(2);
-            }
-            
-            document.querySelectorAll('.station-btn').forEach((btn, i) => {
-                if (i === index - 2) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-        };
-        
-        window.moveCard = function(axis, delta) {
-            const input = document.getElementById(`pos-${axis}`);
-            input.value = (parseFloat(input.value) + delta).toFixed(2);
-            applyPosition();
-        };
-        
-        window.applyPosition = function() {
-            if (cards[selectedStation]) {
-                const x = parseFloat(document.getElementById('pos-x').value);
-                const y = parseFloat(document.getElementById('pos-y').value);
-                const z = parseFloat(document.getElementById('pos-z').value);
-                cards[selectedStation].position.set(x, y, z);
-                cardPositions[selectedStation] = { x, y, z };
-            }
-        };
-        
-        window.copyPosition = function() {
-            if (cards[selectedStation]) {
-                const pos = cards[selectedStation].position;
-                const text = `Station ${selectedStation}: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`;
-                navigator.clipboard?.writeText(text);
-                alert('Position copied: ' + text);
-            }
-        };
-        
-        window.saveSettings = function() {
-            alert('Settings saved!');
-        };
-        
-        window.exportConfig = function() {
-            const config = {
-                cards: cardPositions,
-                vignette: {
-                    center: document.getElementById('vignette-center').value,
-                    darkness: document.getElementById('vignette-darkness').value,
-                    mid: document.getElementById('vignette-mid').value
-                },
-                glow: {
-                    min: MIN_STRENGTH,
-                    max: MAX_STRENGTH
-                }
-            };
-            console.log('CONFIG:', JSON.stringify(config, null, 2));
-            alert('Config exported to console!');
-        };
-
-        // === THREE.JS SCENE SETUP ===
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff); 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
-
-        // === POST-PROCESSING: BLOOM EFFECT ===
-        const renderScene = new RenderPass(scene, camera);
-        
-        // Bloom pass - Cinematic glow configuration
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.1;   // Low threshold = more things glow
-        bloomPass.strength = 0.23;   // Soft, elegant bloom strength
-        bloomPass.radius = 0.8;      // Wide, dreamy halo effect
-        
-        const composer = new EffectComposer(renderer);
-        composer.addPass(renderScene);
-        composer.addPass(bloomPass);
-
-        // === LIGHTS ===
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
-        scene.add(ambientLight);
-        
-        const spotLight = new THREE.SpotLight(0xffeeff, 2); 
-        spotLight.position.set(0, 10, 0); 
-        spotLight.angle = Math.PI / 4; 
-        spotLight.penumbra = 0.5; 
-        spotLight.decay = 1; 
-        spotLight.distance = 50; 
-        spotLight.castShadow = true; 
-        scene.add(spotLight); 
-        spotLight.target.position.set(-0.006, 1.041, -0.008);
-        scene.add(spotLight.target);
-        
-        const centerLight = new THREE.PointLight(0xff00ff, 0.46, 10); 
-        centerLight.position.set(-0.006, 1.041, -0.008); 
-        scene.add(centerLight);
-
-        // === GLOW PULSE SYSTEM ===
-        let glowStartTime = Date.now();
-        let glowDurationUp = 10000 + Math.random() * 20000;
-        let glowDurationDown = 10000 + Math.random() * 20000;
-        let isGlowingUp = true;
-        
-        let MIN_STRENGTH = 0.10;
-        let MAX_STRENGTH = 0.40;
-        
-        document.getElementById('glow-min').addEventListener('input', (e) => {
-            MIN_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-min-val').textContent = e.target.value + '%';
-        });
-        
-        document.getElementById('glow-max').addEventListener('input', (e) => {
-            MAX_STRENGTH = e.target.value / 100;
-            document.getElementById('glow-max-val').textContent = e.target.value + '%';
-        });
-        
-        function getRandomDuration() {
-            return 10000 + Math.random() * 20000;
-        }
-        
-        function updateGlow() {
-            const now = Date.now();
-            const elapsed = now - glowStartTime;
-            
-            if (isGlowingUp) {
-                const progress = Math.min(elapsed / glowDurationUp, 1);
-                const strength = MIN_STRENGTH + (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength; // Update bloom strength dynamically
-                centerLight.intensity = strength * 2.0;
-                
-                if (progress >= 1) {
-                    isGlowingUp = false;
-                    glowStartTime = now;
-                    glowDurationDown = getRandomDuration();
-                }
-            } else {
-                const progress = Math.min(elapsed / glowDurationDown, 1);
-                const strength = MAX_STRENGTH - (MAX_STRENGTH - MIN_STRENGTH) * progress;
-                bloomPass.strength = strength; // Update bloom strength dynamically
-                centerLight.intensity = strength * 2.0;
-                
-                if (progress >= 1) {
-                    isGlowingUp = true;
-                    glowStartTime = now;
-                    glowDurationUp = getRandomDuration();
-                }
-            }
-        }
-
-        // === DYNAMIC BLUR SYSTEM ===
-        let blurState = 'waiting';
-        let blurStartTime = Date.now();
-        let nextBlurTime = Date.now() + 4000 + Math.random() * 14000;
-        
-        function updateBlur() {
-            const now = Date.now();
-            const vignette = document.getElementById('vignette');
-            const blurStatus = document.getElementById('blur-status');
-            
-            if (blurState === 'waiting' && now >= nextBlurTime) {
-                blurState = 'active';
-                blurStartTime = now;
-                blurStatus.textContent = 'Blur: ACTIVE';
-            }
-            
-            if (blurState === 'active') {
-                const elapsed = (now - blurStartTime) / 1000;
-                if (elapsed >= 1.0) {
-                    blurState = 'waiting';
-                    nextBlurTime = now + 4000 + Math.random() * 14000;
-                    vignette.style.backdropFilter = 'blur(0px)';
-                    blurStatus.textContent = 'Blur: INACTIVE';
-                } else {
-                    vignette.style.backdropFilter = `blur(1px)`;
-                }
-            }
-            
-            document.getElementById('vignette-blur-val').textContent = 
-                vignette.style.backdropFilter.includes('1px') ? '1px' : '0px';
-        }
-
-        // === VIGNETTE CONTROLS ===
-        const vignette = document.getElementById('vignette');
-        
-        document.getElementById('vignette-center').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-center-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        document.getElementById('vignette-darkness').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-darkness-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        document.getElementById('vignette-mid').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('vignette-mid-val').textContent = val + '%';
-            updateVignette();
-        });
-        
-        function updateVignette() {
-            const center = document.getElementById('vignette-center').value;
-            const darkness = document.getElementById('vignette-darkness').value / 100;
-            const mid = document.getElementById('vignette-mid').value / 100;
-            
-            vignette.style.background = `radial-gradient(circle at center, transparent ${center}%, rgba(0,0,0,${mid}) 80%, rgba(0,0,0,${darkness}) 100%)`;
-        }
-
-        // === STATIONS ===
-        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
-        const STATIONS = [
-            { name: "Intro", pos: new THREE.Vector3(0.092, 8.581, -0.067) },
-            { name: "C: First", pos: new THREE.Vector3(-5.325, 1.356, 1.727) },
-            { name: "D: 2", pos: new THREE.Vector3(0.077, 1.301, 5.964) },
-            { name: "E: 3", pos: new THREE.Vector3(5.276, 1.338, 1.737) },
-            { name: "F: 4", pos: new THREE.Vector3(3.257, 1.258, -4.664) },
-            { name: "G: 5", pos: new THREE.Vector3(-3.403, 1.240, -4.008) }
-        ];
-
-        const cardPositions = {
-            2: { x: 0.10, y: 1.20, z: 4.00 },
-            3: { x: 3.60, y: 1.25, z: 1.20 },
-            4: { x: 2.20, y: 1.20, z: -3.20 },
-            5: { x: -2.20, y: 1.25, z: -2.70 }
-        };
-
-        // === CREATE CARDS ===
-        const cards = [];
-        
-        function createCard(stationName, stationIndex) {
-            const canvas = document.createElement('canvas'); 
-            canvas.width = 512; 
-            canvas.height = 512;
-            const context = canvas.getContext('2d');
-            
-            context.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
-            context.fillRect(0, 0, 512, 512);
-            
-            context.shadowColor = 'rgba(0, 0, 0, 1.0)';
-            context.shadowBlur = 20;
-            context.shadowOffsetX = 4;
-            context.shadowOffsetY = 4;
-            
-            context.font = 'bold 70px Arial'; 
-            context.fillStyle = '#ffffff'; 
-            context.textAlign = 'center';
-            context.fillText(stationName, 256, 200);
-            context.fillText(stationName, 256, 200);
-            
-            context.font = 'bold 45px Arial'; 
-            context.fillStyle = '#ffffff';
-            context.fillText(`Station ${stationIndex}`, 256, 300);
-            context.fillText(`Station ${stationIndex}`, 256, 300);
-            
-            context.font = 'bold 32px Arial';
-            context.fillStyle = '#ffffff';
-            context.fillText('Viewpoint', 256, 370);
-            context.fillText('Viewpoint', 256, 370);
-            
-            context.shadowColor = 'transparent';
-            context.shadowBlur = 0;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-            
-            const pageTexture = new THREE.CanvasTexture(canvas);
-            
-            const pageMaterial = new THREE.MeshStandardMaterial({ 
-                map: pageTexture,
-                transparent: true,
-                opacity: 0.0,
-                roughness: 0.05,
-                metalness: 0.0,
-                side: THREE.DoubleSide,
-                depthWrite: false,
-                blending: THREE.NormalBlending,
-                emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 0.5
-            });
-            
-            const pageGeometry = new THREE.PlaneGeometry(1.8, 1.8);
-            const card = new THREE.Mesh(pageGeometry, pageMaterial);
-            
-            return card;
-        }
-
-        function positionCards() {
-            for (let i = 2; i <= 5; i++) {
-                if (cards[i] && cardPositions[i]) {
-                    cards[i].position.set(cardPositions[i].x, cardPositions[i].y, cardPositions[i].z);
-                    cards[i].lookAt(POINT_CENTER);
-                }
-            }
-        }
-
-        for (let i = 2; i < STATIONS.length; i++) {
-            const card = createCard(STATIONS[i].name, i);
-            cards[i] = card;
-            scene.add(card);
-        }
-
+        // ============================================
+        // GLOBAL STATE
+        // ============================================
+        let scene, camera, renderer, composer, bloomPass;
         let currentStationIndex = 0;
         let isAnimating = false;
         let animationProgress = 0;
         let startPos = new THREE.Vector3();
         let endPos = new THREE.Vector3();
-        const ANIMATION_DURATION = 2.5;
+        let transitionSpeed = 3.5;
+        
+        // Glow system
+        let glowStartTime = Date.now();
+        let glowDurationUp = 7000 + Math.random() * 15000;
+        let glowDurationDown = 7000 + Math.random() * 15000;
+        let isGlowingUp = true;
+        let MIN_GLOW = 0.10;
+        let MAX_GLOW = 0.80;
+        
+        // Particles
+        let particleSystem;
+        const PARTICLE_COUNT = 150;
+        
+        // Stations - cinematic journey through the grove
+        const STATIONS = [
+            { 
+                name: "The Approach", 
+                pos: new THREE.Vector3(0.092, 8.581, -0.067),
+                description: "You descend from above, as if falling through dream."
+            },
+            { 
+                name: "The Threshold", 
+                pos: new THREE.Vector3(-5.325, 1.356, 1.727),
+                description: "You cross into the circle of columns."
+            },
+            { 
+                name: "The Heart", 
+                pos: new THREE.Vector3(0.077, 1.301, 5.964),
+                description: "You stand before the tree. It breathes."
+            },
+            { 
+                name: "The Canopy", 
+                pos: new THREE.Vector3(5.276, 1.338, 1.737),
+                description: "You look up through branches toward the sky."
+            },
+            { 
+                name: "The Roots", 
+                pos: new THREE.Vector3(3.257, 1.258, -4.664),
+                description: "You kneel close to the earth."
+            },
+            { 
+                name: "The Return", 
+                pos: new THREE.Vector3(-3.403, 1.240, -4.008),
+                description: "You complete the circle. The tree remembers."
+            }
+        ];
+        
+        const POINT_CENTER = new THREE.Vector3(-0.006, 1.041, -0.008);
 
-        // === LOAD MODEL ===
-        const loader = new GLTFLoader();
-        loader.load('./environment_vr_room_baked.glb', function (gltf) {
-            const model = gltf.scene;
-            model.traverse((child) => { 
-                if (child.isMesh) { 
-                    child.castShadow = true; 
-                    child.receiveShadow = true; 
-                    if (child.name.toLowerCase().includes('tree')) { 
-                        child.material.emissive = new THREE.Color(0xaa00aa); 
-                        child.material.emissiveIntensity = 0.5; 
-                    } 
-                } 
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        window.initTour = function() {
+            console.log(' Initializing the Arcane grove...');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff);
+            scene.fog = new THREE.FogExp2(0xffffff, 0.02);
+            
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                powerPreference: "high-performance"
             });
-            scene.add(model);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            
+            const container = document.getElementById('three-canvas-container');
+            container.appendChild(renderer.domElement);
+            
+            // Post-processing
+            const renderScene = new RenderPass(scene, camera);
+            bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight), 
+                1.5, 0.4, 0.85
+            );
+            bloomPass.threshold = 0.1;
+            bloomPass.strength = 0.23;
+            bloomPass.radius = 0.8;
+            
+            composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
+            
+            // Lights
+            setupLights();
+            
+            // Particles
+            createParticles();
+            
+            // Load model
+            loadModel();
+            
+            // Start at first station
             camera.position.copy(STATIONS[0].pos);
             camera.lookAt(POINT_CENTER);
-            positionCards();
-        }, undefined, function (error) { console.error(error); });
+            
+            // Setup controls
+            setupControls();
+            
+            // Start animation
+            animate();
+            
+            window.addEventListener('resize', onWindowResize);
+            
+            console.log('✦ The grove is alive.');
+        };
 
-        // === UI LOGIC ===
-        document.getElementById('blocker').addEventListener('click', function() { 
-            this.style.display = 'none'; 
-            document.getElementById('status').innerText = "Tour Started"; 
-        });
+        function setupLights() {
+            // Ambient - soft fill
+            const ambientLight = new THREE.AmbientLight(0xfff5ee, 0.6);
+            scene.add(ambientLight);
+            
+            // Main spotlight from above (the oculus)
+            const spotLight = new THREE.SpotLight(0xffeeff, 3);
+            spotLight.position.set(0, 12, 0);
+            spotLight.angle = Math.PI / 3.5;
+            spotLight.penumbra = 0.8;
+            spotLight.decay = 1.5;
+            spotLight.distance = 60;
+            spotLight.castShadow = true;
+            spotLight.shadow.mapSize.width = 2048;
+            spotLight.shadow.mapSize.height = 2048;
+            spotLight.shadow.bias = -0.0001;
+            scene.add(spotLight);
+            spotLight.target.position.copy(POINT_CENTER);
+            scene.add(spotLight.target);
+            
+            // Center light - the tree's heart glow
+            const centerLight = new THREE.PointLight(0xff00ff, 0.5, 15);
+            centerLight.position.copy(POINT_CENTER);
+            scene.add(centerLight);
+            
+            // Rim lights for atmosphere
+            const rimLight1 = new THREE.PointLight(0xffd4a3, 0.4, 20);
+            rimLight1.position.set(8, 3, 8);
+            scene.add(rimLight1);
+            
+            const rimLight2 = new THREE.PointLight(0xa3d4ff, 0.3, 20);
+            rimLight2.position.set(-8, 3, -8);
+            scene.add(rimLight2);
+        }
 
+        function createParticles() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(PARTICLE_COUNT * 3);
+            const velocities = [];
+            
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 25;
+                positions[i * 3 + 1] = Math.random() * 12 + 0.5;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 25;
+                
+                velocities.push({
+                    x: (Math.random() - 0.5) * 0.008,
+                    y: (Math.random() - 0.5) * 0.008 + 0.005,
+                    z: (Math.random() - 0.5) * 0.008,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const material = new THREE.PointsMaterial({
+                color: 0xffd4a3,
+                size: 0.08,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            
+            particleSystem = new THREE.Points(geometry, material);
+            scene.add(particleSystem);
+            particleSystem.userData.velocities = velocities;
+        }
+
+        function loadModel() {
+            const loader = new GLTFLoader();
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingPercent = document.getElementById('loadingPercent');
+            
+            loader.load(
+                './environment_vr_room_baked.glb',
+                function (gltf) {
+                    const model = gltf.scene;
+                    
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            
+                            // Enhance the tree
+                            if (child.name.toLowerCase().includes('tree') || 
+                                child.name.toLowerCase().includes('plant')) {
+                                child.material.emissive = new THREE.Color(0xaa00aa);
+                                child.material.emissiveIntensity = 0.6;
+                            }
+                        }
+                    });
+                    
+                    scene.add(model);
+                    
+                    // Simulate loading completion
+                    let progress = 0;
+                    const loadInterval = setInterval(() => {
+                        progress += Math.random() * 15;
+                        if (progress >= 100) {
+                            progress = 100;
+                            clearInterval(loadInterval);
+                            setTimeout(() => {
+                                document.getElementById('loadingContainer').classList.add('fade-out');
+                                setTimeout(() => {
+                                    document.getElementById('three-canvas-container').classList.add('visible');
+                                    document.getElementById('tour-ui').classList.add('visible');
+                                    updateStationDisplay();
+                                }, 1000);
+                            }, 500);
+                        }
+                        if (loadingBar) loadingBar.style.width = progress + '%';
+                        if (loadingPercent) loadingPercent.textContent = Math.floor(progress) + '%';
+                    }, 100);
+                    
+                },
+                function (xhr) {
+                    // Progress callback
+                    if (xhr.lengthComputable) {
+                        const percent = (xhr.loaded / xhr.total) * 100;
+                        if (loadingBar) loadingBar.style.width = percent + '%';
+                        if (loadingPercent) loadingPercent.textContent = Math.floor(percent) + '%';
+                    }
+                },
+                function (error) {
+                    console.error('✗ Error loading model:', error);
+                    if (loadingPercent) loadingPercent.textContent = 'Error';
+                }
+            );
+        }
+
+        // ============================================
+        // GLOW SYSTEM
+        // ============================================
+        function updateGlow() {
+            if (!bloomPass) return;
+            
+            const now = Date.now();
+            const elapsed = now - glowStartTime;
+            
+            if (isGlowingUp) {
+                const progress = Math.min(elapsed / glowDurationUp, 1);
+                const currentGlow = MIN_GLOW + (MAX_GLOW - MIN_GLOW) * progress;
+                bloomPass.strength = currentGlow;
+                
+                if (progress >= 1) {
+                    isGlowingUp = false;
+                    glowStartTime = now;
+                    glowDurationDown = 7000 + Math.random() * 15000;
+                }
+            } else {
+                const progress = Math.min(elapsed / glowDurationDown, 1);
+                const currentGlow = MAX_GLOW - (MAX_GLOW - MIN_GLOW) * progress;
+                bloomPass.strength = currentGlow;
+                
+                if (progress >= 1) {
+                    isGlowingUp = true;
+                    glowStartTime = now;
+                    glowDurationUp = 7000 + Math.random() * 15000;
+                }
+            }
+        }
+
+        // ============================================
+        // PARTICLE ANIMATION
+        // ============================================
+        function updateParticles(time) {
+            if (!particleSystem) return;
+            
+            const positions = particleSystem.geometry.attributes.position.array;
+            const velocities = particleSystem.userData.velocities;
+            
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const v = velocities[i];
+                
+                positions[i * 3] += v.x + Math.sin(time + v.phase) * 0.003;
+                positions[i * 3 + 1] += v.y;
+                positions[i * 3 + 2] += v.z + Math.cos(time + v.phase) * 0.003;
+                
+                // Reset if too high
+                if (positions[i * 3 + 1] > 13) {
+                    positions[i * 3] = (Math.random() - 0.5) * 25;
+                    positions[i * 3 + 1] = 0.5;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * 25;
+                }
+            }
+            
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            particleSystem.rotation.y = time * 0.02;
+        }
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
         window.nextStation = function() {
             if (isAnimating) return;
-            if (currentStationIndex === 0) {
-                currentStationIndex = 1;
-            } else if (currentStationIndex < STATIONS.length - 1) {
-                currentStationIndex++;
-            } else {
-                currentStationIndex = 1;
-            }
-            startAnimation(STATIONS[currentStationIndex].pos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            
-            if (currentStationIndex !== 1) {
-                hideNavBar();
-            }
-            
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
+            currentStationIndex = (currentStationIndex + 1) % STATIONS.length;
+            startTransition(STATIONS[currentStationIndex].pos);
+            updateStationDisplay();
         };
 
         window.prevStation = function() {
             if (isAnimating) return;
-            if (currentStationIndex === 0) {
-                currentStationIndex = STATIONS.length - 1;
-            } else if (currentStationIndex > 1) {
-                currentStationIndex--;
-            } else {
-                currentStationIndex = STATIONS.length - 1;
-            }
-            startAnimation(STATIONS[currentStationIndex].pos);
-            document.getElementById('status').innerText = `Moving to ${STATIONS[currentStationIndex].name}...`;
-            
-            if (currentStationIndex !== 1) {
-                hideNavBar();
-            }
-            
-            if (currentStationIndex >= 2) {
-                selectStation(currentStationIndex);
-            }
+            currentStationIndex = (currentStationIndex - 1 + STATIONS.length) % STATIONS.length;
+            startTransition(STATIONS[currentStationIndex].pos);
+            updateStationDisplay();
         };
 
-        function startAnimation(targetPos) {
-            isAnimating = true; 
-            animationProgress = 0; 
-            startPos.copy(camera.position); 
+        function startTransition(targetPos) {
+            isAnimating = true;
+            animationProgress = 0;
+            startPos.copy(camera.position);
             endPos.copy(targetPos);
+            
             const center = POINT_CENTER.clone();
             const midPoint = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
             const direction = new THREE.Vector3().subVectors(midPoint, center).normalize();
-            midPoint.add(direction.multiplyScalar(2)); 
-            window.animControlPoints = { start: startPos, mid: midPoint, end: endPos };
+            midPoint.add(direction.multiplyScalar(2.5));
+            
+            window.animControlPoints = { 
+                start: startPos, 
+                mid: midPoint, 
+                end: endPos 
+            };
+            
+            document.getElementById('status').textContent = STATIONS[currentStationIndex].description;
         }
 
-        function easeInOutCubic(t) { 
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; 
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
 
-        // === ANIMATION LOOP ===
+        function updateStationDisplay() {
+            const stationName = document.getElementById('stationName');
+            if (stationName) {
+                stationName.style.opacity = '0';
+                setTimeout(() => {
+                    stationName.textContent = STATIONS[currentStationIndex].name;
+                    stationName.style.opacity = '1';
+                }, 300);
+            }
+        }
+
+        // ============================================
+        // CONTROLS
+        // ============================================
+        function setupControls() {
+            // Bloom
+            const bloomSlider = document.getElementById('bloom-slider');
+            if (bloomSlider) {
+                bloomSlider.addEventListener('input', (e) => {
+                    const val = e.target.value / 100;
+                    bloomPass.strength = val;
+                    document.getElementById('bloom-val').textContent = e.target.value + '%';
+                });
+            }
+            
+            // Radius
+            const radiusSlider = document.getElementById('radius-slider');
+            if (radiusSlider) {
+                radiusSlider.addEventListener('input', (e) => {
+                    const val = e.target.value / 100;
+                    bloomPass.radius = val;
+                    document.getElementById('radius-val').textContent = e.target.value + '%';
+                });
+            }
+            
+            // Vignette
+            const vignetteSlider = document.getElementById('vignette-slider');
+            if (vignetteSlider) {
+                vignetteSlider.addEventListener('input', (e) => {
+                    const val = e.target.value / 100;
+                    const vignette = document.getElementById('vignette');
+                    vignette.style.background = `radial-gradient(circle at center, transparent 40%, rgba(0,0,0,${val * 0.6}) 75%, rgba(0,0,0,${val}) 100%)`;
+                    document.getElementById('vignette-val').textContent = e.target.value + '%';
+                });
+            }
+            
+            // Glow min/max
+            const glowMin = document.getElementById('glow-min');
+            const glowMax = document.getElementById('glow-max');
+            if (glowMin) {
+                glowMin.addEventListener('input', (e) => {
+                    MIN_GLOW = e.target.value / 100;
+                    document.getElementById('glow-min-val').textContent = e.target.value + '%';
+                });
+            }
+            if (glowMax) {
+                glowMax.addEventListener('input', (e) => {
+                    MAX_GLOW = e.target.value / 100;
+                    document.getElementById('glow-max-val').textContent = e.target.value + '%';
+                });
+            }
+            
+            // Speed
+            const speedSlider = document.getElementById('speed-slider');
+            if (speedSlider) {
+                speedSlider.addEventListener('input', (e) => {
+                    const val = parseInt(e.target.value);
+                    const speeds = ['Very Slow', 'Slow', 'Normal', 'Fast', 'Very Fast'];
+                    transitionSpeed = 5.5 - (val * 0.8);
+                    document.getElementById('speed-val').textContent = speeds[val - 1];
+                });
+            }
+            
+            // Hydro ripple buttons
+            setupHydroButtons();
+        }
+
+        function setupHydroButtons() {
+            const hydroButtons = document.querySelectorAll('.hydro-btn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.addEventListener('mousemove', (e) => {
+                const screenWidth = window.innerWidth;
+                const mouseX = e.clientX;
+                
+                if (prevBtn) {
+                    const rect = prevBtn.getBoundingClientRect();
+                    const dist = Math.hypot(
+                        mouseX - (rect.left + rect.width/2), 
+                        e.clientY - (rect.top + rect.height/2)
+                    );
+                    const prox = mouseX < screenWidth / 2 
+                        ? Math.max(0.3, 1 - dist/800) 
+                        : Math.max(0, 0.2 * (1 - dist/1200));
+                    prevBtn.style.setProperty('--proximity', prox);
+                }
+                
+                if (nextBtn) {
+                    const rect = nextBtn.getBoundingClientRect();
+                    const dist = Math.hypot(
+                        mouseX - (rect.left + rect.width/2), 
+                        e.clientY - (rect.top + rect.height/2)
+                    );
+                    const prox = mouseX >= screenWidth / 2 
+                        ? Math.max(0.3, 1 - dist/800) 
+                        : Math.max(0, 0.2 * (1 - dist/1200));
+                    nextBtn.style.setProperty('--proximity', prox);
+                }
+            });
+            
+            // Auto bloom
+            setInterval(() => {
+                hydroButtons.forEach(btn => {
+                    btn.classList.add('bloom');
+                    setTimeout(() => btn.classList.remove('bloom'), 1200);
+                });
+            }, 3000);
+            
+            // Hover bloom
+            hydroButtons.forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    btn.classList.add('bloom');
+                    setTimeout(() => btn.classList.remove('bloom'), 1200);
+                });
+            });
+        }
+
+        window.toggleControlPanel = function() {
+            const panel = document.getElementById('control-panel');
+            panel.classList.toggle('visible');
+        };
+
+        // ============================================
+        // ANIMATION LOOP
+        // ============================================
         function animate() {
             requestAnimationFrame(animate);
             
+            if (!scene) return;
+            
+            const time = Date.now() * 0.001;
+            
             updateGlow();
-            updateBlur();
-
-            if (currentStationIndex === 1 && !isAnimating && animationProgress >= 1) {
-                showNavBar();
-            }
-
-            for (let i = 2; i < cards.length; i++) {
-                if (cards[i]) {
-                    if (i === currentStationIndex) {
-                        cards[i].lookAt(camera.position);
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.8, 0.1);
-                    } else {
-                        cards[i].material.opacity = THREE.MathUtils.lerp(cards[i].material.opacity, 0.0, 0.1);
-                    }
-                }
-            }
-
+            updateParticles(time);
+            
             if (isAnimating) {
-                animationProgress += 0.016 / ANIMATION_DURATION;
-                if (animationProgress >= 1) { 
-                    animationProgress = 1; 
-                    isAnimating = false; 
-                    document.getElementById('status').innerText = `Arrived at ${STATIONS[currentStationIndex].name}`; 
-                    
-                    if (currentStationIndex === 1) {
-                        showNavBar();
-                    }
+                animationProgress += 0.016 / transitionSpeed;
+                
+                if (animationProgress >= 1) {
+                    animationProgress = 1;
+                    isAnimating = false;
+                    document.getElementById('status').textContent = STATIONS[currentStationIndex].description;
                 }
+                
                 const t = easeInOutCubic(animationProgress);
-                const p0 = window.animControlPoints.start; 
-                const p1 = window.animControlPoints.mid; 
+                const p0 = window.animControlPoints.start;
+                const p1 = window.animControlPoints.mid;
                 const p2 = window.animControlPoints.end;
+                
                 const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
                 const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
                 const z = (1-t)*(1-t)*p0.z + 2*(1-t)*t*p1.z + t*t*p2.z;
+                
                 camera.position.set(x, y, z);
                 camera.lookAt(POINT_CENTER);
+            } else {
+                // Subtle breathing movement when stationary
+                camera.position.y += Math.sin(time * 0.5) * 0.001;
             }
-
-            composer.render(); // Render with bloom effect
+            
+            composer.render();
         }
-        animate();
-        
-        setTimeout(() => selectStation(2), 100);
-        
-        document.getElementById('glow-min').value = 23;
-        document.getElementById('glow-max').value = 39;
-        MIN_STRENGTH = 0.23;
-        MAX_STRENGTH = 0.39;
-        updateVignette();
 
-        window.addEventListener('resize', () => {
+        function onWindowResize() {
+            if (!camera || !renderer) return;
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             composer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+
+    <!-- ============================================
+         PAGE LOGIC
+         ============================================ -->
+    <script>
+        // ============================================
+        // WISH STORAGE
+        // ============================================
+        const WISH_STORAGE_KEY = 'arcane_wish';
+        
+        function saveWish(wish, returnDate) {
+            const data = {
+                wish: wish,
+                returnDate: returnDate,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(WISH_STORAGE_KEY, JSON.stringify(data));
+        }
+        
+        function getWish() {
+            const data = localStorage.getItem(WISH_STORAGE_KEY);
+            if (!data) return null;
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        function clearWish() {
+            localStorage.removeItem(WISH_STORAGE_KEY);
+        }
+        
+        function isReturnDateToday(returnDate) {
+            if (!returnDate) return false;
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            const returnStr = new Date(returnDate).toISOString().split('T')[0];
+            return todayStr >= returnStr;
+        }
+        
+        function getDaysUntilReturn(returnDate) {
+            if (!returnDate) return null;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const returnD = new Date(returnDate);
+            returnD.setHours(0, 0, 0, 0);
+            const diff = returnD - today;
+            return Math.ceil(diff / (1000 * 60 * 60 * 24));
+        }
+
+        // ============================================
+        // PARTICLE GENERATORS
+        // ============================================
+        function createParticles(containerId, count = 30) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.setProperty('--x', Math.random() * 100 + '%');
+                particle.style.setProperty('--dx', (Math.random() - 0.5) * 200 + 'px');
+                particle.style.setProperty('--dy', -(Math.random() * 100 + 100) + 'vh');
+                particle.style.setProperty('--duration', (Math.random() * 10 + 10) + 's');
+                particle.style.setProperty('--delay', (Math.random() * 10) + 's');
+                container.appendChild(particle);
+            }
+        }
+
+        // ============================================
+        // INTRO SEQUENCE
+        // ============================================
+        let currentIntroScreen = 1;
+        
+        function beginJourney() {
+            // Check if there's an existing wish
+            const existingWish = getWish();
+            
+            if (existingWish && isReturnDateToday(existingWish.returnDate)) {
+                // Wish fulfilled - show special screen
+                showFulfilled(existingWish);
+            } else {
+                // Normal journey - show intro
+                showIntro();
+            }
+        }
+        
+        function showIntro() {
+            const landing = document.getElementById('landingPage');
+            const intro = document.getElementById('introContainer');
+            
+            landing.classList.add('hidden');
+            
+            setTimeout(() => {
+                intro.classList.add('active');
+                createParticles('introParticles', 40);
+                showIntroScreen(1);
+            }, 1500);
+        }
+        
+        function showIntroScreen(num) {
+            // Hide all screens
+            for (let i = 1; i <= 6; i++) {
+                const screen = document.getElementById('introScreen' + i);
+                if (screen) {
+                    screen.classList.remove('active');
+                    screen.classList.add('fade-out');
+                }
+            }
+            
+            // Show target screen
+            setTimeout(() => {
+                const target = document.getElementById('introScreen' + num);
+                if (target) {
+                    target.classList.remove('fade-out');
+                    target.classList.add('active');
+                }
+                currentIntroScreen = num;
+            }, 500);
+        }
+        
+        function nextIntroScreen(num) {
+            showIntroScreen(num);
+        }
+        
+        function showRitual() {
+            const intro = document.getElementById('introContainer');
+            const ritual = document.getElementById('ritualContainer');
+            
+            intro.classList.add('fade-out');
+            
+            setTimeout(() => {
+                intro.classList.remove('active');
+                ritual.classList.add('active');
+                createParticles('ritualParticles', 50);
+                
+                // Set minimum date to tomorrow
+                const dateInput = document.getElementById('dateInput');
+                if (dateInput) {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    dateInput.min = tomorrow.toISOString().split('T')[0];
+                }
+            }, 1500);
+        }
+        
+        function submitWish(event) {
+            event.preventDefault();
+            
+            const wish = document.getElementById('wishInput').value.trim();
+            const date = document.getElementById('dateInput').value;
+            
+            if (!wish || !date) return;
+            
+            saveWish(wish, date);
+            
+            const ritual = document.getElementById('ritualContainer');
+            const loading = document.getElementById('loadingContainer');
+            
+            ritual.classList.add('fade-out');
+            
+            setTimeout(() => {
+                ritual.classList.remove('active');
+                loading.classList.add('active');
+                
+                // Initialize tour in background
+                if (window.initTour) {
+                    window.initTour();
+                }
+            }, 1500);
+        }
+        
+        function showFulfilled(wish) {
+            const landing = document.getElementById('landingPage');
+            const fulfilled = document.getElementById('fulfilledContainer');
+            
+            // Set the wish text
+            const wishText = document.getElementById('fulfilledWishText');
+            if (wishText && wish.wish) {
+                wishText.textContent = '"' + wish.wish + '"';
+            }
+            
+            landing.classList.add('hidden');
+            
+            setTimeout(() => {
+                fulfilled.classList.add('active');
+                createParticles('fulfilledParticles', 60);
+            }, 1500);
+        }
+        
+        function enterTourFromFulfilled() {
+            const fulfilled = document.getElementById('fulfilledContainer');
+            const loading = document.getElementById('loadingContainer');
+            
+            fulfilled.classList.add('fade-out');
+            
+            setTimeout(() => {
+                fulfilled.classList.remove('active');
+                loading.classList.add('active');
+                
+                if (window.initTour) {
+                    window.initTour();
+                }
+            }, 1500);
+        }
+
+        // ============================================
+        // INITIALIZATION ON LOAD
+        // ============================================
+        window.addEventListener('DOMContentLoaded', () => {
+            // Check for existing wish on load
+            const existingWish = getWish();
+            
+            if (existingWish) {
+                const daysUntil = getDaysUntilReturn(existingWish.returnDate);
+                
+                if (daysUntil !== null && daysUntil <= 0) {
+                    // Return date has passed - show fulfilled screen immediately
+                    // But still show landing first for dramatic effect
+                    console.log('✦ The tree remembers. Your return day has come.');
+                } else if (daysUntil !== null && daysUntil > 0) {
+                    console.log('✦ ' + daysUntil + ' days until your return to the Arcane.');
+                }
+            }
         });
+
+        // Expose functions globally
+        window.beginJourney = beginJourney;
+        window.nextIntroScreen = nextIntroScreen;
+        window.showRitual = showRitual;
+        window.submitWish = submitWish;
+        window.enterTourFromFulfilled = enterTourFromFulfilled;
+        window.toggleControlPanel = function() {
+            const panel = document.getElementById('control-panel');
+            panel.classList.toggle('visible');
+        };
     </script>
 </body>
 </html>
