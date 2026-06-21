@@ -41,6 +41,7 @@
             color: #fff;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            touch-action: none;
         }
 
         /* ============================================
@@ -1036,11 +1037,16 @@
             display: none;
             opacity: 0;
             transition: opacity 2s ease-out;
+            cursor: grab;
         }
 
         #three-canvas-container.visible {
             display: block;
             opacity: 1;
+        }
+
+        #three-canvas-container:active {
+            cursor: grabbing;
         }
 
         #three-canvas-container canvas {
@@ -1498,6 +1504,12 @@
         let particleSystem;
         const PARTICLE_COUNT = 150;
         
+        // Touch/Mouse drag navigation
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragThreshold = 50; // pixels
+        
         // Stations - cinematic journey through the grove
         const STATIONS = [
             { 
@@ -1582,6 +1594,9 @@
             
             // Load model
             loadModel();
+            
+            // Setup touch/mouse drag navigation
+            setupDragNavigation();
             
             // Start at first station
             camera.position.copy(STATIONS[0].pos);
@@ -1727,6 +1742,70 @@
                     if (loadingPercent) loadingPercent.textContent = 'Error';
                 }
             );
+        }
+
+        // ============================================
+        // TOUCH/MOUSE DRAG NAVIGATION
+        // ============================================
+        function setupDragNavigation() {
+            const container = document.getElementById('three-canvas-container');
+            
+            // Mouse events
+            container.addEventListener('mousedown', handleDragStart);
+            container.addEventListener('mousemove', handleDragMove);
+            container.addEventListener('mouseup', handleDragEnd);
+            container.addEventListener('mouseleave', handleDragEnd);
+            
+            // Touch events
+            container.addEventListener('touchstart', handleDragStart, { passive: false });
+            container.addEventListener('touchmove', handleDragMove, { passive: false });
+            container.addEventListener('touchend', handleDragEnd);
+        }
+
+        function handleDragStart(e) {
+            isDragging = true;
+            dragStartX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            dragStartY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            
+            // Visual feedback
+            document.getElementById('three-canvas-container').style.cursor = 'grabbing';
+        }
+
+        function handleDragMove(e) {
+            if (!isDragging || isAnimating) return;
+            e.preventDefault();
+            
+            const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            
+            const deltaX = currentX - dragStartX;
+            const deltaY = currentY - dragStartY;
+            
+            // Check if drag distance exceeds threshold
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            if (distance > dragThreshold) {
+                // Determine direction
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    // Horizontal drag - navigate between stations
+                    if (deltaX > 0) {
+                        // Drag right - go to previous station
+                        prevStation();
+                    } else {
+                        // Drag left - go to next station
+                        nextStation();
+                    }
+                }
+                
+                // Reset drag start
+                dragStartX = currentX;
+                dragStartY = currentY;
+            }
+        }
+
+        function handleDragEnd() {
+            isDragging = false;
+            document.getElementById('three-canvas-container').style.cursor = 'grab';
         }
 
         // ============================================
